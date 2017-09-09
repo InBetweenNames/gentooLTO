@@ -1,0 +1,4 @@
+# required by dev-qt/qt-creator-4.3.0::gentoo[cmake]
+# required by @selected
+# required by @world (argument)
+>=dev-util/cmake-3.8.1 server

@@ -1,0 +1,676 @@
+x11-base/xorg-server xephyr kdrive xvfb
+# required by x11-libs/gtk+-3.18.8::gentoo[wayland]
+# required by x11-misc/redshift-1.11::gentoo[gtk]
+# required by @selected
+# required by @world (argument)
+>=x11-libs/libxkbcommon-0.5.0 abi_x86_32
+# required by app-office/libreoffice-5.1.0.3::gentoo[postgres]
+# required by libreoffice (argument)
+>=dev-db/postgresql-9.5.1 kerberos
+# required by dev-qt/qtgui-4.8.7::gentoo[xv]
+# required by dev-qt/qtwebkit-4.8.7::gentoo
+# required by net-im/skype-4.3.0.37-r6::gentoo
+# required by skype (argument)
+>=x11-libs/libXv-1.0.10 abi_x86_32
+# required by net-im/skype-4.3.0.37-r6::gentoo
+# required by skype (argument)
+>=x11-libs/libXScrnSaver-1.2.2-r1 abi_x86_32
+# required by dev-qt/qt3support-4.8.7::gentoo
+# required by dev-qt/qtgui-4.8.7::gentoo[qt3support]
+# required by dev-qt/qtwebkit-4.8.7::gentoo
+# required by net-im/skype-4.3.0.37-r6::gentoo
+# required by skype (argument)
+>=dev-qt/qtcore-4.8.7-r1:4 abi_x86_32
+# required by media-libs/gst-plugins-base-0.10.36-r2::gentoo
+# required by dev-qt/qtwebkit-4.8.7::gentoo[gstreamer]
+# required by net-im/skype-4.3.0.37-r6::gentoo
+# required by skype (argument)
+>=media-libs/gstreamer-0.10.36-r2:0.10 abi_x86_32
+# required by dev-qt/qtwebkit-4.8.7::gentoo[gstreamer]
+# required by net-im/skype-4.3.0.37-r6::gentoo
+# required by skype (argument)
+>=media-libs/gst-plugins-base-0.10.36-r2:0.10 abi_x86_32
+# required by net-im/skype-4.3.0.37-r6::gentoo
+# required by skype (argument)
+>=dev-qt/qtwebkit-4.8.7:4 abi_x86_32 -exceptions
+# required by dev-qt/qtgui-4.8.7::gentoo[xv]
+# required by dev-qt/qtwebkit-4.8.7::gentoo
+# required by net-im/skype-4.3.0.37-r6::gentoo
+# required by skype (argument)
+>=x11-proto/videoproto-2.3.3 abi_x86_32
+# required by dev-qt/qt3support-4.8.7::gentoo
+# required by dev-qt/qtgui-4.8.7::gentoo[qt3support]
+# required by dev-qt/qtwebkit-4.8.7::gentoo
+# required by net-im/skype-4.3.0.37-r6::gentoo
+# required by skype (argument)
+>=dev-qt/qtsql-4.8.7-r1:4 abi_x86_32
+# required by dev-db/mariadb-10.1.12::gentoo
+# required by virtual/mysql-5.6-r8::gentoo
+# required by dev-perl/DBD-mysql-4.32.0-r1::gentoo
+>=virtual/libmysqlclient-18 abi_x86_32
+# required by virtual/libmysqlclient-18::gentoo
+# required by dev-qt/qtsql-4.8.7-r1::gentoo[mysql]
+# required by dev-qt/qt3support-4.8.7::gentoo
+# required by dev-qt/qtgui-4.8.7::gentoo[qt3support]
+# required by dev-qt/qtwebkit-4.8.7::gentoo
+# required by net-im/skype-4.3.0.37-r6::gentoo
+# required by skype (argument)
+>=dev-db/mariadb-10.1.12 abi_x86_32
+# required by dev-qt/qtgui-4.8.7::gentoo
+# required by dev-qt/qtwebkit-4.8.7::gentoo
+# required by net-im/skype-4.3.0.37-r6::gentoo
+# required by skype (argument)
+>=dev-qt/qtscript-4.8.7:4 abi_x86_32
+# required by media-libs/gst-plugins-base-0.10.36-r2::gentoo[orc]
+# required by dev-qt/qtwebkit-4.8.7::gentoo[gstreamer]
+# required by net-im/skype-4.3.0.37-r6::gentoo
+# required by skype (argument)
+>=dev-lang/orc-0.4.25 abi_x86_32
+# required by dev-db/sqlite-3.11.1::gentoo[readline]
+# required by dev-qt/qtsql-4.8.7-r1::gentoo[sqlite]
+# required by dev-qt/qt3support-4.8.7::gentoo
+# required by dev-qt/qtgui-4.8.7::gentoo[qt3support]
+# required by dev-qt/qtwebkit-4.8.7::gentoo
+# required by net-im/skype-4.3.0.37-r6::gentoo
+# required by skype (argument)
+>=sys-libs/readline-6.3_p8-r2 abi_x86_32
+# required by dev-qt/qtgui-4.8.7::gentoo[mng]
+# required by dev-qt/qtwebkit-4.8.7::gentoo
+# required by net-im/skype-4.3.0.37-r6::gentoo
+# required by skype (argument)
+>=media-libs/libmng-2.0.3 abi_x86_32
+# required by net-im/skype-4.3.0.37-r6::gentoo[plasma]
+# required by skype (argument)
+>=dev-libs/sni-qt-0.2.6-r1 abi_x86_32
+# required by dev-libs/libdbusmenu-qt-0.9.3_pre20140619-r1::gentoo[qt4]
+# required by dev-libs/sni-qt-0.2.6-r1::gentoo
+# required by net-im/skype-4.3.0.37-r6::gentoo[plasma]
+# required by skype (argument)
+>=dev-qt/qtdbus-4.8.7:4 abi_x86_32
+# required by dev-qt/qtgui-4.8.7::gentoo[qt3support]
+# required by dev-qt/qtwebkit-4.8.7::gentoo
+# required by net-im/skype-4.3.0.37-r6::gentoo
+# required by skype (argument)
+>=dev-qt/qt3support-4.8.7 abi_x86_32
+# required by dev-qt/qtsql-4.8.7-r1::gentoo[sqlite]
+# required by dev-qt/qt3support-4.8.7::gentoo
+# required by dev-qt/qtgui-4.8.7::gentoo[qt3support]
+# required by dev-qt/qtwebkit-4.8.7::gentoo
+# required by net-im/skype-4.3.0.37-r6::gentoo
+# required by skype (argument)
+>=dev-db/sqlite-3.11.1 abi_x86_32
+# required by media-libs/libmng-2.0.3::gentoo[lcms]
+# required by dev-qt/qtgui-4.8.7::gentoo[mng]
+# required by dev-qt/qtwebkit-4.8.7::gentoo
+# required by net-im/skype-4.3.0.37-r6::gentoo
+# required by skype (argument)
+>=media-libs/lcms-2.7 abi_x86_32
+# required by dev-libs/sni-qt-0.2.6-r1::gentoo
+# required by net-im/skype-4.3.0.37-r6::gentoo[plasma]
+# required by skype (argument)
+>=dev-libs/libdbusmenu-qt-0.9.3_pre20140619-r1 abi_x86_32
+# required by dev-qt/qtcore-4.8.7-r1::gentoo[qt3support]
+# required by dev-qt/qtxmlpatterns-4.8.7::gentoo
+# required by dev-qt/qtwebkit-4.8.7::gentoo
+# required by net-im/skype-4.3.0.37-r6::gentoo
+# required by skype (argument)
+>=dev-qt/qtgui-4.8.7:4 abi_x86_32
+# required by x11-libs/libXScrnSaver-1.2.2-r1::gentoo
+# required by net-im/skype-4.3.0.37-r6::gentoo
+# required by skype (argument)
+>=x11-proto/scrnsaverproto-1.2.2-r1 abi_x86_32
+# required by dev-qt/qtwebkit-4.8.7::gentoo
+# required by net-im/skype-4.3.0.37-r6::gentoo
+# required by skype (argument)
+>=dev-qt/qtxmlpatterns-4.8.7:4 abi_x86_32
+# required by gnome-base/gnome-keyring-3.18.3::gentoo
+# required by app-crypt/libsecret-0.18.4::gentoo
+# required by gnome-extra/nm-applet-1.0.10::gentoo
+# required by net-misc/networkmanager-openvpn-1.0.8::gentoo[gtk]
+# required by networkmanager-openvpn (argument)
+>=app-crypt/pinentry-0.9.7 gnome-keyring
+# required by www-client/firefox-46.0_beta1::mozilla[system-libvpx]
+# required by @selected
+# required by @world (argument)
+>=media-libs/libvpx-1.5.0 svc
+# required by app-office/texmaker-4.5::gentoo[qt5]
+# required by texmaker (argument)
+>=dev-qt/qtwebkit-5.7.0_alpha printsupport
+# required by dev-texlive/texlive-context-2015::gentoo
+# required by texlive-context (argument)
+>=app-text/texlive-core-2015 xetex
+# required by sys-devel/clang-3.7.1-r100::gentoo
+# required by clang (argument)
+sys-devel/llvm clang
+# required by dev-db/mariadb-10.1.13::gentoo
+# required by virtual/libmysqlclient-18::gentoo
+# required by dev-qt/qtsql-5.7.0_alpha::qt[mysql]
+# required by @selected
+# required by @world (argument)
+>=virtual/mysql-5.6-r8 embedded
+# required by virtual/mysql-5.6-r8::gentoo
+# required by media-sound/amarok-2.8.90::kde
+# required by amarok (argument)
+>=dev-db/mariadb-10.1.13 embedded
+# required by net-libs/signond-8.58::gentoo
+# required by kde-apps/ktp-auth-handler-15.12.3::gentoo
+# required by kde-apps/plasma-telepathy-meta-15.12.3::gentoo
+# required by kde-apps/kdenetwork-meta-15.12.3-r2::gentoo[telepathy]
+# required by @selected
+# required by @world (argument)
+# required by app-emulation/wine-1.9.8::gentoo[osmesa]
+# required by wine (argument)
+>=media-libs/mesa-11.2.1 osmesa
+# required by media-plugins/gst-plugins-libav-1.6.3::gentoo[-libav]
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[ffmpeg]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-video/ffmpeg-2.8.6 abi_x86_32
+# required by app-emulation/wine-1.9.8::gentoo[gsm]
+# required by wine (argument)
+>=media-sound/gsm-1.0.13-r1 abi_x86_32
+# required by media-plugins/gst-plugins-cdparanoia-1.6.3::gentoo
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[cdda]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-sound/cdparanoia-3.10.2-r6 abi_x86_32
+# required by media-libs/libsdl-1.2.15-r9::gentoo[opengl]
+# required by media-libs/libmpeg2-0.5.1-r2::gentoo[sdl]
+# required by media-plugins/gst-plugins-mpeg2dec-1.6.3::gentoo
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[mpeg,dvd,-vcd]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=virtual/glu-9.0-r1 abi_x86_32
+# required by app-emulation/wine-1.9.8::gentoo[odbc]
+# required by wine (argument)
+>=dev-db/unixODBC-2.3.4 abi_x86_32
+# required by media-plugins/gst-plugins-vaapi-0.7.0::gentoo
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[vaapi]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-libs/gst-plugins-base-1.6.3 abi_x86_32
+# required by media-plugins/gst-plugins-vaapi-0.7.0::gentoo
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[vaapi]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-libs/gstreamer-1.6.3 abi_x86_32
+# required by app-emulation/wine-1.9.8::gentoo[mp3]
+# required by wine (argument)
+>=media-sound/mpg123-1.23.3 abi_x86_32
+# required by sys-libs/ldb-1.1.26::gentoo
+# required by net-fs/samba-4.2.11::gentoo
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=sys-libs/tdb-1.3.9 abi_x86_32
+# required by media-plugins/gst-plugins-resindvd-1.6.3::gentoo
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[dvd]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-libs/libdvdnav-5.0.3 abi_x86_32
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[dvd]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-plugins/gst-plugins-dvdread-1.6.3 abi_x86_32
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[cdda]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-plugins/gst-plugins-cdparanoia-1.6.3 abi_x86_32
+# required by virtual/libgudev-230::gentoo
+# required by media-plugins/gst-plugins-v4l2-1.6.3::gentoo[udev]
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[v4l]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=dev-libs/libgudev-230 abi_x86_32
+# required by media-plugins/gst-plugins-mpeg2dec-1.6.3::gentoo
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[mpeg,dvd,-vcd]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-libs/libmpeg2-0.5.1-r2 abi_x86_32
+# required by sys-libs/ldb-1.1.26::gentoo
+# required by net-fs/samba-4.2.11::gentoo
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=sys-libs/tevent-0.9.28 abi_x86_32
+# required by media-plugins/gst-plugins-v4l2-1.6.3::gentoo[udev]
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[v4l]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=virtual/libgudev-230 abi_x86_32
+# required by media-libs/libdvdnav-5.0.3::gentoo
+# required by media-plugins/gst-plugins-resindvd-1.6.3::gentoo
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[dvd]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-libs/libdvdread-5.0.3 abi_x86_32
+# required by media-video/ffmpeg-2.8.6::gentoo[sdl]
+# required by media-plugins/gst-plugins-libav-1.6.3::gentoo[-libav]
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[ffmpeg]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-libs/libsdl-1.2.15-r9 abi_x86_32
+# required by sys-libs/ldb-1.1.26::gentoo
+# required by net-fs/samba-4.2.11::gentoo
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=dev-libs/popt-1.16-r2 abi_x86_32
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[vaapi]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-plugins/gst-plugins-vaapi-0.7.0 abi_x86_32
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[aac]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-plugins/gst-plugins-faad-1.6.3 abi_x86_32
+# required by dev-db/unixODBC-2.3.4::gentoo
+# required by app-emulation/wine-1.9.8::gentoo[odbc]
+# required by wine (argument)
+>=dev-libs/libltdl-2.4.6 abi_x86_32
+# required by media-plugins/gst-plugins-dts-1.6.3::gentoo
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[dts]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-libs/libdca-0.0.5-r3 abi_x86_32
+# required by media-video/ffmpeg-2.8.6::gentoo[aac,encode]
+# required by media-plugins/gst-plugins-libav-1.6.3::gentoo[-libav]
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[ffmpeg]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-libs/vo-aacenc-0.1.3 abi_x86_32
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[x264]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-plugins/gst-plugins-x264-1.6.3 abi_x86_32
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[mp3]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-plugins/gst-plugins-mad-1.6.3 abi_x86_32
+# required by media-plugins/gst-plugins-resindvd-1.6.3::gentoo
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[dvd]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-libs/gst-plugins-bad-1.6.3 abi_x86_32
+# required by media-libs/libdvdread-5.0.3::gentoo[css]
+# required by media-plugins/gst-plugins-resindvd-1.6.3::gentoo
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[dvd]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-libs/libdvdcss-1.4.0 abi_x86_32
+# required by app-emulation/wine-1.9.8::gentoo[openal]
+# required by wine (argument)
+>=media-libs/openal-1.17.2 abi_x86_32
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[flac]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-plugins/gst-plugins-flac-1.6.3 abi_x86_32
+# required by dev-libs/libverto-0.2.6::gentoo[libev]
+# required by app-crypt/mit-krb5-1.14.2::gentoo
+# required by net-fs/samba-4.2.11::gentoo[system-mitkrb5]
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=dev-libs/libev-4.22 abi_x86_32
+# required by net-fs/samba-4.2.11::gentoo
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=dev-python/subunit-1.2.0 abi_x86_32
+# required by app-arch/libarchive-3.1.2-r4::gentoo[lzma]
+# required by net-fs/samba-4.2.11::gentoo
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=app-arch/xz-utils-5.2.2 abi_x86_32
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[dts]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-plugins/gst-plugins-dts-1.6.3 abi_x86_32
+# required by app-crypt/mit-krb5-1.14.2::gentoo
+# required by net-fs/samba-4.2.11::gentoo[system-mitkrb5]
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=dev-libs/libverto-0.2.6 abi_x86_32
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[dvd]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-plugins/gst-plugins-resindvd-1.6.3 abi_x86_32
+# required by app-emulation/wine-1.9.8::gentoo[opencl]
+# required by wine (argument)
+>=virtual/opencl-0-r4 abi_x86_32
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=net-fs/samba-4.2.11 abi_x86_32 winbind
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[mpeg,dvd,-vcd]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-plugins/gst-plugins-mpeg2dec-1.6.3 abi_x86_32
+# required by media-plugins/gst-plugins-x264-1.6.3::gentoo
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[x264]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-libs/gst-plugins-ugly-1.6.3 abi_x86_32
+# required by app-arch/libarchive-3.1.2-r4::gentoo[acl]
+# required by net-fs/samba-4.2.11::gentoo
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=virtual/acl-0-r2 abi_x86_32
+# required by media-plugins/gst-plugins-faad-1.6.3::gentoo
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[aac]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-libs/faad2-2.7-r3 abi_x86_32
+# required by app-crypt/mit-krb5-1.14.2::gentoo
+# required by net-fs/samba-4.2.11::gentoo[system-mitkrb5]
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=sys-libs/e2fsprogs-libs-1.42.13 abi_x86_32
+# required by media-plugins/gst-plugins-v4l2-1.6.3::gentoo
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[v4l]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-libs/libv4l-1.10.0 abi_x86_32
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[dvd,a52]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-plugins/gst-plugins-a52dec-1.6.3 abi_x86_32
+# required by virtual/acl-0-r2::gentoo
+# required by app-arch/libarchive-3.1.2-r4::gentoo[acl]
+# required by net-fs/samba-4.2.11::gentoo
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=sys-apps/acl-2.2.52-r1 abi_x86_32
+# required by virtual/glu-9.0-r1::gentoo
+# required by app-emulation/wine-1.9.8::gentoo[opengl]
+# required by wine (argument)
+>=media-libs/glu-9.0.0-r1 abi_x86_32
+# required by net-fs/samba-4.2.11::gentoo
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=sys-libs/uid_wrapper-1.2.1 abi_x86_32
+# required by media-plugins/gst-plugins-x264-1.6.3::gentoo
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[x264]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-libs/x264-0.0.20151011 abi_x86_32
+# required by net-fs/samba-4.2.11::gentoo
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=sys-libs/ntdb-1.0-r1 abi_x86_32
+# required by net-fs/samba-4.2.11::gentoo
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=net-libs/socket_wrapper-1.1.6 abi_x86_32
+# required by media-video/ffmpeg-2.8.6::gentoo[encode,xvid]
+# required by media-plugins/gst-plugins-libav-1.6.3::gentoo[-libav]
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[ffmpeg]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-libs/xvid-1.3.4 abi_x86_32
+# required by sys-libs/tevent-0.9.28::gentoo
+# required by net-fs/samba-4.2.11::gentoo
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=sys-libs/talloc-2.1.6 abi_x86_32
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[ffmpeg]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-plugins/gst-plugins-libav-1.6.3 abi_x86_32
+# required by net-fs/samba-4.2.11::gentoo
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=sys-libs/ldb-1.1.26 abi_x86_32
+# required by app-emulation/wine-1.9.8::gentoo[xml]
+# required by wine (argument)
+>=dev-libs/libxslt-1.1.28-r5 abi_x86_32
+# required by net-fs/samba-4.2.11::gentoo
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=sys-libs/nss_wrapper-1.1.3 abi_x86_32
+# required by media-libs/libsdl-1.2.15-r9::gentoo[sound]
+# required by media-libs/libmpeg2-0.5.1-r2::gentoo[sdl]
+# required by media-plugins/gst-plugins-mpeg2dec-1.6.3::gentoo
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[mpeg,dvd,-vcd]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-libs/audiofile-0.3.6-r1 abi_x86_32
+# required by media-video/ffmpeg-2.8.6::gentoo[encode,mp3]
+# required by media-plugins/gst-plugins-libav-1.6.3::gentoo[-libav]
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[ffmpeg]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-sound/lame-3.99.5-r1 abi_x86_32
+# required by dev-python/subunit-1.2.0::gentoo
+# required by net-fs/samba-4.2.11::gentoo
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=dev-libs/check-0.10.0 abi_x86_32
+# required by app-emulation/wine-1.9.8::gentoo[s3tc]
+# required by wine (argument)
+>=media-libs/libtxc_dxtn-1.0.1-r1 abi_x86_32
+# required by dev-python/subunit-1.2.0::gentoo
+# required by net-fs/samba-4.2.11::gentoo
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=dev-util/cppunit-1.13.2-r2 abi_x86_32
+# required by media-plugins/gst-plugins-pulse-1.6.3::gentoo
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[pulseaudio]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-libs/gst-plugins-good-1.6.3 abi_x86_32
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[v4l]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-plugins/gst-plugins-v4l2-1.6.3 abi_x86_32
+# required by media-plugins/gst-plugins-a52dec-1.6.3::gentoo
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[dvd,a52]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-libs/a52dec-0.7.4-r7 abi_x86_32
+# required by net-fs/samba-4.2.11::gentoo
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=app-arch/libarchive-3.1.2-r4 abi_x86_32
+# required by net-fs/samba-4.2.11::gentoo[system-mitkrb5]
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=app-crypt/mit-krb5-1.14.2 abi_x86_32
+# required by net-fs/samba-4.2.11::gentoo
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=dev-libs/libbsd-0.8.2 abi_x86_32
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[pulseaudio]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-plugins/gst-plugins-pulse-1.6.3 abi_x86_32
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-plugins/gst-plugins-meta-1.6.3 abi_x86_32
+# required by app-crypt/mit-krb5-1.14.2::gentoo[keyutils]
+# required by net-fs/samba-4.2.11::gentoo[system-mitkrb5]
+# required by app-emulation/wine-1.9.8::gentoo[netapi]
+# required by wine (argument)
+>=sys-apps/keyutils-1.5.9-r2 abi_x86_32
+# required by media-plugins/gst-plugins-mad-1.6.3::gentoo
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[mp3]
+# required by app-emulation/wine-1.9.8::gentoo[gstreamer]
+# required by wine (argument)
+>=media-libs/libmad-0.15.1b-r8 abi_x86_32
+# required by kde-apps/kio-extras-16.04.0::kde[samba]
+# required by kde-apps/dolphin-16.04.0::kde
+# required by kde-apps/kdecore-meta-16.04.0::kde
+# required by @selected
+# required by @world (argument)
+>=net-fs/samba-4.2.11 client
+# required by net-libs/signond-8.58::gentoo
+# required by net-libs/signon-oauth2-0.21::gentoo
+# required by kde-apps/kaccounts-providers-16.04.0::kde
+# required by @preserved-rebuild (argument)
+>=net-libs/libproxy-0.4.11-r2 -kde
+# required by app-office/texmaker-4.5::gentoo[qt5]
+# required by @selected
+# required by @world (argument)
+>=dev-qt/qtwebkit-5.6.0 printsupport
+# required by app-editors/neovim-0.1.4::gentoo
+# required by @selected
+# required by @world (argument)
+>=dev-lua/lpeg-1.0.0-r1 luajit
+# required by app-editors/neovim-0.1.4::gentoo
+# required by @selected
+# required by @world (argument)
+>=dev-lua/mpack-1.0.2 luajit
+media-libs/libsdl2 abi_x86_32 -wayland
+dev-libs/nss abi_x86_32
+# required by media-libs/libsdl2-2.0.4::gentoo[X]
+# required by libsdl2 (argument)
+>=x11-libs/libXt-1.1.5 abi_x86_32
+# required by dev-libs/nss-3.23::gentoo
+# required by @selected
+# required by @world (argument)
+>=dev-libs/nspr-4.12 abi_x86_32
+gnome-base/gconf abi_x86_32
+# required by gnome-base/gconf-3.2.6-r4::gentoo
+# required by gnome-base/gconf (argument)
+>=dev-libs/dbus-glib-0.106 abi_x86_32
+media-libs/libcanberra abi_x86_32
+# required by games-util/steam-client-meta-0-r20150828::steam-overlay[-steamruntime]
+# required by games-util/steam-meta-0-r20131107::steam-overlay
+# required by @selected
+# required by @world (argument)
+>=virtual/libusb-1-r2 abi_x86_32
+# required by games-util/steam-client-meta-0-r20150828::steam-overlay[-steamruntime]
+# required by games-util/steam-meta-0-r20131107::steam-overlay
+# required by @selected
+# required by @world (argument)
+>=sys-libs/libudev-compat-186 abi_x86_32
+# required by games-util/steam-client-meta-0-r20150828::steam-overlay[-steamruntime]
+# required by games-util/steam-meta-0-r20131107::steam-overlay
+# required by @selected
+# required by @world (argument)
+>=net-misc/networkmanager-1.0.12-r1 abi_x86_32
+# required by virtual/libusb-1-r2::gentoo
+# required by games-util/steam-client-meta-0-r20150828::steam-overlay[-steamruntime]
+# required by games-util/steam-meta-0-r20131107::steam-overlay
+# required by @selected
+# required by @world (argument)
+>=dev-libs/libusb-1.0.20 abi_x86_32
+# required by dev-vcs/gitg-3.18.0-r1::gentoo
+# required by gitg (argument)
+>=dev-libs/libgit2-glib-0.24.0 ssh
+# required by x11-libs/gtk+-3.20.6::gentoo[wayland]
+# required by dev-cpp/gtkmm-3.20.1::gentoo
+# required by media-sound/pavucontrol-3.0::gentoo
+# required by @selected
+# required by @world (argument)
+>=dev-libs/wayland-protocols-1.4 abi_x86_32
+# required by dev-libs/glib-2.48.1::gentoo
+# required by dev-libs/atk-2.20.0::gentoo
+# required by x11-libs/gtk+-3.20.6::gentoo
+# required by dev-cpp/gtkmm-3.20.1::gentoo
+# required by media-sound/pavucontrol-3.0::gentoo
+# required by @selected
+# required by @world (argument)
+>=dev-libs/libpcre-8.39 abi_x86_32
+# required by media-sound/clementine-1.3.1-r2::gentoo[mtp]
+# required by @selected
+# required by @world (argument)
+>=gnome-base/gvfs-1.28.2 mtp
+# required by media-libs/gst-plugins-base-1.8.2::gentoo[opus]
+# required by media-plugins/gst-plugins-vaapi-1.8.2::gentoo
+# required by media-plugins/gst-plugins-meta-1.6.3::gentoo[vaapi]
+# required by media-sound/clementine-1.3.1-r2::gentoo
+# required by @selected
+# required by @world (argument)
+>=media-libs/opus-1.1.3 abi_x86_32
+# required by mate-base/mate-1.15.2::rinaldus-overlay
+# required by mate (argument)
+>=x11-wm/marco-1.15.0 gtk3
+# required by mate-base/mate-1.15.2::rinaldus-overlay
+# required by mate (argument)
+>=mate-base/mate-settings-daemon-1.15.0 gtk3
+# required by mate-base/mate-1.15.2::rinaldus-overlay[extras]
+# required by mate (argument)
+>=media-gfx/eom-1.15.0 gtk3
+# required by mate-base/mate-1.15.2::rinaldus-overlay
+# required by mate (argument)
+>=mate-base/mate-panel-1.15.0 gtk3
+# required by mate-base/mate-1.15.2::rinaldus-overlay[extras]
+# required by mate (argument)
+>=mate-extra/mate-power-manager-1.15.0-r1 gtk3
+# required by mate-base/mate-1.15.2::rinaldus-overlay[extras]
+# required by mate (argument)
+>=app-editors/pluma-1.15.0 gtk3
+# required by mate-base/mate-1.15.2::rinaldus-overlay[base]
+# required by mate (argument)
+>=mate-base/mate-applets-1.15.0 gtk3
+# required by media-gfx/eom-1.15.0::rinaldus-overlay
+# required by mate-base/mate-1.15.2::rinaldus-overlay[extras]
+# required by mate (argument)
+>=mate-base/mate-desktop-1.15.1 gtk3
+# required by mate-base/mate-1.15.2::rinaldus-overlay[base]
+# required by mate (argument)
+>=mate-base/mate-control-center-1.15.1 gtk3
+# required by mate-base/mate-settings-daemon-1.15.0::rinaldus-overlay
+# required by mate-base/mate-applets-1.15.0::rinaldus-overlay
+# required by mate-base/mate-1.15.2::rinaldus-overlay[base]
+# required by mate (argument)
+>=mate-base/libmatekbd-1.15.0 gtk3
+# required by mate-base/mate-1.15.2::rinaldus-overlay[extras]
+# required by mate (argument)
+>=app-text/atril-1.15.2 gtk3
+# required by app-arch/engrampa-1.15.0-r1::rinaldus-overlay
+# required by mate-base/mate-1.15.2::rinaldus-overlay[extras]
+# required by mate (argument)
+>=mate-base/caja-1.15.2 gtk3
+# required by mate-base/mate-applets-1.15.0::rinaldus-overlay
+# required by mate-base/mate-1.15.2::rinaldus-overlay[base]
+# required by mate (argument)
+>=dev-libs/libmateweather-1.15.0 gtk3
+
+dev-qt/qtopengl abi_x86_32
+dev-qt/qtdeclarative abi_x86_32
+dev-qt/qtsvg abi_x86_32
+# required by games-util/steam-client-meta-0-r20160828::steam-overlay[-steamruntime]
+# required by games-util/steam-meta-0-r20160817::steam-overlay
+# required by @selected
+# required by @world (argument)
+>=media-libs/libpng-1.2.56:1.2 abi_x86_32
+# required by kde-plasma/plasma-pa-5.8.3::gentoo
+# required by kde-plasma/plasma-desktop-5.8.3::gentoo[pulseaudio]
+# required by kde-plasma/plasma-meta-5.8.3::gentoo
+# required by @selected
+# required by @world (argument)
+>=media-sound/pulseaudio-9.0 gnome
+# required by media-libs/mesa-13.0.0::gentoo[opencl]
+# required by x11-apps/mesa-progs-8.3.0::gentoo
+# required by @selected
+# required by @world (argument)
+>=sys-devel/clang-9999 abi_x86_32
+# required by virtual/libelf-1::gentoo
+# required by media-libs/mesa-13.0.0::gentoo[-video_cards_r600,opencl,-video_cards_radeonsi,llvm,-video_cards_radeon]
+# required by x11-apps/mesa-progs-8.3.0::gentoo
+# required by @selected
+# required by @world (argument)
+>=dev-libs/elfutils-0.166 abi_x86_32
+# required by media-libs/mesa-13.0.0::gentoo[-video_cards_r600,opencl,-video_cards_radeonsi,llvm,-video_cards_radeon]
+# required by x11-apps/mesa-progs-8.3.0::gentoo
+# required by @selected
+# required by @world (argument)
+>=virtual/libelf-1 abi_x86_32
+=sys-devel/clang-3.9.0-r100 abi_x86_32
+# required by media-libs/mesa-13.0.2::gentoo[opencl]
+# required by www-client/firefox-50.1.0::mozilla
+# required by @__auto_slot_operator_replace_installed__ (argument)
+>=sys-devel/clang-3.9.1-r100 abi_x86_32
+>=net-dns/libidn-1.33 abi_x86_32
+# required by net-libs/gnutls-3.5.8::gentoo
+# required by app-crypt/gnupg-2.1.17-r1::gentoo
+# required by gnome-base/gnome-keyring-3.20.0::gentoo
+# required by gnome-base/libgnome-keyring-3.12.0::gentoo
+# required by net-im/skypeforlinux-1.14.0.5::gentoo
+# required by @selected
+# required by @world (argument)
+>=dev-libs/libunistring-0.9.7 abi_x86_32
+# required by app-shells/fish-2.4.0-r1::gentoo
+# required by @selected
+# required by @world (argument)
+>=dev-libs/libpcre2-10.22 pcre32
+# required by x11-drivers/nvidia-drivers-375.26-r1::gentoo[tools]
+# required by @selected
+# required by @world (argument)
+>=dev-libs/jansson-2.9 abi_x86_32

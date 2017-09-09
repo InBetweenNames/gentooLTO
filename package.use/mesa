@@ -1,0 +1,6 @@
+# required by dev-util/amdapp-3.0-r1::science
+# required by sci-libs/clblas-2.10::science
+# required by sci-libs/arrayfire-9999::science[opencl]
+# required by @selected
+# required by @world (argument)
+media-libs/mesa gles2 opencl

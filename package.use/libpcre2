@@ -1,0 +1,5 @@
+# required by dev-qt/qtcore-5.9.0::qt
+# required by dev-qt/qtscript-5.9.0::qt
+# required by @selected
+# required by @world (argument)
+>=dev-libs/libpcre2-10.23 pcre16

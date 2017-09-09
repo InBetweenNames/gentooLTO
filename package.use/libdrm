@@ -1,0 +1,11 @@
+# required by x11-libs/libva-intel-driver-1.7.3::gentoo
+# required by @selected
+# required by @world (argument)
+>=x11-libs/libdrm-2.4.75 video_cards_intel# required by media-libs/mesa-17.0.0_rc2::gentoo[-video_cards_radeon,-video_cards_r100,video_cards_radeonsi,-video_cards_r600,-video_cards_r300,-video_cards_r200]
+# required by virtual/opencl-0-r5::gentoo
+# required by dev-util/amdapp-3.0-r1::science
+# required by sci-libs/clblas-2.10::science
+# required by sci-libs/arrayfire-9999::science[opencl]
+# required by @selected
+# required by @world (argument)
+>=x11-libs/libdrm-2.4.75 video_cards_radeon video_cards_amdgpu

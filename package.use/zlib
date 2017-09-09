@@ -1,0 +1,76 @@
+sys-libs/zlib static-libs
+## required by net-fs/samba-4.5.4::gentoo
+## required by kde-apps/kio-extras-16.12.1::gentoo[samba]
+## required by @selected
+## required by @world (argument)
+#>=dev-libs/libaio-0.3.110 abi_x86_32
+## required by dev-util/amdapp-3.0-r1::science
+## required by sci-libs/clblas-2.10::science
+## required by sci-libs/arrayfire-9999::science[opencl]
+## required by @selected
+## required by @world (argument)
+#>=media-libs/mesa-17.0.0_rc2 video_cards_radeonsi
+## required by media-libs/mesa-17.0.0_rc2::gentoo[-video_cards_radeon,-video_cards_r100,video_cards_radeonsi,-video_cards_r600,-video_cards_r300,-video_cards_r200]
+## required by virtual/opencl-0-r5::gentoo
+## required by dev-util/amdapp-3.0-r1::science
+## required by sci-libs/clblas-2.10::science
+## required by sci-libs/arrayfire-9999::science[opencl]
+## required by @selected
+## required by @world (argument)
+#>=x11-libs/libdrm-2.4.75 video_cards_radeon video_cards_amdgpu
+## required by x11-libs/libva-intel-driver-1.7.3::gentoo
+## required by @selected
+## required by @world (argument)
+#>=x11-libs/libdrm-2.4.75 video_cards_intel
+## required by sci-libs/scipy-0.18.1::gentoo
+## required by scipy (argument)
+#>=dev-python/numpy-1.11.2-r1
+## required by net-libs/gnutls-3.5.9-r1::gentoo[idn]
+## required by mail-mta/nullmailer-2.0-r1::gentoo
+## required by virtual/mta-1::gentoo
+## required by net-analyzer/fail2ban-0.9.6::gentoo
+## required by @selected
+## required by @world (argument)
+#>=net-dns/libidn2-0.16-r1 abi_x86_32
+## required by dev-qt/qt-creator-4.3.0::gentoo[cmake]
+## required by @selected
+## required by @world (argument)
+#>=dev-util/cmake-3.8.1 server
+## required by net-misc/networkmanager-1.8.0::gentoo
+## required by gnome-extra/nm-applet-1.8.0::gentoo
+## required by net-misc/networkmanager-openvpn-1.2.8::gentoo[gtk]
+## required by @selected
+## required by @world (argument)
+#>=dev-libs/libnl-3.3.0 abi_x86_32
+## required by net-misc/networkmanager-1.8.0::gentoo
+## required by gnome-extra/nm-applet-1.8.0::gentoo
+## required by net-misc/networkmanager-openvpn-1.2.10::gentoo[gtk]
+## required by @selected
+## required by @world (argument)
+#>=net-libs/libndp-1.6-r1 abi_x86_32
+## required by dev-qt/qtcore-5.9.0::qt
+## required by dev-qt/qtscript-5.9.0::qt
+## required by @selected
+## required by @world (argument)
+#>=dev-libs/libpcre2-10.23 pcre16
+## required by sys-apps/microcode-ctl-1.28-r1::gentoo
+## required by @selected
+## required by @world (argument)
+#>=sys-firmware/intel-microcode-20170511 monolithic
+## required by net-fs/samba-4.6.7::gentoo
+## required by app-emulation/wine-2.14::rinaldus-overlay[netapi]
+## required by @selected
+## required by @world (argument)
+#>=dev-util/cmocka-1.1.1 abi_x86_32
+## required by kde-apps/akonadi-17.04.3-r1::gentoo
+## required by kde-apps/akonadi (argument)
+#>=dev-qt/qtsql-5.9.1 postgres
+## required by media-libs/phonon-vlc-0.9.1-r1::gentoo
+#>=media-libs/phonon-4.9.1-r1 qt4
+## required by media-libs/phonon-4.9.1-r1::gentoo[vlc]
+## required by dev-qt/designer-4.8.7::gentoo[phonon,kde]
+## required by kde-frameworks/kdelibs-4.14.35::gentoo
+## required by dev-vcs/subversion-1.9.7::gentoo[kwallet]
+## required by @selected
+## required by @world (argument)
+#>=media-libs/phonon-vlc-0.9.1-r1 qt4

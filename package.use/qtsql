@@ -1,0 +1,3 @@
+# required by kde-apps/akonadi-17.04.3-r1::gentoo
+# required by kde-apps/akonadi (argument)
+>=dev-qt/qtsql-5.9.1 postgres

@@ -1,0 +1,7 @@
+cross-armv7-softfloat-linux-musl
+cross-armv7-softfloat-linux-gnueabi
+cross-armv7-hardfloat-linux-gnueabi
+cross-arm-hardfloat-linux-gnueabi
+cross-arm-hardfloat-linux-gnu
+cross-armv7a-hardfloat-linux-gnueabi
+cross-armv7a-softfloat-linux-gnueabi

@@ -1,0 +1,2 @@
+dev-lang/ghc llvm profile
+cross-armv7a-hardfloat-linux-gnueabi/ghc -profile

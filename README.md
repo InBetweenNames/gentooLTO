@@ -45,7 +45,7 @@ I've never actually yet emerged a package that causes the Graphite optimizations
 
 ### -O3 problems
 
-These are rare, but they do happen.  One example is `media-video/ffmpeg`.  For the life of me, I can't seem to build it with `-O3`.  When this happens, I usually force down to `-O2` (which disables Graphite implicitly in this configuration) using the `env/O2*.conf` configs.  Some packages are sensitive to both `-O3` and `LTO`, so I've included both an LTOed and non-LTOed `-O2` configurations for this purpose.
+These are rare, but they do happen.  When this happens, I usually force down to `-O2` (which disables Graphite implicitly in this configuration) using the `env/O2*.conf` configs.  Some packages are sensitive to both `-O3` and `LTO`, so I've included both an LTOed and non-LTOed `-O2` configurations for this purpose.
 
 ### Patches
 
@@ -61,11 +61,27 @@ The packages I've found so far that don't play nice with glibc 2.26 are as follo
 * sys-libs/gpm
 * =sys-libs/compiler-rt-sanitizers-4.0.1 (5.0.0 seems unaffected)
 
-I have over 1500 packages installed on my system at this time, and I did an `emerge -e @world` before I uploaded my configuration to this repository.  Allcurrently installed packages in my system, including deep dependencies, can be found in the file `worldsetdeep`.  Considering how few exceptions I have listed here, I find these results encouraging.  Perhaps we are closer than we think to an LTOed default Gentoo system?
+I have over 1500 packages installed on my system at this time, and I did an `emerge -e @world` before I uploaded my configuration to this repository.  All currently installed packages in my system, including deep dependencies, can be found in the file `worldsetdeep`.  Considering how few exceptions I have listed here, I find these results encouraging.  Perhaps we are closer than we think to an LTOed default Gentoo system?
 
 ## How to use this configuration
 
 If you're building a new system, I'd recommend using glibc 2.25 since there are some packages which do not build with it.  I wouldn't recommend just taking this repository as-is and using it as your portage--instead you should cherry pick the parts that are useful to you.  A good start would be to take the `make.conf`, `env`, and `package.env` directories and leave out `python.conf` and `cross-armv7a-hardfloat-linux-gnueabi.conf`, and perhaps use GCC 7.2.0.  In `make.conf`, make sure you set `-march` appropriately, as I have it set to Haswell currently and that may not be suitable for your system.  You can set it to `native` if you are unsure what it should be.
 I would recommend taking the `patches` directory, too, if you are planning to build Firefox, as it needs a small buildsystem patch in order to handle LTO arguments correctly.
 
+## Goals of this project
+
+Ideally, it should be possible to build Gentoo with LTO by default, no exceptions.  I'm not sure if we'll ever get to that point, but I think it's worthwhile trying.  At the very least, we'll help catch undefined behaviour and packages that don't respect LDFLAGS, a worthwhile endeavour in its own right.  If we could demonstrate that O3 and Graphite produce tangible benefits, perhaps we could even change the "O2-by-default" perception many people have.  The internal compiler errors produced by GCC with Graphite should make for some good bug reports.
+
+## How to contribute
+
+The easiest way to contribute would be to test this on your own system and contribute your LTO, Graphite, and O3 overrides here. If you want to contribute new compiler flags, understand that these must keep with the overall philosophy of this repository: allow the compiler
+to make the final call as to whether a transformation should be applied or not.
+
+If you are willing to, try investigating things on a per-package basis to see if the problem can be corrected at the ebuild level.  If not, consider sending a patch upstream to fix the problem.  This could be very difficult, but would help a lot in keeping things clean here.
+
+If you get internal compiler errors, consider isolating the troubling code and making a GCC bug report with it.
+
+Some packages may perform worse with these configuration options rather than straight O2.  These would also make good candidates for GCC bug reports, as it means the optimizers' cost functions may need to be adjusted.  You may be able to use a package's own test suites to measure this yourself.  I'll create a place to put these overrides when I get a PR about this.
+
+Some users have expressed interest in seeing benchmarks to measure the effects of this configuration on their systems.  I would have performed such benchmarks myself if I had known of a good "general responsiveness" benchmark to test with.  If you know of any good benchmarks that measure this, or are willing to develop one, please let me know.  I think that this would be very useful to the Linux community as a whole.
 

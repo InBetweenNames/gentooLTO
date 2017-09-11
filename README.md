@@ -60,7 +60,6 @@ The packages I've found so far that don't play nice with glibc 2.26 are as follo
 * sys-devel/flex
 * sys-libs/gpm
 * =sys-libs/compiler-rt-sanitizers-4.0.1 (5.0.0 seems unaffected)
-* sys-libs/gpm
 
 I have over 1500 packages installed on my system at this time, and I did an `emerge -e @world` before I uploaded my configuration to this repository.  Allcurrently installed packages in my system, including deep dependencies, can be found in the file `worldsetdeep`.  Considering how few exceptions I have listed here, I find these results encouraging.  Perhaps we are closer than we think to an LTOed default Gentoo system?
 

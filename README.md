@@ -81,6 +81,8 @@ This should point to your active GCC's `liblto_plugin.so`.  For example, for GCC
 ln -sf /usr/libexec/gcc/x86_64-pc-linux-gnu/7.2.0/liblto_plugin.so /usr/x86_64-pc-linux-gnu/binutils-bin/lib/bfd-plugins/liblto_plugin.so
 ~~~
 
+After you've set things up, I recommend to do an `emerge -e @world` to rebuild your system with LTO.
+
 ## Goals of this project
 
 Ideally, it should be possible to build Gentoo with LTO by default, no exceptions.  I'm not sure if we'll ever get to that point, but I think it's worthwhile trying.  At the very least, we'll help catch undefined behaviour and packages that don't respect LDFLAGS, a worthwhile endeavour in its own right.  If we could demonstrate that O3 and Graphite produce tangible benefits, perhaps we could even change the "O2-by-default" perception many people have.  The internal compiler errors produced by GCC with Graphite should make for some good bug reports.

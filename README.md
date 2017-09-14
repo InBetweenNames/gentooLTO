@@ -68,6 +68,19 @@ I have over 1500 packages installed on my system at this time, and I did an `eme
 If you're building a new system, I'd recommend using glibc 2.25 since there are some packages which do not build with it.  I wouldn't recommend just taking this repository as-is and using it as your portage--instead you should cherry pick the parts that are useful to you.  A good start would be to take the `make.conf`, `env`, and `package.env` directories and leave out `python.conf` and `cross-armv7a-hardfloat-linux-gnueabi.conf`, and perhaps use GCC 7.2.0.  In `make.conf`, make sure you set `-march` appropriately, as I have it set to Haswell currently and that may not be suitable for your system.  You can set it to `native` if you are unsure what it should be.
 I would recommend taking the `patches` directory, too, if you are planning to build Firefox, as it needs a small buildsystem patch in order to handle LTO arguments correctly.
 
+When you switch your configuration to LTO by copying the make.conf rules here, make sure you also have your linker plugin symlinks set correctly (thanks @rx80).
+I haven't observed a need for this with binutils 2.29, but with 2.28.1 at least one person had problems with this being unset.  On `x86_64`, you can check it as follows:
+
+~~~
+ls -l /usr/x86_64-pc-linux-gnu/binutils-bin/lib/bfd-plugins/liblto_plugin.so
+~~~
+
+This should point to your active GCC's `liblto_plugin.so`.  For example, for GCC 7.2.0, you could set it like so:
+
+~~~
+ln -sf /usr/libexec/gcc/x86_64-pc-linux-gnu/7.2.0/liblto_plugin.so /usr/x86_64-pc-linux-gnu/binutils-bin/lib/bfd-plugins/liblto_plugin.so
+~~~
+
 ## Goals of this project
 
 Ideally, it should be possible to build Gentoo with LTO by default, no exceptions.  I'm not sure if we'll ever get to that point, but I think it's worthwhile trying.  At the very least, we'll help catch undefined behaviour and packages that don't respect LDFLAGS, a worthwhile endeavour in its own right.  If we could demonstrate that O3 and Graphite produce tangible benefits, perhaps we could even change the "O2-by-default" perception many people have.  The internal compiler errors produced by GCC with Graphite should make for some good bug reports.

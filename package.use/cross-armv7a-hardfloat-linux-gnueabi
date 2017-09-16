@@ -1,4 +1,0 @@
-cross-armv7a-hardfloat-linux-gnueabi/binutils -selinux -multilib
-cross-armv7a-hardfloat-linux-gnueabi/linux-headers -selinux -multilib
-cross-armv7a-hardfloat-linux-gnueabi/glibc -selinux -multilib
-cross-armv7a-hardfloat-linux-gnueabi/gcc -selinux -boundschecking -d -gcj -gtk -libffi -mudflap -objc -objc++ -objc-gc -multilib

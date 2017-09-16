@@ -1,5 +1,0 @@
-# required by net-fs/samba-4.6.7::gentoo
-# required by app-emulation/wine-2.14::rinaldus-overlay[netapi]
-# required by @selected
-# required by @world (argument)
->=dev-util/cmocka-1.1.1 abi_x86_32

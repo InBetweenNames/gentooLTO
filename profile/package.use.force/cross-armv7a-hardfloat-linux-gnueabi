@@ -1,5 +1,0 @@
-cross-armv7a-hardfloat-linux-gnueabi/binutils -multilib
-cross-armv7a-hardfloat-linux-gnueabi/gcc -multilib
-cross-armv7a-hardfloat-linux-gnueabi/linux-headers -multilib
-cross-armv7a-hardfloat-linux-gnueabi/glibc -multilib
-cross-armv7a-hardfloat-linux-gnueabi/gdb -multilib

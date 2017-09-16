@@ -1,2 +1,0 @@
-sys-devel/llvm LLVM_TARGETS: ARM
-sys-devel/clang LLVM_TARGETS: ARM

@@ -1,7 +1,0 @@
-# required by net-libs/gnutls-3.5.9-r1::gentoo[idn]
-# required by mail-mta/nullmailer-2.0-r1::gentoo
-# required by virtual/mta-1::gentoo
-# required by net-analyzer/fail2ban-0.9.6::gentoo
-# required by @selected
-# required by @world (argument)
->=net-dns/libidn2-0.16-r1 abi_x86_32

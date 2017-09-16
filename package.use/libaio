@@ -1,5 +1,0 @@
-# required by net-fs/samba-4.5.4::gentoo
-# required by kde-apps/kio-extras-16.12.1::gentoo[samba]
-# required by @selected
-# required by @world (argument)
->=dev-libs/libaio-0.3.110 abi_x86_32

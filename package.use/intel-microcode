@@ -1,4 +1,0 @@
-# required by sys-apps/microcode-ctl-1.28-r1::gentoo
-# required by @selected
-# required by @world (argument)
->=sys-firmware/intel-microcode-20170511 monolithic

@@ -1,6 +1,0 @@
-# required by net-misc/networkmanager-1.8.0::gentoo
-# required by gnome-extra/nm-applet-1.8.0::gentoo
-# required by net-misc/networkmanager-openvpn-1.2.10::gentoo[gtk]
-# required by @selected
-# required by @world (argument)
->=net-libs/libndp-1.6-r1 abi_x86_32

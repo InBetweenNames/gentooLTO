@@ -1,4 +1,4 @@
-# Gentoo O3-Graphite-LTO configuration
+# Gentoo O3-Graphite-LTO configuration overlay
 
 > Warning: this configuration is not for the faint of heart.  It is probably not a good idea to use this on a production system!  Against my better judgement, I do anyways...
 
@@ -6,30 +6,60 @@ Interested in running Gentoo at (theoretically) maximum speed?  Want to have a n
 
 ## Introduction
 
-This repository is a snapshot of my Gentoo Portage configuration.  Earlier in 2017, I set out to do an experiment
-in building Gentoo using the `-O3` gcc compiler option.  It is well documented on the Gentoo wiki that this is not
-a recommended configuration, but I wanted to see to what extent things would break.  As it turns out, most packages
-that cannot be built with `-O3` are already forced to build with `-O2` anyways, so I experienced very few failures.  With the success I had using -`O3`, I decided to make things a little more complicated and toss the [Graphite](https://gcc.gnu.org/wiki/Graphite) optimizations in the mix.  Then I went a bit more daring and tossed in LTO.  After about 8 months of doing this, I feel good enough about my configuration that I decided to publish it for interested parties to see.  This repository will be actively updated and tested, as it is the basis for my own Portage configuration.
+This overlay contains a set of configuration files extracted from my own Gentoo Portage configuration to enable system-wide LTO.  It is intended to be used with aggressive compiler optimizations to help catch bugs in programs, including GCC.  However, it can also be used for plain LTO without any aggressive compiler optimizations.  Read on to see how to use it.
+
+The history: earlier in 2017, I set out to do an experiment in building Gentoo using the `-O3` gcc compiler option.  It is well documented on the Gentoo wiki that this is not
+a recommended configuration, but I wanted to see to what extent things would break.  As it turns out, most packages that cannot be built with `-O3` are already forced to build with `-O2` anyways in the ebuilds themselves, so I experienced very few failures.  With the success I had using -`O3`, I decided to make things a little more complicated and toss the [Graphite](https://gcc.gnu.org/wiki/Graphite) optimizations in the mix.  Then I went a bit more daring and tossed in LTO.  After about 8 months of doing this, I feel good enough about my configuration that I decided to publish it for interested parties to see.  This repository will be actively updated and tested, as it is the basis for my own Portage configuration.
 
 My original LTO and Graphite experiments were based on [this helpful blog post](http://yuguangzhang.com/blog/enabling-gcc-graphite-and-lto-on-gentoo/).  What this experiment does is expand on the content in that post with an active and updated configuration.
 
-## A brief note about compiler optimizations
+## The philosophy behind this overlay
 
 > All optimizations are transformations, but not all transformations are optimizations.
 
-It is important to note that just because something is compiled with `-O3` and Graphite does not mean that the compiler will necessarily perform more optimizations than it would otherwise.  I only include flags that allow the compiler to perform a transformation if it is deemed profitable--any "optimization" that doesn't actually optimize, after all, is just a transformation.  The philosophy behind this configuration is to allow the compiler to optimize as it sees fit, without the restrictions normally imposed by `-O2` and friends.  **You won't ever find a flag that intentionally overrides the compiler's judgement in this configuration**.   If you do find a flag in this configuration that does, please file a bug report!  An example of a flag that overrides the compiler's judgement is `-funroll-loops`.
+It is important to note that just because something is compiled with `-O3` and Graphite does not mean that the compiler will necessarily perform more optimizations than it would otherwise.  I only include flags in `make.conf.lto` that allow the compiler to perform a transformation if it is deemed profitable--any "optimization" that doesn't actually optimize, after all, is just a transformation.  The philosophy behind this configuration is to allow the compiler to optimize as it sees fit, without the restrictions normally imposed by `-O2` and friends.  **You won't ever find a flag that intentionally overrides the compiler's judgement in this configuration**.   If you do find a flag in this configuration that does, please file a bug report!  An example of a flag that overrides the compiler's judgement is `-funroll-loops`.
 
 The biggest gotcha with `-O3` is that it does not play nice with Undefined Behaviour.  UB is far more prevalent in C and C++ programs than anyone would like to admit, so the default advice with any source distribution is to build with `-O2` and be done with it.  If `-O3` produces non-working code, that is more often than not the code's fault and not the compiler's.
 
-## The configuration
+## How to use this configuration
 
-Right now I'm on glibc 2.26, so some packages fail to build because of that alone.  Notably versions of GCC < 7.0 have some problems here currently.  I also run the latest stable binutils (2.29) as well.  My compiler at this time is GCC 7.2.0.  I do have [SSP](http://wiki.osdev.org/Stack_Smashing_Protector) and [PIE](https://en.wikipedia.org/wiki/Position-independent_code#Position-independent_executables) disabled for the time being, but this is by means no requirement to run this config.
+Simply add this overlay to your system and `emerge sys-config/ltoize`.  This will add in the necessary overrides to your `/etc/portage/`, but it won't modify your `make.conf`.
+It will create a `make.conf.lto` in `/etc/portage` with the recommended settings for LTO.  Modify your own `make.conf` accordingly--there are comments in `make.conf.lto` to help
+guide you through the process, including for enabling Graphite.
 
-Most Gentoo-ers have `-march=native -O2` in their `CFLAGS` and `CXXFLAGS`.  Using `-march=native` alone is a good idea as it allows GCC to tune it's code generation to your specific processor.  I've enabled LTO, Graphite, and `-O3` in mine, which can be found in `make.conf`.  I also pass all compiler options to the linker as well in `LDFLAGS`, which is necessary for LTO to work.
+If you're building a new system, I'd recommend using glibc 2.25 since there are some packages which do not build with glibc 2.26.
 
-Not all packages build cleanly.  I have a number of environment overrides which are used to override the default settings on a per-package basis.  The configurations are in `env/`, and the per-package overrides are in `package.env/`.  I have tried to categorize the overrides based on the kind of failure were being exhibited, but in some cases this was difficult.  LTO overrides can be found in `package.env/ltoworkarounds.conf`.  Graphite and -O3 failures can be found in `package.env/nooptimize.conf`.  You'll also find some other environment overrides in there, which aren't relevant to this project, such as crossdev configurations for my Haskell-on-ARM projects and some overrides for Python.
+When you find a problem, whether it's a package not playing nice with -O3, Graphite, or LTO, consider opening an issue here or sending a pull request with the overrides needed to get the package working.  Over time, we should be able to achieve full coverage of `/usr/portage` this way and provide a one size fits all solution, and not to mention help improve some open source software through the bug reports that will no doubt be generated! 
 
-My Portage profile is `default/linux/amd64/17.0/desktop/plasma`.
+`ltoize` will also obtain patches which help certain packages build with LTO.  It installs symlinks to these patches in `/etc/portage/patches`, so that you can have your own
+patches alongside the ones maintained in this repository.
+
+When you switch your configuration to LTO by copying the make.conf rules here, make sure you also have your linker plugin symlinks set correctly (thanks @rx80).
+I haven't observed a need for this with binutils 2.29, but with 2.28.1 at least one person had problems with this being unset.
+
+`ltoize` *should* set this correctly, but if you have an esoteric configuration it may require some manual tweaking.
+
+On `amd64`, you can check it as follows:
+
+~~~
+ls -l /usr/x86_64-pc-linux-gnu/binutils-bin/lib/bfd-plugins/liblto_plugin.so
+~~~
+
+This should point to your active GCC's `liblto_plugin.so`.  For example, for GCC 7.2.0, you could set it like so:
+
+~~~
+ln -sf /usr/libexec/gcc/x86_64-pc-linux-gnu/7.2.0/liblto_plugin.so /usr/x86_64-pc-linux-gnu/binutils-bin/lib/bfd-plugins/liblto_plugin.so
+~~~
+
+After you've set everything up, I recommend an `emerge -e @world` to rebuild your system with LTO and any optimizations you have chosen.
+
+## Additional details about LTOize
+
+The actual `/etc/portage` modifications are in `sys-config/ltoize/files`.  This is a stripped down version of my own Portage configuration which `ltoize` uses to install into your own `/etc/portage`.  `ltoize` uses symlinks to accomplish this task so that when you do an `emerge --sync` or equivalent, you will automatically pull in the latest set of overrides.  `make.conf.lto` is just installed as a normal file, however, and the version number of `ltoize` will increment when a notable change is made to that file.  That could be including some new compiler flags, or perhaps revising how LTO is done.  Any such a change would require manual intervention, so you will be notified when you update `ltoize`.
+
+Not all packages build cleanly.  I have a number of environment overrides which are used to override the default settings on a per-package basis.  The configurations are in `env/lto`, and the per-package overrides are in `package.env/`.  I have tried to categorize the overrides based on the kind of failure were being exhibited, but in some cases this was difficult.  LTO overrides can be found in `package.env/ltoworkarounds.conf`.  Graphite and -O3 overrides are included in that file as well, but they won't affect you if you are not using those compiler flags.
+
+The only thing which isn't always automatically updated are the LTO patches.  If a modification is made to an existing match, you will transparently receive that patch in your own `/etc/portage/patches` since a symlink will be used.  However, if a patch is created for a new package, you will need to re-run `ltoize` to get the new symlink.  I'm still thinking about a good way to handle this.  `/etc/portage/patches` unfortunately can't have a subdirectory like `lto` since it is used to match against the package being installed.
 
 ## Caveats
 
@@ -49,11 +79,20 @@ These are rare, but they do happen.  When this happens, I usually force down to 
 
 ### Patches
 
-I do include a small patch to Firefox in the `patches` directory to allow it to build with LTO.  It's a small buildsystem patch that was on a bug report.  I usually only go through the trouble to include a patch in `patches` if one already exists.
+I do include a small patch to Firefox in the `patches` directory to allow it to build with LTO.  It's a small buildsystem patch that was on a bug report.  I usually only go through the trouble to include a patch in `patches` if one already exists.  The `ltoize` tool will automatically grab this for you.
 
 ### A special note about Perl 5
 
 Perl 5 in general does not play nice with LTO ([see this reddit comment](https://www.reddit.com/r/Gentoo/comments/6z8s8m/a_gentoo_portage_configuration_for_building_with/dmuhohy/)).  Packages which use Perl 5 or have `perl` in their USE flags may require the `ltofat.conf` configuration, or in the worst case `nolto.conf`.  This does not appear to be something that can be fixed easily for Perl 5, so we'll have exercise caution. Perl 6 is unaffected, however.
+
+## My own configuration
+
+Right now I'm on glibc 2.26, so some packages fail to build because of that alone.  Notably versions of GCC < 7.0 have some problems here currently.  I also run the latest stable binutils (2.29) as well.  My compiler at this time is GCC 7.2.0.  I do have [SSP](http://wiki.osdev.org/Stack_Smashing_Protector) and [PIE](https://en.wikipedia.org/wiki/Position-independent_code#Position-independent_executables) disabled for the time being, but this is by means no requirement to run this config.
+
+Most Gentoo-ers have `-march=native -O2` in their `CFLAGS` and `CXXFLAGS`.  Using `-march` is a good idea as it allows GCC to tune it's code generation to your specific processor.  I've enabled LTO, Graphite, and `-O3` in mine, which can be found in `make.conf.lto`.  I also pass all compiler options to the linker as well in `LDFLAGS`, which is necessary for LTO to work.
+
+
+My Portage profile is `default/linux/amd64/17.0/desktop/plasma`.
 
 ## Conclusions
 
@@ -67,25 +106,6 @@ The packages I've found so far that don't play nice with glibc 2.26 are as follo
 
 I have over 1500 packages installed on my system at this time, and I did an `emerge -e @world` before I uploaded my configuration to this repository.  All currently installed packages in my system, including deep dependencies, can be found in the file `worldsetdeep`.  Considering how few exceptions I have listed here, I find these results encouraging.  Perhaps we are closer than we think to an LTOed default Gentoo system?
 
-## How to use this configuration
-
-If you're building a new system, I'd recommend using glibc 2.25 since there are some packages which do not build with it.  I wouldn't recommend just taking this repository as-is and using it as your portage--instead you should cherry pick the parts that are useful to you.  A good start would be to take the `make.conf`, `env`, and `package.env` directories and leave out `python.conf` and `cross-armv7a-hardfloat-linux-gnueabi.conf`, and perhaps use GCC 7.2.0.  In `make.conf`, make sure you set `-march` appropriately, as I have it set to Haswell currently and that may not be suitable for your system.  You can set it to `native` if you are unsure what it should be.
-I would recommend taking the `patches` directory, too, if you are planning to build Firefox, as it needs a small buildsystem patch in order to handle LTO arguments correctly.
-
-When you switch your configuration to LTO by copying the make.conf rules here, make sure you also have your linker plugin symlinks set correctly (thanks @rx80).
-I haven't observed a need for this with binutils 2.29, but with 2.28.1 at least one person had problems with this being unset.  On `x86_64`, you can check it as follows:
-
-~~~
-ls -l /usr/x86_64-pc-linux-gnu/binutils-bin/lib/bfd-plugins/liblto_plugin.so
-~~~
-
-This should point to your active GCC's `liblto_plugin.so`.  For example, for GCC 7.2.0, you could set it like so:
-
-~~~
-ln -sf /usr/libexec/gcc/x86_64-pc-linux-gnu/7.2.0/liblto_plugin.so /usr/x86_64-pc-linux-gnu/binutils-bin/lib/bfd-plugins/liblto_plugin.so
-~~~
-
-After you've set things up, I recommend to do an `emerge -e @world` to rebuild your system with LTO.
 
 ## Goals of this project
 

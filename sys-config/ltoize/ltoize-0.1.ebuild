@@ -70,6 +70,11 @@ pkg_preinst() {
 	insinto "/etc/portage"
 	doins "${FILESDIR}/make.conf.lto"
 
+	elog "Installing patches to help certain software build with this configuration (installed as symlinks)"
+	for i in $(ls ${LTO_PORTAGE_DIR}/patches); do
+		dosym "${LTO_PORTAGE_DIR}/patches/$i" "${ROOT}etc/portage/patches/$i"
+	done
+
 }
 
 pkg_postinst()

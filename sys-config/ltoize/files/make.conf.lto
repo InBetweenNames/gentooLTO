@@ -1,0 +1,31 @@
+#FLTO should be of the form -flto[=n] where n is the number of threads to use during linking.
+#It's usually a good idea to set this to the number of hardware threads in your system
+FLTO="-flto=8"
+
+#GRAPHITE contains Graphite specific optimizations and other optimizations that are disabled at O3
+#but don't influence the compiler's judgement.
+#These should be updated with GCC 7.2.1 (-ftree-loop-distribution may be enabled
+#by -O3 by default)
+GRAPHITE="-fgraphite-identity -ftree-loop-distribution -floop-nest-optimize" 
+
+#FLTO and GRAPHITE are variables used in the LTO and Graphite overrides as well.  If you don't want Graphite or LTO,
+#just unset these variables--no further action is necessary
+
+
+#These variables are required to be set to their appropriate GCC wrappers.  This is required for LTO.
+AR=gcc-ar
+NM=gcc-nm
+RANLIB=gcc-ranlib
+
+#Your CFLAGS should contain ${FLTO} and, depending on your gcc, -fuse-linker-plugin
+#Newer GCCs enable -fuse-linker-plugin by default.
+CFLAGS="-march=native -O3 ${GRAPHITE} ${FLTO} -fuse-linker-plugin -pipe"
+
+#Your CXXFLAGS should be a superset of your CFLAGS.  Most people will never need to add anything extra to their CXXFLAGS.
+CXXFLAGS="${CFLAGS}"
+
+#Your LDFLAGS should contain *ALL* of your CFLAGS for LTO to work.  It must receieve all optimization options, march, etc.
+#It's usually a good idea to enable -Wl,--hash-style=gnu as well to help find packages which don't respect LDFLAGS
+LDFLAGS="-Wl,--hash-style=gnu ${CFLAGS}"
+
+#Consider also using cpuid2cpuflags to set your CPU_FLAGS_* variable in your make.conf for packages that rely on explicit optimizations such as intrinsics

@@ -51,6 +51,10 @@ These are rare, but they do happen.  When this happens, I usually force down to 
 
 I do include a small patch to Firefox in the `patches` directory to allow it to build with LTO.  It's a small buildsystem patch that was on a bug report.  I usually only go through the trouble to include a patch in `patches` if one already exists.
 
+### A special note about Perl 5
+
+Perl 5 in general does not play nice with LTO ([see this reddit comment](https://www.reddit.com/r/Gentoo/comments/6z8s8m/a_gentoo_portage_configuration_for_building_with/dmuhohy/)).  Packages which use Perl 5 or have `perl` in their USE flags may require the `ltofat.conf` configuration, or in the worst case `nolto.conf`.  This does not appear to be something that can be fixed easily for Perl 5, so we'll have exercise caution. Perl 6 is unaffected, however.
+
 ## Conclusions
 
 After running this configuration for long enough, it seems stable for personal use, and it is the configuration I use on my desktop right now.  I see no need to revert anything, but YMMV.  If anything this repository can be used as a canary to see which packages exhibit undefined behaviour in C or C++.

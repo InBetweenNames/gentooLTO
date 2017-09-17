@@ -23,7 +23,7 @@ The biggest gotcha with `-O3` is that it does not play nice with Undefined Behav
 
 ## How to use this configuration
 
-Simply add this overlay to your system and `emerge sys-config/ltoize`.  This will add in the necessary overrides to your `/etc/portage/`, but it won't modify your `make.conf`.
+Simply add this overlay (`layman -a lto-overlay`) to your system and `emerge sys-config/ltoize`.  This will add in the necessary overrides to your `/etc/portage/`, but it won't modify your `make.conf`.
 It will create a `make.conf.lto` in `/etc/portage` with the recommended settings for LTO.  Modify your own `make.conf` accordingly--there are comments in `make.conf.lto` to help
 guide you through the process, including for enabling Graphite.
 

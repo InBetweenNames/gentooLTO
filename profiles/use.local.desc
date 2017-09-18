@@ -1,0 +1,5 @@
+# This file is deprecated as per GLEP 56 in favor of metadata.xml. Please add
+# your descriptions to your package's metadata.xml ONLY.
+# * generated automatically using egencache *
+
+sys-config/ltoize:ltopluginsymlink - Install a symlink to the currently active GCC's liblto_plugin.so into your binutils bfd_plugins directory. This is not recommended since the plugin symlink will not be automatically updated when the active GCC version changes. Also, it should not be necessary if packages respect AR, NM, and RANLIB properly.

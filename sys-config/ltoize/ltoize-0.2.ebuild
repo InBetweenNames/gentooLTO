@@ -3,7 +3,7 @@
 
 EAPI=6
 
-inherit versionator
+inherit versionator toolchain-funcs
 
 DESCRIPTION="A configuration for portage to make building with LTO easy."
 HOMEPAGE="https://github.com/InBetweenNames/gentooLTO"
@@ -11,11 +11,11 @@ KEYWORDS="~*"
 
 SRC_URI=""
 
-LICENSE="BSD"
+LICENSE="GPL-2+"
 SLOT="0"
-IUSE=""
+IUSE="ltopluginsymlink"
 
-DEPEND=">=sys-devel/gcc-6.4.0:* >=sys-devel/binutils-2.28.1:*"
+DEPEND=">=sys-devel/gcc-4.9.4:* >=sys-devel/binutils-2.28.1:*"
 #DEPEND="graphite ? ( gcc[graphite] )"
 
 RDEPEND="${DEPEND}"
@@ -24,15 +24,15 @@ RDEPEND="${DEPEND}"
 
 pkg_setup() {
 
-	BINUTILS_VER=$(portageq best_version / sys-devel/binutils | sed -e "s/.*-//")
-	GCC_VER=$(portageq best_version / sys-devel/gcc | sed -e "s/.*-//")
+	ACTIVE_GCC=$(gcc-fullversion)
 
-	if ! version_is_at_least 2.29 "${BINUTILS_VER}"; then
-		ewarn "Warning: binutils version < 2.29, it is recommended that you upgrade"
-	fi
-
-	if ! version_is_at_least 7.2.0 "${GCC_VER}"; then
-		ewarn "Warning: GCC version < 7.2.0, it is recommended that you upgrade"
+	if ! version_is_at_least 7.2.0 "${ACTIVE_GCC}"; then
+		ewarn "Warning: Active GCC version < 7.2.0, it is recommended that you use the newest GCC if you want LTO."
+		if [ "${I_KNOW_WHAT_I_AM_DOING}" != "y" ]; then
+			eerror "Aborting LTOize installation due to older GCC -- set I_KNOW_WHAT_I_AM_DOING=y if you want to override this behaviour."
+		else
+			ewarn "I_KNOW_WHAT_I_AM_DOING=y -- continuing anyway"
+		fi
 	fi
 
 	if [ -z "${ROOT}etc/portage/package.env" ] && [ -f "${ROOT}etc/portage/package.env" ]; then
@@ -55,14 +55,12 @@ pkg_preinst() {
 
 	dosym "${LTO_PORTAGE_DIR}/package.env/ltoworkarounds.conf" "${ROOT}etc/portage/package.env/ltoworkarounds.conf"
 
-	ACTIVE_GCC=$(gcc-config -c | sed -e 's/.*-//')
+	ACTIVE_GCC=$(gcc-fullversion)
 
-	LIBLTO_TARGET="${ROOT}usr/libexec/gcc/${CHOST}/${ACTIVE_GCC}/liblto_plugin.so"
-
-	LIBLTO_LINK_NAME="${ROOT}usr/${CHOST}/binutils-bin/lib/bfd-plugins/liblto_plugin.so"
-
-	elog "Installing liblto_plugin.so symlink because gcc and/or binutils may require it"
-	dosym "${ROOT}usr/libexec/gcc/${CHOST}/${ACTIVE_GCC}/liblto_plugin.so" "${ROOT}usr/${CHOST}/binutils-bin/lib/bfd-plugins/liblto_plugin.so"
+	if use ltopluginsymlink; then
+		elog "Installing liblto_plugin.so symlink because gcc binutils may require it."
+		dosym "${ROOT}usr/libexec/gcc/${CHOST}/${ACTIVE_GCC}/liblto_plugin.so" "${ROOT}usr/${CHOST}/binutils-bin/lib/bfd-plugins/liblto_plugin.so"
+	fi
 
 	#Insert make.conf sample...
 
@@ -84,4 +82,20 @@ pkg_postinst()
 	elog "Occasionally, you will experience breakage due to LTO problems.  These are documented in the README.md of this repository.  If you add an override for a particular package, please consider sending a pull request upstream so that other users of this repository can benefit."
 	elog "You will require a complete system rebuild in order to gain the benefits of LTO system-wide.  Please consider reading the README.md at the root of this repository before attempting to rebuild your system to familiarize yourself with the goals of this project and potential pitfalls you could run into."
 	elog "This is an experimental project and should not be used on a stable system in its current state."
+
+	BINUTILS_VER=$(binutils-config -c | sed -e "s/.*-//")
+
+	if ! version_is_at_least 2.29 "${BINUTILS_VER}"; then
+		ewarn "Warning: active binutils version < 2.29, it is recommended that you use the newest binutils for LTO."
+	fi
+
+	if use ltopluginsymlink; then
+		elog "A symlink to your GCC's liblto_plugin.so was installed in ${ROOT}usr/${CHOST}/binutils-bin/lib/bfd-plugins/liblto_plugin.so"
+		elog "The version of GCC used to make the symlink was $(gcc-fullversion).  If this is not the GCC version you want, please update the symlink by hand."
+		elog "See this repo's README for details in how to do this."
+		ewarn "WARNING: If you change your active version of GCC, you will have to update this symlink by hand or re-emerge ltoize!"
+	else
+		elog "No liblto_plugin.so symlink was installed into ${ROOT}usr/${CHOST}/binutils-bin/lib/bfd-plugins/ for your GCC.  If this was not what you wanted, add ltopluginsymlink to your USE.  This will only affect packages which do not respect the AR, NM, and RANLIB variables.  For information about this see this repo's README."
+	fi
 }
+

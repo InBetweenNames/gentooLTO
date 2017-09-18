@@ -31,15 +31,41 @@ If you're building a new system, I'd recommend using glibc 2.25 since there are 
 
 When you find a problem, whether it's a package not playing nice with -O3, Graphite, or LTO, consider opening an issue here or sending a pull request with the overrides needed to get the package working.  Over time, we should be able to achieve full coverage of `/usr/portage` this way and provide a one size fits all solution, and not to mention help improve some open source software through the bug reports that will no doubt be generated! 
 
-`ltoize` will also obtain patches which help certain packages build with LTO.  It installs symlinks to these patches in `/etc/portage/patches`, so that you can have your own
-patches alongside the ones maintained in this repository.
+`ltoize` will also obtain patches which help certain packages build with LTO.  It installs symlinks to these patches in `/etc/portage/patches`, so that you can have your own patches alongside the ones maintained in this repository.
 
-When you switch your configuration to LTO by copying the make.conf rules here, make sure you also have your linker plugin symlinks set correctly (thanks @rx80).
-I haven't observed a need for this with binutils 2.29, but with 2.28.1 at least one person had problems with this being unset.
+After you've set everything up, I recommend an `emerge -e @world` to rebuild your system with LTO and any optimizations you have chosen.
 
+## Additional details about LTOize
+
+The actual `/etc/portage` modifications are in `sys-config/ltoize/files`.  This is a stripped down version of my own Portage configuration which `ltoize` uses to install into your own `/etc/portage`.  `ltoize` uses symlinks to accomplish this task so that when you do an `emerge --sync` or equivalent, you will automatically pull in the latest set of overrides.  `make.conf.lto` is just installed as a normal file, however, and the version number of `ltoize` will increment when a notable change is made to that file.  That could be including some new compiler flags, or perhaps revising how LTO is done.  Any such a change would require manual intervention, so you will be notified when you update `ltoize`.
+
+Not all packages build cleanly.  I have a number of environment overrides which are used to override the default settings on a per-package basis.  The configurations are in `env/lto`, and the per-package overrides are in `package.env/`.  I have tried to categorize the overrides based on the kind of failure were being exhibited, but in some cases this was difficult.  LTO overrides can be found in `package.env/ltoworkarounds.conf`.  Graphite and -O3 overrides are included in that file as well, but they won't affect you if you are not using those compiler flags.
+
+The only thing which isn't always automatically updated are the LTO patches.  If a modification is made to an existing match, you will transparently receive that patch in your own `/etc/portage/patches` since a symlink will be used.  However, if a patch is created for a new package, you will need to re-run `ltoize` to get the new symlink.  I'm still thinking about a good way to handle this.  `/etc/portage/patches` unfortunately can't have a subdirectory like `lto` since it is used to match against the package being installed.
+
+### A note about the GCC LTO plugin
+
+Binutils needs a way to obtain the LTO plugin from GCC in order to properly perform LTO and other linking tasks.  Currently `ld`, `ar`, `nm`, and `ranlib` are known to use this plugin in LTO builds.
+There are two ways to do this: pass the path to the plugin manually to each of those utilities, or install a symlink to the plugin in binutils `bfd_plugins` directory and have binutils automatically load it.  Support for automatically loading the LTO plugin from this directory was added in [2014](https://sourceware.org/ml/binutils/2014-01/msg00213.html) (thanks @pchome!).
+
+To do it the first way, we defined the variables `AR`, `NM`, and `RANLIB` in `make.conf` to point to GCC wrappers which automatically pass the plugin path in:
+
+~~~
+AR=gcc-ar
+NM=gcc-nm
+RANLIB=gcc-ranlib
+~~~
+
+One advantage in using the wrappers is that the plugin symlink does not need to be updated when you switch your active GCC version with `gcc-config`.  The downside is that there exist packages which do not respect these flags and invoke `ar`, `nm`, and `ranlib` directly, causing build failures.
+These packages pose a problem for any Gentoo crossdev users as well--so finding these packages is important.
+
+On the other hand, if you use the symlink method, then packages which use `ar`, `nm`, and `ranlib` directly will still work--that being said, we will miss out on some good bug reports!  I'm not sure how common this actually is in practice, but it does happen.
+The other downside is that if you change your GCC version with `gcc-config`, you will need to update this symlink manually.  Perhaps a modification could be made to `gcc-config` to alleviate this, if the symlink method wins out.
+
+`ltoize` has a USE flag `ltopluginsymlink` which will optionally install a symlink to GCC's `liblto_plugin.so` in your binutils `bfd_plugins` directory.  This USE flag is disabled by default since I want to encourage users to find bugs.
 `ltoize` *should* set this correctly, but if you have an esoteric configuration it may require some manual tweaking.
 
-On `amd64`, you can check it as follows:
+On `amd64`, you can check it as follows (thanks @rx80!):
 
 ~~~
 ls -l /usr/x86_64-pc-linux-gnu/binutils-bin/lib/bfd-plugins/liblto_plugin.so
@@ -51,15 +77,6 @@ This should point to your active GCC's `liblto_plugin.so`.  For example, for GCC
 ln -sf /usr/libexec/gcc/x86_64-pc-linux-gnu/7.2.0/liblto_plugin.so /usr/x86_64-pc-linux-gnu/binutils-bin/lib/bfd-plugins/liblto_plugin.so
 ~~~
 
-After you've set everything up, I recommend an `emerge -e @world` to rebuild your system with LTO and any optimizations you have chosen.
-
-## Additional details about LTOize
-
-The actual `/etc/portage` modifications are in `sys-config/ltoize/files`.  This is a stripped down version of my own Portage configuration which `ltoize` uses to install into your own `/etc/portage`.  `ltoize` uses symlinks to accomplish this task so that when you do an `emerge --sync` or equivalent, you will automatically pull in the latest set of overrides.  `make.conf.lto` is just installed as a normal file, however, and the version number of `ltoize` will increment when a notable change is made to that file.  That could be including some new compiler flags, or perhaps revising how LTO is done.  Any such a change would require manual intervention, so you will be notified when you update `ltoize`.
-
-Not all packages build cleanly.  I have a number of environment overrides which are used to override the default settings on a per-package basis.  The configurations are in `env/lto`, and the per-package overrides are in `package.env/`.  I have tried to categorize the overrides based on the kind of failure were being exhibited, but in some cases this was difficult.  LTO overrides can be found in `package.env/ltoworkarounds.conf`.  Graphite and -O3 overrides are included in that file as well, but they won't affect you if you are not using those compiler flags.
-
-The only thing which isn't always automatically updated are the LTO patches.  If a modification is made to an existing match, you will transparently receive that patch in your own `/etc/portage/patches` since a symlink will be used.  However, if a patch is created for a new package, you will need to re-run `ltoize` to get the new symlink.  I'm still thinking about a good way to handle this.  `/etc/portage/patches` unfortunately can't have a subdirectory like `lto` since it is used to match against the package being installed.
 
 ## Caveats
 

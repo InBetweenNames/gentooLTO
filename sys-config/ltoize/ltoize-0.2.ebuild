@@ -98,4 +98,3 @@ pkg_postinst()
 		elog "No liblto_plugin.so symlink was installed into ${ROOT}usr/${CHOST}/binutils-bin/lib/bfd-plugins/ for your GCC.  If this was not what you wanted, add ltopluginsymlink to your USE.  This will only affect packages which do not respect the AR, NM, and RANLIB variables.  For information about this see this repo's README."
 	fi
 }
-

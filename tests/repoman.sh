@@ -7,6 +7,7 @@ export FEATURES="-news" PORTAGE_RSYNC_EXTRA_OPTS="-q"
 
 # Update the portage tree and install dependencies
 emerge --sync
+emerge -1 portage
 emerge -q --buildpkg --usepkg dev-vcs/git app-portage/repoman
 
 # Run the tests

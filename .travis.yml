@@ -1,0 +1,13 @@
+cache:
+  directories:
+  - $HOME/.portage-pkgdir
+
+matrix:
+  include:
+    - os: linux
+      services: docker
+      language: generic
+      sudo: required
+      script:
+        - 'if [ "${TRAVIS_EVENT_TYPE}" != "cron" ]; then
+          docker run --rm -ti -v "${HOME}"/.portage-pkgdir:/usr/portage/packages -v "${PWD}":/usr/local/portage -w /usr/local/portage gentoo/stage3-amd64:latest /usr/local/portage/tests/repoman.sh; fi'

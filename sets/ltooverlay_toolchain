@@ -4,7 +4,7 @@ dev-libs/mpc
 dev-libs/mpfr
 dev-util/systemtap
 sys-devel/binutils
-sys-devel/binutils-libs
+sys-libs/binutils-libs
 sys-devel/binutils-config
 sys-devel/gcc
 sys-devel/gcc-config

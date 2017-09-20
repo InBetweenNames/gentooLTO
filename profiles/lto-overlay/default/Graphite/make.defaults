@@ -1,0 +1,5 @@
+# Copyright 2004-2017 Gentoo Foundation.
+# Distributed under the terms of the GNU General Public License v2
+
+CFLAGS="${CFLAGS} -floop-interchange -ftree-loop-distribution -floop-strip-mine -floop-block"
+USE="graphite"

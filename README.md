@@ -6,6 +6,8 @@
 
 Interested in running Gentoo at (theoretically) maximum speed?  Want to have a nearly fully [LTOed](https://gcc.gnu.org/wiki/LinkTimeOptimization) system?  Read on to see how it can be done!
 
+NEW: [Chat with us on Freenode! ##gentoolto](https://webchat.freenode.net/?url=irc://irc.freenode.net/##gentoolto)
+
 ## Introduction
 
 This overlay contains a set of configuration files extracted from my own Gentoo Portage configuration to enable system-wide LTO.  It is intended to be used with aggressive compiler optimizations to help catch bugs in programs, including GCC.  However, it can also be used for plain LTO without any aggressive compiler optimizations.  Read on to see how to use it.

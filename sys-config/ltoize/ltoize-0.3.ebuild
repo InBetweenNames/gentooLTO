@@ -15,8 +15,8 @@ LICENSE="GPL-2+"
 SLOT="0"
 IUSE="lto graphite o3"
 
-DEPEND="graphite? ( >=sys-devel/gcc-4.9.4[graphite] )
-	lto? ( >=sys-devel/gcc-4.9.4 )"
+DEPEND="graphite? ( >=sys-devel/gcc-4.9.4:=[graphite] )
+	lto? ( >=sys-devel/gcc-4.9.4:= )"
 RDEPEND="${DEPEND}"
 
 pkg_preinst() {

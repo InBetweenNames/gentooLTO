@@ -7,7 +7,7 @@ inherit versionator toolchain-funcs
 
 DESCRIPTION="A configuration for portage to make building with LTO easy."
 HOMEPAGE="https://github.com/InBetweenNames/gentooLTO"
-KEYWORDS="~*"
+KEYWORDS="~amd64"
 
 SRC_URI=""
 
@@ -15,8 +15,8 @@ LICENSE="GPL-2+"
 SLOT="0"
 IUSE="lto graphite o3"
 
-DEPEND="graphite? ( >=sys-devel/gcc-4.8.4[graphite] )
-	lto? ( >=sys-devel/gcc-4.8.4 )"
+DEPEND="graphite? ( >=sys-devel/gcc-4.9.4[graphite] )
+	lto? ( >=sys-devel/gcc-4.9.4 )"
 RDEPEND="${DEPEND}"
 
 pkg_preinst() {

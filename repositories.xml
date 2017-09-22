@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+ 
+<repositories version="1.0">
+	<repo priority="50" quality="experimental" status="unofficial">
+		<name>lto-overlay</name>
+		<description>LTO and possibly other optimizations overlay</description>
+		<homepage>https://github.com/InBetweenNames/gentooLTO</homepage>
+		<owner>
+			<email>lookatyouhacker@gmail.com</email>
+		</owner>
+		<source type="git">https://github.com/mgomersbach/gentooLTO.git</source>
+	</repo>
+</repositories>

@@ -1,5 +1,5 @@
 #FROM gentoo/portage:latest AS portage
-FROM chinstrap/overlay-docker:add-build-script
+FROM chinstrap/overlay-docker:latest
 
 #COPY --from=portage /usr/portage /usr/portage
 

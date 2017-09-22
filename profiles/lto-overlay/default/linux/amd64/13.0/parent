@@ -1,0 +1,4 @@
+gentoo:default/linux/amd64/13.0
+../../../arch/amd64
+../../../base
+../../../LTO

@@ -1,0 +1,11 @@
+dev-libs/gmp ~*
+dev-libs/isl ~*
+dev-libs/mpc ~*
+dev-libs/mpfr ~*
+sys-devel/binutils ~*
+sys-libs/binutils-libs ~*
+sys-devel/binutils-config ~*
+sys-devel/gcc ~*
+sys-devel/gcc-config ~*
+sys-libs/glibc ~*
+

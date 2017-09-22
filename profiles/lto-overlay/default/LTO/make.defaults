@@ -1,0 +1,8 @@
+# Copyright 2004-2017 Gentoo Foundation.
+# Distributed under the terms of the GNU General Public License v2
+
+CFLAGS="${CFLAGS} -fuse-linker-plugin -flto"
+CXXFLAGS="${CFLAGS}"
+LDFLAGS="${CFLAGS}"
+
+USE="lto"

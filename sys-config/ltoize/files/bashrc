@@ -1,0 +1,78 @@
+#lto-overlay override script
+#
+#lto-overlay uses overrides for disabling LTO and Graphite on certain packages
+#These overrides involve appending a -fno-* flag for the specific flag being disabled (example -fno-lto)
+#This works fine with GCC, but Portage's flag-o-matic.eclass is not aware of this behaviour and will
+#indicate "-flto" is active even if it is followed by "-fno-lto".
+#
+#To work around this, we "condense" *FLAGS such that only the last flag affecting a certain state variable
+#is present.  For example, if CFLAGS="-flto -ftree-vectorize -fno-lto", it would be condensed to
+#CFLAGS="-ftree-vectorized -fno-lto" since "-flto" and "-fno-lto" affect the same state variable.
+#This ensures that is-flagq sees only the relevant flags.
+#
+#It's not a nice hack, but it works.
+
+# @FUNCTION: flags_equal
+# @USAGE: <flag1> <flag2>
+# @DESCRIPTION:
+# An equivalence relation between compiler and linker flags.
+# <flag1> is equal to <flag2> if they both modify the same state variable
+# a flag has the form: -(letter)[no-](restofflag)[=[setting]]
+
+flags_equal()
+{
+	local flag1=$1
+	local flag2=$2
+
+	#First, transform flags into a canonical form:
+	local c_flag1=$(printf "%s\n" "$flag1" | sed -e "s/=.*//" -e "s/no-//" -e "s/[[:digit:]]//g")
+	local c_flag2=$(printf "%s\n" "$flag2" | sed -e "s/=.*//" -e "s/no-//" -e "s/[[:digit:]]//g")
+
+	#Then compare them
+	[[ "$c_flag1" == "$c_flag2" ]]
+}
+
+
+# @FUNCTION: condense_flags
+# @USAGE: <FLAGVAR>
+# @DESCRIPTION:
+# Condense FLAGVAR (for example CFLAGS) such that only the last flags that modify a certain state variable are present
+# For example, if CFLAGS="-fno-lto -flto", then afterwards CFLAGS="-flto", since both -flto and -fno-lto modify the same state variable
+# This produces a sort of "cancelling" effect on flags that effect the same state variable
+condense_flags()																								 
+{																										 
+	local flagvar=$1																								 
+	local condensed
+	local arr_flagvar=(${!flagvar})
+	local c=0
+	for ((i=0; i < ${#arr_flagvar[@]}; i++)); do
+		local unique=true
+		for ((j=i+1; j < ${#arr_flagvar[@]}; j++)); do
+		if flags_equal "${arr_flagvar[i]}" "${arr_flagvar[j]}"; then
+			unique=false
+			break
+		fi
+		done
+
+		if ${unique}; then
+			condensed[$c]=${arr_flagvar[i]}
+			c=$((c+1))
+		fi
+	done
+
+	printf -v "${flagvar}" '%s' "${condensed[*]}"
+
+}
+
+#This will run after env/ overrides
+pre_pkg_setup() {
+	condense_flags CFLAGS
+	condense_flags CXXFLAGS
+	condense_flags LDFLAGS
+
+	echo "lto-overlay modified {C/CXX/LD}FLAGS:"
+	echo "CFLAGS: $CFLAGS"
+	echo "CXXFLAGS: $CXXFLAGS"
+	echo "LDFLAGS: $LDFLAGS"
+
+}

@@ -35,7 +35,7 @@ pkg_setup() {
 		fi
 	fi
 
-	if [ -z "${ROOT}etc/portage/package.env" ] && [ -f "${ROOT}etc/portage/package.env" ]; then
+	if [ -f "${ROOT}etc/portage/package.env" ]; then
 		eerror "${ROOT}etc/portage/package.env is a file not a directory.  Please convert package.env to a directory with the current contents of package.env being moved to a file inside it."
 		die
 	fi
@@ -68,6 +68,14 @@ pkg_preinst() {
 	insinto "/etc/portage"
 	doins "${FILESDIR}/make.conf.lto"
 
+	if [ -f "${ROOT}etc/portage/bashrc" ]; then
+		ewarn "${ROOT}etc/portage/bashrc already exists!  Installing LTOize-specific bashrc functionality into bashrc.lto"
+		dosym "${LTO_PORTAGE_DIR}/bashrc" "${ROOT}etc/portage/bashrc.lto"
+	else
+		elog "Installing bashrc symlink into ${ROOT}etc/portage"
+		dosym "${LTO_PORTAGE_DIR}/bashrc" "${ROOT}etc/portage/bashrc"
+	fi
+
 	elog "Installing patches to help certain software build with this configuration (installed as symlinks)"
 	for i in $(ls ${LTO_PORTAGE_DIR}/patches); do
 		dosym "${LTO_PORTAGE_DIR}/patches/$i" "${ROOT}etc/portage/patches/$i"
@@ -96,5 +104,14 @@ pkg_postinst()
 		ewarn "WARNING: If you change your active version of GCC, you will have to update this symlink by hand or re-emerge ltoize!"
 	else
 		elog "No liblto_plugin.so symlink was installed into ${ROOT}usr/${CHOST}/binutils-bin/lib/bfd-plugins/ for your GCC.  If this was not what you wanted, add ltopluginsymlink to your USE.  This will only affect packages which do not respect the AR, NM, and RANLIB variables.  For information about this see this repo's README."
+	fi
+
+	if [[ -f "${ROOT}etc/portage/bashrc.lto" ]]; then
+		ewarn "LTOize requires special ${ROOT}etc/portage/bashrc support in order to function with certain packages."
+		ewarn "You already have a bashrc inside ${ROOT}etc/portage -- LTOize bashrc settings were installed into ${ROOT}etc/portage/bashrc.lto"
+		ewarn "Please ensure you merge the LTOize settings from bashrc.lto into your Portage bashrc before your next emerge"
+		ewarn "Failure to do this could mean certain packages will not build correctly"
+	else
+		elog "LTOize installed a special Portage bashrc hook in ${ROOT}etc/portage/bashrc -- this was done automatically and nothing more is required from you."
 	fi
 }

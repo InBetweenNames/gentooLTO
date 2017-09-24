@@ -4,10 +4,10 @@
 	<repo priority="50" quality="experimental" status="unofficial">
 		<name>lto-overlay</name>
 		<description>LTO and possibly other optimizations overlay</description>
-		<homepage>https://github.com/mgomersbach/gentooLTO</homepage>
+		<homepage>https://github.com/InBetweenNames/gentooLTO</homepage>
 		<owner>
 			<email>lookatyouhacker@gmail.com</email>
 		</owner>
-		<source type="git">https://github.com/mgomersbach/gentooLTO.git</source>
+		<source type="git">https://github.com/InBetweenNames/gentooLTO.git</source>
 	</repo>
 </repositories>

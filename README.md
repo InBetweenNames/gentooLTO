@@ -23,11 +23,11 @@ My original LTO and Graphite experiments were based on [this helpful blog post](
 
 It is important to note that just because something is compiled with `-O3` and Graphite does not mean that the compiler will necessarily perform more optimizations than it would otherwise.  I only include flags in `make.conf.lto` that allow the compiler to perform a transformation if it is deemed profitable--any "optimization" that doesn't actually optimize, after all, is just a transformation.  The philosophy behind this configuration is to allow the compiler to optimize as it sees fit, without the restrictions normally imposed by `-O2` and friends.  **You won't ever find a flag that intentionally overrides the compiler's judgement in this configuration**.   If you do find a flag in this configuration that does, please file a bug report!  An example of a flag that overrides the compiler's judgement is `-funroll-loops`.
 
-The biggest gotcha with `-O3` is that it does not play nice with Undefined Behaviour.  UB is far more prevalent in C and C++ programs than anyone would like to admit, so the default advice with any source distribution is to build with `-O2` and be done with it.  If `-O3` produces non-working code, that is more often than not the code's fault and not the compiler's.
+The biggest gotcha with `-O3` is that it does not play nice at all with Undefined Behaviour.  UB is far more prevalent in C and C++ programs than anyone would like to admit, so the default advice with any source distribution is to build with `-O2` and be done with it.  If `-O3` produces non-working code, that is more often than not the code's fault and not the compiler's.
 
 ## How to use this configuration
 
-Simply add this overlay (`layman -a lto-overlay`) to your system and `emerge sys-config/ltoize`.  This will add in the necessary overrides to your `/etc/portage/`, but it won't modify your `make.conf`.
+Add the `mv` overlay (`layman -a mv`) and then add this overlay (`layman -a lto-overlay`) to your system and `emerge sys-config/ltoize`.  This will add in the necessary overrides to your `/etc/portage/`, but it won't modify your `make.conf`.
 It will create a `make.conf.lto` in `/etc/portage` with the recommended settings for LTO.  Modify your own `make.conf` accordingly--there are comments in `make.conf.lto` to help
 guide you through the process, including for enabling Graphite.
 
@@ -35,27 +35,33 @@ If you're building a new system, I'd recommend using glibc 2.25 since there are 
 
 When you find a problem, whether it's a package not playing nice with -O3, Graphite, or LTO, consider opening an issue here or sending a pull request with the overrides needed to get the package working.  Over time, we should be able to achieve full coverage of `/usr/portage` this way and provide a one size fits all solution, and not to mention help improve some open source software through the bug reports that will no doubt be generated! 
 
-`ltoize` will also obtain patches which help certain packages build with LTO.  It installs symlinks to these patches in `/etc/portage/patches`, so that you can have your own patches alongside the ones maintained in this repository.
-
-One final note is that `ltoize` will install a `bashrc` override symlink into your `/etc/portage/bashrc`.  It will only do this if you don't already have a `bashrc` there.  If you do have a `bashrc` there,
-then it will install the symlink into `/etc/portage/bashrc.lto`, and you will have to copy the relevant parts into your own `bashrc`.  I would do this automatically, but I figure that anyone who has a `bashrc` for Portage already will have an esoteric configuration that would make it difficult.  The purpose behind this `bashrc` is to normalize your {C,CXX,LD}FLAGS.  The overrides use `-fno*` style flags to disable LTO and Graphite on certain packages, which `flag-o-matic.eclass` does not fully understand.  To take an example, suppose `CFLAGS=-flto -mavx -ftree-vectorize -fno-lto`.  In this case, GCC would perform a non-LTO build, since it honours only the last argument that affects a certain state variable.  However, `is-flagq` from `flag-o-matic.eclass` will happily report that `-flto` is present, since it only checks if `-flto` is a substring of `CFLAGS`, which could trigger the ebuild in question to, say, pass `--enable-lto` to `configure` despite our intentions!  An example of where this happens is in `media-video/ffmpeg`.  To work around this, we install a `bashrc` hook into Portage to remove any flags that are overridden by later flags from {C,CXX,LD}FLAGS.  It's a simple hook that should be easy to integrate into your own `bashrc` if you have one.  Hopefully this will not be required in the future!
-
 After you've set everything up, I recommend an `emerge -e @world` to rebuild your system with LTO and any optimizations you have chosen.
+
 
 ## Additional details about LTOize
 
+`ltoize` relies heavily on the `package.cflags` functionality from the `app-portage/portage-bashrc-mv` package.  This extends the `package.env` functionality in Portage with a Bash-like syntax which is critical to making this work properly.
+Originally, we were using `package.env` overrides, but it turns out that the `flag-o-matic.eclass` used in ebuilds does not "see" flags the same way GCC does--the functions contained inside simply check for the presence of a particular string or pattern inside
+your `*FLAGS` variables and determines whether the flag is active based on that.  However, in GCC, later flags override previous flags, and flags can also toggle other flags not listed.  For example, `CFLAGS=-O3` toggles `-ftree-loop-distribution` on GCC 8,
+but `is-flagq -ftree-loop-distribution` would return false as `-ftree-loop-distribution` is not listed in `CFLAGS` directly.  Another example: if `LDFLAGS=-flto -fno-lto`, then `is-ldflagq "-flto*"` would return true despite that GCC would have `-flto` unset due
+to the later argument overriding it.  The only *real* way to know what flags are active would be to pass in `*FLAGS` to GCC itself and then ask it what flags are active.  Unfortunately, there are probably *many* packages that depend on the existing `flag-o-matic.eclass`
+behaviour, and so changing this is probably not an option.  To try to work around this, we mandate that our `*FLAGS` variables contain no "redundant" flags.  If the effect of a particular flag would be "undone" by a following flag, then that flag is considered "redundant".
+This doesn't solve the `-O3` problem as listed above, but it should at least allow `is-flagq` to work in the cases we need it to (which is mainly for overriding `-flto`). 
+
 The actual `/etc/portage` modifications are in `sys-config/ltoize/files`.  This is a stripped down version of my own Portage configuration which `ltoize` uses to install into your own `/etc/portage`.  `ltoize` uses symlinks to accomplish this task so that when you do an `emerge --sync` or equivalent, you will automatically pull in the latest set of overrides.  `make.conf.lto` is just installed as a normal file, however, and the version number of `ltoize` will increment when a notable change is made to that file.  That could be including some new compiler flags, or perhaps revising how LTO is done.  Any such a change would require manual intervention, so you will be notified when you update `ltoize`.
 
-Not all packages build cleanly.  I have a number of environment overrides which are used to override the default settings on a per-package basis.  The configurations are in `env/lto`, and the per-package overrides are in `package.env/`.  I have tried to categorize the overrides based on the kind of failure were being exhibited, but in some cases this was difficult.  LTO overrides can be found in `package.env/ltoworkarounds.conf`.  Graphite and -O3 overrides are included in that file as well, but they won't affect you if you are not using those compiler flags.
+Not all packages build cleanly.  Environment overrides are used to allow packages to build that have trouble with O3, Graphite, and LTO.  These can be found in `package.cflags/ltoworkarounds.conf`.  I have tried to categorize the overrides based on the kind of failure were being exhibited, but in some cases this was difficult.
+Graphite and -O3 overrides are included in that file as well, but they won't affect you if you are not using those compiler flags.
 
-The only thing which isn't always automatically updated are the LTO patches.  If a modification is made to an existing match, you will transparently receive that patch in your own `/etc/portage/patches` since a symlink will be used.  However, if a patch is created for a new package, you will need to re-run `ltoize` to get the new symlink.  I'm still thinking about a good way to handle this.  `/etc/portage/patches` unfortunately can't have a subdirectory like `lto` since it is used to match against the package being installed.
+`ltoize` will also obtain patches which help certain packages build with LTO.  It installs symlinks to these patches in `/etc/portage/patches`, so that you can have your own patches alongside the ones maintained in this repository.  These aren't automatically updated.  If a modification is made to an existing match, you will transparently receive that patch in your own `/etc/portage/patches` since a symlink will be used.  However, if a patch is created for a new package, you will need to re-run `ltoize` to get the new symlink.  I'm still thinking about a good way to handle this.  `/etc/portage/patches` unfortunately can't have a subdirectory like `lto` since it is used to match against the package being installed.
+
 
 ### A note about the GCC LTO plugin
 
 Binutils needs a way to obtain the LTO plugin from GCC in order to properly perform LTO and other linking tasks.  Currently `ld`, `ar`, `nm`, and `ranlib` are known to use this plugin in LTO builds.
 There are two ways to do this: pass the path to the plugin manually to each of those utilities, or install a symlink to the plugin in binutils `bfd_plugins` directory and have binutils automatically load it.  Support for automatically loading the LTO plugin from this directory was added in [2014](https://sourceware.org/ml/binutils/2014-01/msg00213.html) (thanks @pchome!).
 
-To do it the first way, we defined the variables `AR`, `NM`, and `RANLIB` in `make.conf` to point to GCC wrappers which automatically pass the plugin path in:
+To do it the first way, define the variables `AR`, `NM`, and `RANLIB` in `make.conf` to point to GCC wrappers which automatically pass the plugin path in:
 
 ~~~
 AR=gcc-ar
@@ -64,15 +70,12 @@ RANLIB=gcc-ranlib
 ~~~
 
 One advantage in using the wrappers is that the plugin symlink does not need to be updated when you switch your active GCC version with `gcc-config`.  The downside is that there exist packages which do not respect these flags and invoke `ar`, `nm`, and `ranlib` directly, causing build failures.
-These packages pose a problem for any Gentoo crossdev users as well--so finding these packages is important.
+Notably, GCC does this when doing bootstrapping--so there are legitimate cases where this happens.  On the other hand, if you use the symlink method, then packages which use `ar`, `nm`, and `ranlib` directly will still work--whether this is intentional or a bug.  
 
-On the other hand, if you use the symlink method, then packages which use `ar`, `nm`, and `ranlib` directly will still work--that being said, we will miss out on some good bug reports!  I'm not sure how common this actually is in practice, but it does happen.
-The other downside is that if you change your GCC version with `gcc-config`, you will need to update this symlink manually.  Perhaps a modification could be made to `gcc-config` to alleviate this, if the symlink method wins out.
+The downside to the symlink method is that if you change your GCC version with `gcc-config`, you will need to update this symlink manually.  I have a patch for `gcc-config` that updates it to create this symlink for you.  It is available on this [bug report](https://bugs.gentoo.org/630066#c1).
+If it gets accepted, then this will become the preferred way of using lto-overlay.  Note that my `gcc-config` patch is intended to be applied to the `HEAD` revision of `gcc-config`.
 
-`ltoize` has a USE flag `ltopluginsymlink` which will optionally install a symlink to GCC's `liblto_plugin.so` in your binutils `bfd_plugins` directory.  This USE flag is disabled by default since I want to encourage users to find bugs.
-`ltoize` *should* set this correctly, but if you have an esoteric configuration it may require some manual tweaking.
-
-On `amd64`, you can check it as follows (thanks @rx80!):
+On `amd64`, you can check the symlink as follows (thanks @rx80!):
 
 ~~~
 ls -l /usr/x86_64-pc-linux-gnu/binutils-bin/lib/bfd-plugins/liblto_plugin.so
@@ -83,8 +86,6 @@ This should point to your active GCC's `liblto_plugin.so`.  For example, for GCC
 ~~~
 ln -sf /usr/libexec/gcc/x86_64-pc-linux-gnu/7.2.0/liblto_plugin.so /usr/x86_64-pc-linux-gnu/binutils-bin/lib/bfd-plugins/liblto_plugin.so
 ~~~
-
-
 ## Caveats
 
 Expect breakages when you emerge new packages or update existing ones.  There are a number of potential ways that an emerge might not work.  My observations are as follows.

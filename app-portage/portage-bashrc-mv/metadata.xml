@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>martin@mvath.de</email>
+		<name>Martin Väth</name>
+	</maintainer>
+	<upstream>
+		<maintainer>
+			<email>martin@mvath.de</email>
+			<name>Martin Väth</name>
+		</maintainer>
+		<bugs-to>mailto:martin@mvath.de</bugs-to>
+		<remote-id type="github">vaeth/portage-bashrc-mv</remote-id>
+	</upstream>
+	<use>
+		<flag name="ccache">Install a script for CCACHE_* variable support. This requires dev-util/ccache</flag>
+		<flag name="cflags">Install a script for /etc/portage/package.cflags support. Requires app-portage/eix for fast parsing</flag>
+		<flag name="localepurge">Install a script to remove unneeded locales. Requires the config files of app-admin/localepurge</flag>
+		<flag name="remove-la">Install a script to remove unneeded .ls files</flag>
+	</use>
+</pkgmetadata>

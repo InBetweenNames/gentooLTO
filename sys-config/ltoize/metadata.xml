@@ -5,9 +5,6 @@
 <email>lookatyouhacker@gmail.com</email>
 <name>Shane Peelar</name>
 </maintainer>
-<use>                                                                                                                                                    
- <flag name="ltopluginsymlink">Install a symlink to the currently active GCC's liblto_plugin.so into your binutils bfd_plugins directory.  This is not recommended since the plugin symlink will not be automatically updated when the active GCC version changes.  Also, it should not be necessary if packages respect AR, NM, and RANLIB properly.</flag>
-</use>
 <longdescription lang="en">
 LTOize is a set of configuration files and overrides to make building your system Link Time Optimization easy.  This is part of a bigger initiative to find errors in C and C++ programs that are caused by undefined behaviour.  Users are strongly encouraged to contribute their configuration changes upstream.  For more information, see the gentooLTO project on GitHub.
 </longdescription>

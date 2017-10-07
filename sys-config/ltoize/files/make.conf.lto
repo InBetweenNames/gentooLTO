@@ -11,7 +11,8 @@ GRAPHITE="-fgraphite-identity -ftree-loop-distribution -floop-nest-optimize"
 #FLTO and GRAPHITE are variables used in the LTO and Graphite overrides as well.  If you don't want Graphite or LTO,
 #just unset these variables--no further action is necessary.  Don't rename these variables as the overrides depend on them.
 
-#These variables are required to be set to their appropriate GCC wrappers.  This is required for LTO.
+#These variables are required to be set to their appropriate GCC wrappers.
+#NOTE: SEE ISSUE THREAD IN GENTOOLTO GITHUB FOR NEWER WAY OF DOING THIS.  I'm waiting on it being upstreamed.
 AR=gcc-ar
 NM=gcc-nm
 RANLIB=gcc-ranlib
@@ -27,6 +28,8 @@ CXXFLAGS="${CFLAGS}"
 
 #Your LDFLAGS should contain *ALL* of your CFLAGS for LTO to work.  It must receieve all optimization options, march, etc.
 #It's usually a good idea to enable -Wl,--hash-style=gnu as well to help find packages which don't respect LDFLAGS
-LDFLAGS="-Wl,--hash-style=gnu ${CFLAGS}"
+#NEW: package.cflags takes care of this for you--no need to manually add your {C,CXX}FLAGS here.
+#Your profile likely contains a -Wl,-O1 in there--that could potentially conflict with LTO settings, so we remove it here.
+LDFLAGS="-Wl,--as-needed -Wl,--hash-style=gnu"
 
 #Consider also using cpuid2cpuflags to set your CPU_FLAGS_* variable in your make.conf for packages that rely on explicit optimizations such as intrinsics

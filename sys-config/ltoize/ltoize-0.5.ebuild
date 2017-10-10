@@ -53,8 +53,7 @@ pkg_preinst() {
 	#Insert make.conf sample...
 
 	elog "Installing make.conf.lto sample for make.conf modifications"
-	insinto "${PORTAGE_CONFIGROOT}/etc/portage"
-	doins "${FILESDIR}/make.conf.lto"
+	dosym "${LTO_PORTAGE_DIR}/make.conf.lto" "${PORTAGE_CONFIGROOT}etc/portage/make.conf.lto"
 
 	elog "Installing ltoworkarounds.conf package.cflags overrides"
 	dosym "${LTO_PORTAGE_DIR}/package.cflags/ltoworkarounds.conf" "${PORTAGE_CONFIGROOT}etc/portage/package.cflags/ltoworkarounds.conf"
@@ -69,7 +68,7 @@ pkg_preinst() {
 pkg_postinst()
 {
 	elog "If you have not done so, you will need to modify your make.conf settings to enable LTO building on your system."
-	elog "A sample file has been placed in ${PORTAGE_CONFIGROOT}etc/portage/make.conf.lto that can be used as a basis for these modifications."
+	elog "A symlink has been placed in ${PORTAGE_CONFIGROOT}etc/portage/make.conf.lto that can be used as a basis for these modifications."
 	elog "lto-overlay and ltoize are part of a project to help find undefined behaviour in C and C++ programs through the use of aggressive compiler optimizations."
 	elog "One of the aims of this project is also to improve the performance of linux distributions through these mechanisms as well."
 	elog "Occasionally, you will experience breakage due to LTO problems.  These are documented in the README.md of this repository."

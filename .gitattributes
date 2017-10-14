@@ -1,0 +1,3 @@
+*.ebuild linguist-language=Bash
+*.lto linguist-language=Bash
+*.conf linguist-language=Bash

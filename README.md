@@ -60,32 +60,23 @@ Graphite and -O3 overrides are included in that file as well, but they won't aff
 
 Binutils needs a way to obtain the LTO plugin from GCC in order to properly perform LTO and other linking tasks.  Currently `ld`, `ar`, `nm`, and `ranlib` are known to use this plugin in LTO builds.
 There are two ways to do this: pass the path to the plugin manually to each of those utilities, or install a symlink to the plugin in binutils `bfd_plugins` directory and have binutils automatically load it.  Support for automatically loading the LTO plugin from this directory was added in [2014](https://sourceware.org/ml/binutils/2014-01/msg00213.html) (thanks @pchome!).
+I have a patch for `gcc-config` that creates this symlink for you, which is included in the `gcc-config` contained in this repo.  A [bug report](https://bugs.gentoo.org/630066#c1) was created upstream as this should definitely be something included in the official `gcc-config`.
 
-To do it the first way, define the variables `AR`, `NM`, and `RANLIB` in `make.conf` to point to GCC wrappers which automatically pass the plugin path in:
+This is the recommended way of doing LTO.  Previously, it was required that you set your `AR`, `NM`, and `RANLIB` variables to point to GCC wrappers, which would in turn pass the linker plugin to their corresponding programs, but this causes problems in legitimate cases, such as building toolchains.
 
-~~~
-AR=gcc-ar
-NM=gcc-nm
-RANLIB=gcc-ranlib
-~~~
-
-One advantage in using the wrappers is that the plugin symlink does not need to be updated when you switch your active GCC version with `gcc-config`.  The downside is that there exist packages which do not respect these flags and invoke `ar`, `nm`, and `ranlib` directly, causing build failures.
-Notably, GCC does this when doing bootstrapping--so there are legitimate cases where this happens.  On the other hand, if you use the symlink method, then packages which use `ar`, `nm`, and `ranlib` directly will still work--whether this is intentional or a bug.  
-
-The downside to the symlink method is that if you change your GCC version with `gcc-config`, you will need to update this symlink manually.  I have a patch for `gcc-config` that updates it to create this symlink for you.  It is available on this [bug report](https://bugs.gentoo.org/630066#c1).
-If it gets accepted, then this will become the preferred way of using lto-overlay.  Note that my `gcc-config` patch is intended to be applied to the `HEAD` revision of `gcc-config`.
-
-On `amd64`, you can check the symlink as follows (thanks @rx80!):
+(Thanks @rx80!) If you're interested in seeing where the symlink points, you can check it as follows (on `amd64`):
 
 ~~~
 ls -l /usr/x86_64-pc-linux-gnu/binutils-bin/lib/bfd-plugins/liblto_plugin.so
 ~~~
 
-This should point to your active GCC's `liblto_plugin.so`.  For example, for GCC 7.2.0, you could set it like so:
+This should point to your active GCC's `liblto_plugin.so`.  For example, for GCC 7.2.0, it should look something like:
 
 ~~~
-ln -sf /usr/libexec/gcc/x86_64-pc-linux-gnu/7.2.0/liblto_plugin.so /usr/x86_64-pc-linux-gnu/binutils-bin/lib/bfd-plugins/liblto_plugin.so
+> ls /usr/libexec/gcc/x86_64-pc-linux-gnu/7.2.0/liblto_plugin.so -la
+> lrwxrwxrwx 1 root root 22 Oct 13 09:17 /usr/libexec/gcc/x86_64-pc-linux-gnu/7.2.0/liblto_plugin.so -> liblto_plugin.so.0.0.0*
 ~~~
+
 ## Caveats
 
 Expect breakages when you emerge new packages or update existing ones.  There are a number of potential ways that an emerge might not work.  My observations are as follows.

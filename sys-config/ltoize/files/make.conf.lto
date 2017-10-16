@@ -11,12 +11,6 @@ GRAPHITE="-fgraphite-identity -ftree-loop-distribution -floop-nest-optimize"
 #FLTO and GRAPHITE are variables used in the LTO and Graphite overrides as well.  If you don't want Graphite or LTO,
 #just unset these variables--no further action is necessary.  Don't rename these variables as the overrides depend on them.
 
-#These variables are required to be set to their appropriate GCC wrappers.
-#NOTE: SEE ISSUE THREAD IN GENTOOLTO GITHUB FOR NEWER WAY OF DOING THIS.  I'm waiting on it being upstreamed.
-AR=gcc-ar
-NM=gcc-nm
-RANLIB=gcc-ranlib
-
 #Your CFLAGS should contain ${FLTO} and, depending on your gcc, -fuse-linker-plugin
 #Newer GCCs enable -fuse-linker-plugin by default.
 #${GRAPHITE} should be included here as well.  If you do not want Graphite, just unset the GRAPHITE variable and keep CFLAGS the same.

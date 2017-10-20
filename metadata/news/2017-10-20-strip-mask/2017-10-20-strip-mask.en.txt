@@ -1,0 +1,12 @@
+Title: LTO-overlay default configuration updated
+Author: Shane Peelar <lookatyouhacker@gmail.com>
+Display-If-Installed: sys-config/ltoize
+Content-Type: text/plain
+Posted: 2017-10-20
+Revision: 1
+News-Item-Format: 1.0
+
+The default LTO configuration as part of lto-overlay has been updated to
+reflect a new global workaround for static archives.  It requires modifying
+the STRIP_MASK variable.  See issue #49 in the GentooLTO issue tracker or
+/etc/portage/make.conf.lto for details.

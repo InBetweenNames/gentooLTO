@@ -1,0 +1,20 @@
+--- org/tests/test-runner.h	2015-07-06 22:38:51.000000000 +0300
++++ new/tests/test-runner.h	2017-05-09 13:57:50.935848215 +0300
+@@ -41,7 +41,7 @@
+ 	static void name(void);					\
+ 								\
+ 	const struct test test##name				\
+-		 __attribute__ ((section ("test_section"))) = {	\
++		 __attribute__ ((used, section ("test_section"))) = {	\
+ 		#name, name, 0					\
+ 	};							\
+ 								\
+@@ -51,7 +51,7 @@
+ 	static void name(void);					\
+ 								\
+ 	const struct test test##name				\
+-		 __attribute__ ((section ("test_section"))) = {	\
++		 __attribute__ ((used, section ("test_section"))) = {	\
+ 		#name, name, 1					\
+ 	};							\
+ 								\

@@ -1,0 +1,545 @@
+From 31c0445c25b1e52e87ae6d82be740d55ae87b655 Mon Sep 17 00:00:00 2001
+From: Jeremy Linton <jeremy.linton@arm.com>
+Date: Wed, 3 Aug 2016 18:16:40 -0500
+Subject: [PATCH] change mozjs interface module to c++
+
+The JSAPI is now a full C++ interface. Convert the polkit
+to JavaScript interface module to C++ compilation in order to
+support newer versions of spidermonkey.
+
+Signed-off-by: Jeremy Linton <jeremy.linton@arm.com>
+
+Cleanup configure and add support for mozjs24
+
+Remove mozjs185 and mozjs17 from autoconf and replace them
+with mozjs24.
+
+Now that polkitbackendjsauthority is compiling in C++ mode
+and the autoconf supports mozjs24, update the module so
+that it builds with mozjs24.
+
+Signed-off-by: Jeremy Linton <jeremy.linton@arm.com>
+
+Fix warnings caused by building with C++
+
+C++ needs explicit casts for many pointer type conversions
+For example char * to void * should have a cast. Fix a
+number of these cases. Also, correct a white space indentation
+error left in the last patch for review clarity.
+
+Signed-off-by: Jeremy Linton <jeremy.linton@arm.com>
+
+Replace autocompartment
+
+The autocompartment definition in the previous patches seems to be fine, but
+constructing the autocompartment for the lifetime of the global object is probably
+a better way to handle this.
+
+Signed-off-by: Jeremy Linton <jeremy.linton@arm.com>
+---
+ configure.ac                                       |  17 +-
+ src/polkitbackend/Makefile.am                      |   7 +-
+ ...djsauthority.c => polkitbackendjsauthority.cpp} | 199 +++++++++------------
+ test/polkitbackend/Makefile.am                     |   3 +
+ 4 files changed, 100 insertions(+), 126 deletions(-)
+ rename src/polkitbackend/{polkitbackendjsauthority.c => polkitbackendjsauthority.cpp} (93%)
+
+diff --git a/configure.ac b/configure.ac
+index 91cc627..d810148 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -30,6 +30,8 @@ AC_PROG_MAKE_SET
+ AC_PROG_LN_S
+ AC_SYS_LARGEFILE
+ AM_PROG_CC_C_O
++AC_PROG_CXX
++AX_CXX_COMPILE_STDCXX_11()
+ 
+ # Taken from dbus
+ AC_ARG_ENABLE(ansi,             [  --enable-ansi           enable -ansi -pedantic gcc flags],enable_ansi=$enableval,enable_ansi=no)
+@@ -129,19 +131,10 @@ AC_DEFINE([GLIB_VERSION_MIN_REQUIRED], [GLIB_VERSION_2_30],
+ AC_DEFINE([GLIB_VERSION_MAX_ALLOWED], [G_ENCODE_VERSION(2,34)],
+         [Notify us when we'll need to transition away from g_type_init()])
+ 
+-AC_ARG_WITH(mozjs, AS_HELP_STRING([--with-mozjs=@<:@mozjs185/mozjs-17.0|auto@:>@],
+-		                  [Specify version of Spidermonkey to use]),,
+-            with_mozjs=auto)
+-AS_IF([test x${with_mozjs} != xauto], [
+-  PKG_CHECK_MODULES(LIBJS, ${with_mozjs})
+-], [
+-  PKG_CHECK_MODULES(LIBJS, [mozjs185], have_mozjs185=yes, have_mozjs185=no)
+-  AS_IF([test x${have_mozjs185} = xno], [
+-  PKG_CHECK_MODULES(LIBJS, [mozjs-17.0], have_mozjs17=yes,
+-   [AC_MSG_ERROR([Could not find mozjs185 or mozjs-17.0; see http://ftp.mozilla.org/pub/mozilla.org/js/])])
+-  ])
+-])
++PKG_CHECK_MODULES(LIBJS, [mozjs-24])
++
+ AC_SUBST(LIBJS_CFLAGS)
++AC_SUBST(LIBJS_CXXFLAGS)
+ AC_SUBST(LIBJS_LIBS)
+ 
+ EXPAT_LIB=""
+diff --git a/src/polkitbackend/Makefile.am b/src/polkitbackend/Makefile.am
+index 547ca82..5da7bdf 100644
+--- a/src/polkitbackend/Makefile.am
++++ b/src/polkitbackend/Makefile.am
+@@ -32,7 +32,7 @@ libpolkit_backend_1_la_SOURCES =                                   			\
+ 	polkitbackendprivate.h								\
+ 	polkitbackendauthority.h		polkitbackendauthority.c		\
+ 	polkitbackendinteractiveauthority.h	polkitbackendinteractiveauthority.c	\
+-	polkitbackendjsauthority.h		polkitbackendjsauthority.c		\
++	polkitbackendjsauthority.h		polkitbackendjsauthority.cpp		\
+ 	polkitbackendactionpool.h		polkitbackendactionpool.c		\
+ 	polkitbackendconfigsource.h		polkitbackendconfigsource.c		\
+ 	polkitbackendactionlookup.h		polkitbackendactionlookup.c		\
+@@ -54,6 +54,8 @@ libpolkit_backend_1_la_CFLAGS =                                        	\
+ 	$(LIBJS_CFLAGS)							\
+         $(NULL)
+ 
++libpolkit_backend_1_la_CXXFLAGS = $(libpolkit_backend_1_la_CFLAGS)
++
+ libpolkit_backend_1_la_LIBADD =                               		\
+         $(GLIB_LIBS)							\
+ 	$(LIBSYSTEMD_LIBS)						\
+@@ -74,6 +76,9 @@ polkitd_SOURCES = 							\
+ 					polkitd.c			\
+ 	$(NULL)
+ 
++# force C++ link via dummy C++ file, (see GNU automake manual section 8.3.5)
++nodist_EXTRA_polkitd_SOURCES = dummy-force-cpp-link.cxx
++
+ polkitd_CFLAGS = 							\
+ 	-DPOLKIT_BACKEND_I_KNOW_API_IS_SUBJECT_TO_CHANGE		\
+ 	-DG_LOG_DOMAIN=\"polkitd-1\"					\
+diff --git a/src/polkitbackend/polkitbackendjsauthority.c b/src/polkitbackend/polkitbackendjsauthority.cpp
+similarity index 93%
+rename from src/polkitbackend/polkitbackendjsauthority.c
+rename to src/polkitbackend/polkitbackendjsauthority.cpp
+index 097dcc5..42c9d78 100644
+--- a/src/polkitbackend/polkitbackendjsauthority.c
++++ b/src/polkitbackend/polkitbackendjsauthority.cpp
+@@ -72,6 +72,7 @@ struct _PolkitBackendJsAuthorityPrivate
+   JSRuntime *rt;
+   JSContext *cx;
+   JSObject *js_global;
++  JSAutoCompartment *ac;
+   JSObject *js_polkit;
+ 
+   GThread *runaway_killer_thread;
+@@ -88,11 +89,7 @@ struct _PolkitBackendJsAuthorityPrivate
+ };
+ 
+ static JSBool execute_script_with_runaway_killer (PolkitBackendJsAuthority *authority,
+-#if JS_VERSION == 186
+                                                   JSScript                 *script,
+-#else
+-                                                  JSObject                 *script,
+-#endif
+                                                   jsval                    *rval);
+ 
+ static void utils_spawn (const gchar *const  *argv,
+@@ -153,17 +150,13 @@ static JSClass js_global_class = {
+   "global",
+   JSCLASS_GLOBAL_FLAGS,
+   JS_PropertyStub,
+-  JS_PropertyStub,
++  JS_DeletePropertyStub,
+   JS_PropertyStub,
+   JS_StrictPropertyStub,
+   JS_EnumerateStub,
+   JS_ResolveStub,
+   JS_ConvertStub,
+-#if JS_VERSION == 186      
+   NULL,
+-#else
+-  JS_FinalizeStub,
+-#endif
+   JSCLASS_NO_OPTIONAL_MEMBERS
+ };
+ 
+@@ -173,17 +166,13 @@ static JSClass js_polkit_class = {
+   "Polkit",
+   0,
+   JS_PropertyStub,
+-  JS_PropertyStub,
++  JS_DeletePropertyStub,
+   JS_PropertyStub,
+   JS_StrictPropertyStub,
+   JS_EnumerateStub,
+   JS_ResolveStub,
+   JS_ConvertStub,
+-#if JS_VERSION == 186      
+   NULL,
+-#else
+-  JS_FinalizeStub,
+-#endif
+   JSCLASS_NO_OPTIONAL_MEMBERS
+ };
+ 
+@@ -295,23 +284,15 @@ load_scripts (PolkitBackendJsAuthority  *authority)
+ 
+   for (l = files; l != NULL; l = l->next)
+     {
+-      const gchar *filename = l->data;
+-#if JS_VERSION == 186
+-      JSScript *script;
+-#else
+-      JSObject *script;
+-#endif
++      const gchar *filename = (gchar *)l->data;
++      JS::RootedScript script(authority->priv->cx);
++      JS::CompileOptions options(authority->priv->cx);
++      JS::RootedObject   obj(authority->priv->cx,authority->priv->js_global);
++      options.setUTF8(true);
++      script = JS::Compile (authority->priv->cx,
++                            obj, options,
++                            filename);
+ 
+-#if JS_VERSION == 186
+-      script = JS_CompileUTF8File (authority->priv->cx,
+-				   authority->priv->js_global,
+-				   filename);
+-      
+-#else
+-      script = JS_CompileFile (authority->priv->cx,
+-			       authority->priv->js_global,
+-			       filename);
+-#endif
+       if (script == NULL)
+         {
+           polkit_backend_authority_log (POLKIT_BACKEND_AUTHORITY (authority),
+@@ -365,11 +346,7 @@ reload_scripts (PolkitBackendJsAuthority *authority)
+ 
+   polkit_backend_authority_log (POLKIT_BACKEND_AUTHORITY (authority),
+                                 "Collecting garbage unconditionally...");
+-#if JS_VERSION == 186
+   JS_GC (authority->priv->rt);
+-#else
+-  JS_GC (authority->priv->cx);
+-#endif
+ 
+   load_scripts (authority);
+ 
+@@ -461,7 +438,7 @@ polkit_backend_js_authority_constructed (GObject *object)
+   PolkitBackendJsAuthority *authority = POLKIT_BACKEND_JS_AUTHORITY (object);
+   gboolean entered_request = FALSE;
+ 
+-  authority->priv->rt = JS_NewRuntime (8L * 1024L * 1024L);
++  authority->priv->rt = JS_NewRuntime (8L * 1024L * 1024L, JS_USE_HELPER_THREADS);
+   if (authority->priv->rt == NULL)
+     goto fail;
+ 
+@@ -475,80 +452,84 @@ polkit_backend_js_authority_constructed (GObject *object)
+   JS_SetOptions (authority->priv->cx,
+                  JSOPTION_VAROBJFIX
+                  /* | JSOPTION_JIT | JSOPTION_METHODJIT*/);
+-  JS_SetVersion(authority->priv->cx, JSVERSION_LATEST);
+   JS_SetErrorReporter(authority->priv->cx, report_error);
+   JS_SetContextPrivate (authority->priv->cx, authority);
+ 
+   JS_BeginRequest(authority->priv->cx);
+   entered_request = TRUE;
+ 
+-  authority->priv->js_global =
+-#if JS_VERSION == 186
+-    JS_NewGlobalObject (authority->priv->cx, &js_global_class, NULL);
+-#else
+-    JS_NewCompartmentAndGlobalObject (authority->priv->cx, &js_global_class, NULL);
+-#endif
++  {
++    JS::CompartmentOptions compart_opts;
++    compart_opts.setVersion(JSVERSION_LATEST);
++    authority->priv->js_global = JS_NewGlobalObject (authority->priv->cx, &js_global_class, NULL, compart_opts);
+ 
+-  if (authority->priv->js_global == NULL)
+-    goto fail;
+-  JS_AddObjectRoot (authority->priv->cx, &authority->priv->js_global);
+-
+-  if (!JS_InitStandardClasses (authority->priv->cx, authority->priv->js_global))
+-    goto fail;
+-
+-  authority->priv->js_polkit = JS_DefineObject (authority->priv->cx,
+-                                                authority->priv->js_global,
+-                                                "polkit",
+-                                                &js_polkit_class,
+-                                                NULL,
+-                                                JSPROP_ENUMERATE);
+-  if (authority->priv->js_polkit == NULL)
+-    goto fail;
+-  JS_AddObjectRoot (authority->priv->cx, &authority->priv->js_polkit);
++    if (authority->priv->js_global == NULL)
++      goto fail;
+ 
+-  if (!JS_DefineFunctions (authority->priv->cx,
+-                           authority->priv->js_polkit,
+-                           js_polkit_functions))
+-    goto fail;
++    authority->priv->ac = new JSAutoCompartment(authority->priv->cx,  authority->priv->js_global);
+ 
+-  if (!JS_EvaluateScript (authority->priv->cx,
+-                          authority->priv->js_global,
+-                          init_js, strlen (init_js), /* init.js */
+-                          "init.js",  /* filename */
+-                          0,     /* lineno */
+-                          NULL)) /* rval */
+-    {
++    if (authority->priv->ac == NULL)
+       goto fail;
+-    }
+ 
+-  if (authority->priv->rules_dirs == NULL)
+-    {
+-      authority->priv->rules_dirs = g_new0 (gchar *, 3);
+-      authority->priv->rules_dirs[0] = g_strdup (PACKAGE_SYSCONF_DIR "/polkit-1/rules.d");
+-      authority->priv->rules_dirs[1] = g_strdup (PACKAGE_DATA_DIR "/polkit-1/rules.d");
+-    }
+-
+-  g_mutex_init (&authority->priv->rkt_init_mutex);
+-  g_cond_init (&authority->priv->rkt_init_cond);
+-  g_mutex_init (&authority->priv->rkt_timeout_pending_mutex);
++    JS_AddObjectRoot (authority->priv->cx, &authority->priv->js_global);
+ 
+-  authority->priv->runaway_killer_thread = g_thread_new ("runaway-killer-thread",
+-                                                         runaway_killer_thread_func,
+-                                                         authority);
++    if (!JS_InitStandardClasses (authority->priv->cx, authority->priv->js_global))
++      goto fail;
+ 
+-  /* wait for runaway_killer_thread to set up its GMainContext */
+-  g_mutex_lock (&authority->priv->rkt_init_mutex);
+-  while (authority->priv->rkt_context == NULL)
+-    g_cond_wait (&authority->priv->rkt_init_cond, &authority->priv->rkt_init_mutex);
+-  g_mutex_unlock (&authority->priv->rkt_init_mutex);
++    authority->priv->js_polkit = JS_DefineObject (authority->priv->cx,
++                                                  authority->priv->js_global,
++                                                  "polkit",
++                                                  &js_polkit_class,
++                                                  NULL,
++                                                  JSPROP_ENUMERATE);
++    if (authority->priv->js_polkit == NULL)
++      goto fail;
++    JS_AddObjectRoot (authority->priv->cx, &authority->priv->js_polkit);
+ 
+-  setup_file_monitors (authority);
+-  load_scripts (authority);
++    if (!JS_DefineFunctions (authority->priv->cx,
++                             authority->priv->js_polkit,
++                             js_polkit_functions))
++      goto fail;
+ 
++    if (!JS_EvaluateScript (authority->priv->cx,
++                            authority->priv->js_global,
++                            init_js, strlen (init_js), /* init.js */
++                            "init.js",  /* filename */
++                            0,     /* lineno */
++                            NULL)) /* rval */
++      {
++        goto fail;
++      }
++
++    if (authority->priv->rules_dirs == NULL)
++      {
++        authority->priv->rules_dirs = g_new0 (gchar *, 3);
++        authority->priv->rules_dirs[0] = g_strdup (PACKAGE_SYSCONF_DIR "/polkit-1/rules.d");
++        authority->priv->rules_dirs[1] = g_strdup (PACKAGE_DATA_DIR "/polkit-1/rules.d");
++      }
++
++    g_mutex_init (&authority->priv->rkt_init_mutex);
++    g_cond_init (&authority->priv->rkt_init_cond);
++    g_mutex_init (&authority->priv->rkt_timeout_pending_mutex);
++
++    authority->priv->runaway_killer_thread = g_thread_new ("runaway-killer-thread",
++                                                           runaway_killer_thread_func,
++                                                           authority);
++
++    /* wait for runaway_killer_thread to set up its GMainContext */
++    g_mutex_lock (&authority->priv->rkt_init_mutex);
++    while (authority->priv->rkt_context == NULL)
++      g_cond_wait (&authority->priv->rkt_init_cond, &authority->priv->rkt_init_mutex);
++    g_mutex_unlock (&authority->priv->rkt_init_mutex);
++
++    setup_file_monitors (authority);
++    load_scripts (authority);
++  }
+   JS_EndRequest (authority->priv->cx);
+   entered_request = FALSE;
+ 
+   G_OBJECT_CLASS (polkit_backend_js_authority_parent_class)->constructed (object);
++
+   return;
+ 
+  fail:
+@@ -578,7 +559,7 @@ polkit_backend_js_authority_finalize (GObject *object)
+     {
+       GFileMonitor *monitor = authority->priv->dir_monitors[n];
+       g_signal_handlers_disconnect_by_func (monitor,
+-                                            G_CALLBACK (on_dir_monitor_changed),
++                                            (gpointer*)G_CALLBACK (on_dir_monitor_changed),
+                                             authority);
+       g_object_unref (monitor);
+     }
+@@ -587,6 +568,7 @@ polkit_backend_js_authority_finalize (GObject *object)
+ 
+   JS_BeginRequest (authority->priv->cx);
+   JS_RemoveObjectRoot (authority->priv->cx, &authority->priv->js_polkit);
++  delete authority->priv->ac;
+   JS_RemoveObjectRoot (authority->priv->cx, &authority->priv->js_global);
+   JS_EndRequest (authority->priv->cx);
+ 
+@@ -664,7 +646,7 @@ polkit_backend_js_authority_class_init (PolkitBackendJsAuthorityClass *klass)
+                                                        NULL,
+                                                        NULL,
+                                                        G_TYPE_STRV,
+-                                                       G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE));
++                                                       GParamFlags(G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE)));
+ 
+ 
+   g_type_class_add_private (klass, sizeof (PolkitBackendJsAuthorityPrivate));
+@@ -704,7 +686,7 @@ set_property_strv (PolkitBackendJsAuthority  *authority,
+       JSString *jsstr;
+       jsval val;
+ 
+-      jsstr = JS_NewStringCopyZ (authority->priv->cx, g_ptr_array_index(value, n));
++      jsstr = JS_NewStringCopyZ (authority->priv->cx, (char *)g_ptr_array_index(value, n));
+       val = STRING_TO_JSVAL (jsstr);
+       JS_SetElement (authority->priv->cx, array_object, n, &val);
+     }
+@@ -762,7 +744,6 @@ subject_to_jsval (PolkitBackendJsAuthority  *authority,
+   char *session_str = NULL;
+ 
+   src = "new Subject();";
+-
+   if (!JS_EvaluateScript (authority->priv->cx,
+                           authority->priv->js_global,
+                           src, strlen (src),
+@@ -995,11 +976,7 @@ rkt_on_timeout (gpointer user_data)
+   g_mutex_unlock (&authority->priv->rkt_timeout_pending_mutex);
+ 
+   /* Supposedly this is thread-safe... */
+-#if JS_VERSION == 186
+   JS_TriggerOperationCallback (authority->priv->rt);
+-#else
+-  JS_TriggerOperationCallback (authority->priv->cx);
+-#endif
+ 
+   /* keep source around so we keep trying to kill even if the JS bit catches the exception
+    * thrown in js_operation_callback()
+@@ -1037,11 +1014,7 @@ runaway_killer_teardown (PolkitBackendJsAuthority *authority)
+ 
+ static JSBool
+ execute_script_with_runaway_killer (PolkitBackendJsAuthority *authority,
+-#if JS_VERSION == 186
+                                     JSScript                 *script,
+-#else
+-                                    JSObject                 *script,
+-#endif
+                                     jsval                    *rval)
+ {
+   JSBool ret;
+@@ -1371,8 +1344,8 @@ spawn_cb (GObject       *source_object,
+           GAsyncResult  *res,
+           gpointer       user_data)
+ {
+-  SpawnData *data = user_data;
+-  data->res = g_object_ref (res);
++  SpawnData *data = (SpawnData *)user_data;
++  data->res = (GAsyncResult*)g_object_ref (res);
+   g_main_loop_quit (data->loop);
+ }
+ 
+@@ -1681,7 +1654,7 @@ static void
+ utils_on_cancelled (GCancellable *cancellable,
+                     gpointer      user_data)
+ {
+-  UtilsSpawnData *data = user_data;
++  UtilsSpawnData *data = (UtilsSpawnData *)user_data;
+   GError *error;
+ 
+   error = NULL;
+@@ -1696,7 +1669,7 @@ utils_read_child_stderr (GIOChannel *channel,
+                          GIOCondition condition,
+                          gpointer user_data)
+ {
+-  UtilsSpawnData *data = user_data;
++  UtilsSpawnData *data = (UtilsSpawnData *)user_data;
+   gchar buf[1024];
+   gsize bytes_read;
+ 
+@@ -1710,7 +1683,7 @@ utils_read_child_stdout (GIOChannel *channel,
+                          GIOCondition condition,
+                          gpointer user_data)
+ {
+-  UtilsSpawnData *data = user_data;
++  UtilsSpawnData *data = (UtilsSpawnData *)user_data;
+   gchar buf[1024];
+   gsize bytes_read;
+ 
+@@ -1724,7 +1697,7 @@ utils_child_watch_cb (GPid     pid,
+                       gint     status,
+                       gpointer user_data)
+ {
+-  UtilsSpawnData *data = user_data;
++  UtilsSpawnData *data = (UtilsSpawnData *)user_data;
+   gchar *buf;
+   gsize buf_size;
+ 
+@@ -1753,7 +1726,7 @@ utils_child_watch_cb (GPid     pid,
+ static gboolean
+ utils_timeout_cb (gpointer user_data)
+ {
+-  UtilsSpawnData *data = user_data;
++  UtilsSpawnData *data = (UtilsSpawnData *)user_data;
+ 
+   data->timed_out = TRUE;
+ 
+@@ -1782,12 +1755,12 @@ utils_spawn (const gchar *const  *argv,
+   data->simple = g_simple_async_result_new (NULL,
+                                             callback,
+                                             user_data,
+-                                            utils_spawn);
++                                            (gpointer*)utils_spawn);
+   data->main_context = g_main_context_get_thread_default ();
+   if (data->main_context != NULL)
+     g_main_context_ref (data->main_context);
+ 
+-  data->cancellable = cancellable != NULL ? g_object_ref (cancellable) : NULL;
++  data->cancellable = cancellable != NULL ? (GCancellable*)g_object_ref (cancellable) : NULL;
+ 
+   data->child_stdout = g_string_new (NULL);
+   data->child_stderr = g_string_new (NULL);
+@@ -1820,7 +1793,7 @@ utils_spawn (const gchar *const  *argv,
+   if (!g_spawn_async_with_pipes (NULL, /* working directory */
+                                  (gchar **) argv,
+                                  NULL, /* envp */
+-                                 G_SPAWN_SEARCH_PATH | G_SPAWN_DO_NOT_REAP_CHILD,
++                                 GSpawnFlags(G_SPAWN_SEARCH_PATH | G_SPAWN_DO_NOT_REAP_CHILD),
+                                  NULL, /* child_setup */
+                                  NULL, /* child_setup's user_data */
+                                  &(data->child_pid),
+@@ -1887,7 +1860,7 @@ utils_spawn_finish (GAsyncResult   *res,
+   if (g_simple_async_result_propagate_error (simple, error))
+     goto out;
+ 
+-  data = g_simple_async_result_get_op_res_gpointer (simple);
++  data = (UtilsSpawnData*)g_simple_async_result_get_op_res_gpointer (simple);
+ 
+   if (data->timed_out)
+     {
+diff --git a/test/polkitbackend/Makefile.am b/test/polkitbackend/Makefile.am
+index 8859c1f..53bfb2a 100644
+--- a/test/polkitbackend/Makefile.am
++++ b/test/polkitbackend/Makefile.am
+@@ -35,6 +35,9 @@ TEST_PROGS =
+ 
+ TEST_PROGS += polkitbackendjsauthoritytest
+ polkitbackendjsauthoritytest_SOURCES = test-polkitbackendjsauthority.c
++# force C++ link via dummy C++ file, (see GNU automake manual section 8.3.5)
++nodist_EXTRA_polkitbackendjsauthoritytest_SOURCES = dummy-force-cpp-link.cxx
++
+ 
+ # ----------------------------------------------------------------------------------------------------
+ 
+-- 
+2.9.2
+

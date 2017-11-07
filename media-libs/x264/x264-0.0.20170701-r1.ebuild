@@ -1,7 +1,7 @@
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=5
+EAPI=6
 
 inherit flag-o-matic multilib toolchain-funcs eutils multilib-minimal
 
@@ -34,10 +34,7 @@ RDEPEND="opencl? ( >=virtual/opencl-0-r3[${MULTILIB_USEDEP}] )
 
 DOCS="AUTHORS doc/*.txt"
 
-src_prepare() {
-	epatch_user
-}
-
+PATCHES="${FILESDIR}/lto.patch"
 
 multilib_src_configure() {
 	tc-export CC

@@ -2,6 +2,14 @@
 #It's usually a good idea to set this to the number of hardware threads in your system
 FLTO="-flto=8"
 
+# https://bugs.gentoo.org/603594
+# Keep all static libraries unstripped.
+# This should allow you to omit almost all -ffat-lto-objects flags and build many more packages with LTO.
+# After enabling this you must rebuild all packages providing static libraries with LTO support.
+# Use $ `equery b -n $(find /lib* /usr/lib* -type f -name "*.a" 2>/dev/null)` | sort | uniq
+# or # `emerge -1va $(find /lib* /usr/lib* -type f -name "*.a" 2>/dev/null)` commands to get corresponding list.
+STRIP_MASK="*.a"
+
 #GRAPHITE contains Graphite specific optimizations and other optimizations that are disabled at O3
 #but don't influence the compiler's judgement.
 #These should be updated with GCC 7.2.1 (-ftree-loop-distribution may be enabled
@@ -10,12 +18,6 @@ GRAPHITE="-fgraphite-identity -ftree-loop-distribution -floop-nest-optimize"
 
 #FLTO and GRAPHITE are variables used in the LTO and Graphite overrides as well.  If you don't want Graphite or LTO,
 #just unset these variables--no further action is necessary.  Don't rename these variables as the overrides depend on them.
-
-#These variables are required to be set to their appropriate GCC wrappers.
-#NOTE: SEE ISSUE THREAD IN GENTOOLTO GITHUB FOR NEWER WAY OF DOING THIS.  I'm waiting on it being upstreamed.
-AR=gcc-ar
-NM=gcc-nm
-RANLIB=gcc-ranlib
 
 #Your CFLAGS should contain ${FLTO} and, depending on your gcc, -fuse-linker-plugin
 #Newer GCCs enable -fuse-linker-plugin by default.

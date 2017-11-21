@@ -1,0 +1,41 @@
+From b87a6228e90fb0704fe7c47bddf701e94f4798a1 Mon Sep 17 00:00:00 2001
+From: Shane Peelar <lookatyouhacker@gmail.com>
+Date: Thu, 21 Sep 2017 13:05:14 -0400
+Subject: [PATCH] Add support for symlinking appropriate LTO plugin
+
+Since Binutils 2.25, automatic loading of LTO plugins is supported from
+binutils, but the LTO plugins must be in the bfd-plugins directory in
+order to be found.  This patches gcc-config to automatically do this.
+
+Signed-off-by: Shane Peelar <lookatyouhacker@gmail.com>
+---
+ gcc-config | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/gcc-config b/gcc-config
+index 7fcde15..11fa58f 100755
+--- a/gcc-config
++++ b/gcc-config
+@@ -689,6 +689,19 @@ switch_profile() {
+ 
+ 	update_wrappers ${CTARGET}
+ 
++	#Update LTO plugin for GCC.  Supported as of binutils 2.25 (which is masked)
++	local BFD_PLUGINS_DIR
++	local LIBLTO_PLUGIN
++	LIBLTO_PLUGIN="${EROOT}usr/libexec/gcc/${CTARGET}/${CC_COMP_VERSION}/liblto_plugin.so"
++	if is_cross_compiler; then
++		BFD_PLUGINS_DIR="${EROOT}usr/${CHOST}/${CTARGET}/binutils-bin/lib/bfd-plugins"
++	else
++		BFD_PLUGINS_DIR="${EROOT}usr/${CHOST}/binutils-bin/lib/bfd-plugins"
++	fi
++	ewarn "Updating LTO plugin symlink in ${BFD_PLUGINS_DIR}"
++	mkdir -p "${BFD_PLUGINS_DIR}"
++	ln -sf "${LIBLTO_PLUGIN}" "${BFD_PLUGINS_DIR}"
++
+ 	if [[ ${ROOT} == "/" ]] && \
+ 	   [[ ${FORCE} == "yes" || ${envd_changed} -gt 0 ]]
+ 	then
+-- 
+2.14.1
+

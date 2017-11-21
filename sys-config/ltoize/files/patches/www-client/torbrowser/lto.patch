@@ -1,0 +1,38 @@
+diff -Naur a/security/sandbox/linux/moz.build b/security/sandbox/linux/moz.build
+--- a/security/sandbox/linux/moz.build	2016-06-01 12:11:46.000000000 +0800
++++ b/security/sandbox/linux/moz.build	2016-06-30 13:38:52.561530457 +0800
+@@ -79,7 +79,7 @@
+ # from the function using it which breaks the build.  Work around that by
+ # forcing there to be only one partition.
+ if '-flto' in CONFIG['OS_CXXFLAGS'] and not CONFIG['CLANG_CXX']:
+-    LDFLAGS += ['--param lto-partitions=1']
++    LDFLAGS += ['--lto-partition=one']
+ 
+ DEFINES['NS_NO_XPCOM'] = True
+ DISABLE_STL_WRAPPING = True
+
+diff --git a/ipc/app/moz.build b/ipc/app/moz.build
+index 55c338cb89c9..44ff9f0646b2 100644
+--- a/ipc/app/moz.build
++++ b/ipc/app/moz.build
+@@ -72,7 +72,7 @@ if CONFIG['MOZ_SANDBOX'] and CONFIG['OS_TARGET'] in ('Linux', 'Android'):
+     # from the function using it which breaks the build.  Work around that by
+     # forcing there to be only one partition.
+     if '-flto' in CONFIG['OS_CXXFLAGS'] and not CONFIG['CLANG_CXX']:
+-        LDFLAGS += ['--param lto-partitions=1']
++        LDFLAGS += ['--lto-partition=one']
+ 
+ if CONFIG['MOZ_SANDBOX'] and CONFIG['OS_TARGET'] == 'Darwin':
+     # For sandbox includes and the include dependencies those have
+diff --git a/ipc/app/pie/moz.build b/ipc/app/pie/moz.build
+index 0247b25b4b11..88ef1905d3c3 100644
+--- a/ipc/app/pie/moz.build
++++ b/ipc/app/pie/moz.build
+@@ -25,6 +25,6 @@ if CONFIG['MOZ_SANDBOX']:
+     # from the function using it which breaks the build.  Work around that by
+     # forcing there to be only one partition.
+     if '-flto' in CONFIG['OS_CXXFLAGS'] and not CONFIG['CLANG_CXX']:
+-	LDFLAGS += ['--param lto-partitions=1']
++	LDFLAGS += ['--lto-partition=one']
+ 
+ LDFLAGS += ['-pie']

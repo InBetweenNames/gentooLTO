@@ -16,7 +16,7 @@ SLOT="0"
 IUSE=""
 
 #portage-bashrc-mv can be obtained from mv overlay
-DEPEND=">=sys-devel/gcc-4.9.4:* >=sys-devel/binutils-2.28.1:* app-portage/portage-bashrc-mv[cflags]"
+DEPEND=">=sys-devel/gcc-4.9.4:* >=sys-devel/binutils-2.28.1:* app-portage/portage-bashrc-mv[cflags] >=sys-devel/gcc-config-1.9.0-r1"
 #DEPEND="graphite ? ( gcc[graphite] )"
 
 RDEPEND="${DEPEND}"
@@ -36,8 +36,8 @@ pkg_setup() {
 		fi
 	fi
 
-	if [ -f "${PORTAGE_CONFIGROOT}etc/portage/package.cflags" ]; then
-		eerror "${PORTAGE_CONFIGROOT}etc/portage/package.cflags is a file not a directory.  Please convert package.cflags to a directory with the current contents of package.cflags being moved to a file inside it."
+	if [ -f "${PORTAGE_CONFIGROOT%/}/etc/portage/package.cflags" ]; then
+		eerror "${PORTAGE_CONFIGROOT%/}/etc/portage/package.cflags is a file not a directory.  Please convert package.cflags to a directory with the current contents of package.cflags being moved to a file inside it."
 		die
 	fi
 
@@ -53,14 +53,14 @@ pkg_preinst() {
 	#Insert make.conf sample...
 
 	elog "Installing make.conf.lto sample for make.conf modifications"
-	dosym "${LTO_PORTAGE_DIR}/make.conf.lto" "${PORTAGE_CONFIGROOT}etc/portage/make.conf.lto"
+	dosym "${LTO_PORTAGE_DIR}/make.conf.lto" "${PORTAGE_CONFIGROOT%/}/etc/portage/make.conf.lto"
 
 	elog "Installing ltoworkarounds.conf package.cflags overrides"
-	dosym "${LTO_PORTAGE_DIR}/package.cflags/ltoworkarounds.conf" "${PORTAGE_CONFIGROOT}etc/portage/package.cflags/ltoworkarounds.conf"
+	dosym "${LTO_PORTAGE_DIR}/package.cflags/ltoworkarounds.conf" "${PORTAGE_CONFIGROOT%/}/etc/portage/package.cflags/ltoworkarounds.conf"
 
 	elog "Installing patches to help certain software build with this configuration (installed as symlinks)"
 	for i in $(ls ${LTO_PORTAGE_DIR}/patches); do
-		dosym "${LTO_PORTAGE_DIR}/patches/$i" "${PORTAGE_CONFIGROOT}etc/portage/patches/$i"
+		dosym "${LTO_PORTAGE_DIR}/patches/$i" "${PORTAGE_CONFIGROOT%/}/etc/portage/patches/$i"
 	done
 
 }
@@ -68,7 +68,7 @@ pkg_preinst() {
 pkg_postinst()
 {
 	elog "If you have not done so, you will need to modify your make.conf settings to enable LTO building on your system."
-	elog "A symlink has been placed in ${PORTAGE_CONFIGROOT}etc/portage/make.conf.lto that can be used as a basis for these modifications."
+	elog "A symlink has been placed in ${PORTAGE_CONFIGROOT%/}/etc/portage/make.conf.lto that can be used as a basis for these modifications."
 	elog "lto-overlay and ltoize are part of a project to help find undefined behaviour in C and C++ programs through the use of aggressive compiler optimizations."
 	elog "One of the aims of this project is also to improve the performance of linux distributions through these mechanisms as well."
 	elog "Occasionally, you will experience breakage due to LTO problems.  These are documented in the README.md of this repository."

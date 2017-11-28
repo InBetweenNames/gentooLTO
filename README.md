@@ -6,7 +6,7 @@
 
 Interested in running Gentoo at (theoretically) maximum speed?  Want to have a nearly fully [LTOed](https://gcc.gnu.org/wiki/LinkTimeOptimization) system?  Read on to see how it can be done!
 
-NEW: [Chat with us on Freenode! ##gentoolto](https://webchat.freenode.net/?url=irc://irc.freenode.net/##gentoolto)
+[Chat with us on Freenode! ##gentoolto](https://webchat.freenode.net/?url=irc://irc.freenode.net/##gentoolto)
 
 ## Introduction
 

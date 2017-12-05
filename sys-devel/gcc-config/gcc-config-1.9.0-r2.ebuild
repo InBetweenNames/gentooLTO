@@ -21,7 +21,9 @@ RDEPEND=">=sys-apps/gentoo-functions-0.10"
 PATCHES="${FILESDIR}/0001-Add-support-for-symlinking-appropriate-LTO-plugin.patch"
 
 src_compile() {
-	emake CC="$(tc-getCC)"
+	emake CC="$(tc-getCC)" \
+		PV="${PV}" \
+		SUBLIBDIR="$(get_libdir)"
 }
 
 src_install() {

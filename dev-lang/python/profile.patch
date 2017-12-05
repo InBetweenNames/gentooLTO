@@ -1,0 +1,39 @@
+diff --git a/dev-lang/python/python-2.7.14.ebuild b/dev-lang/python/python-2.7.14.ebuild
+index f44a2137ff3..a1270aeb55b 100644
+--- a/dev-lang/python/python-2.7.14.ebuild
++++ b/dev-lang/python/python-2.7.14.ebuild
+@@ -213,7 +213,7 @@ src_compile() {
+ 	touch Include/graminit.h Python/graminit.c
+ 
+ 	cd "${BUILD_DIR}" || die
+-	emake
++	emake profile-opt PROFILE_TASK="-m test.regrtest -w -uall,-audio -x test_gdb test_multiprocessing"
+ 
+ 	# Work around bug 329499. See also bug 413751 and 457194.
+ 	if has_version dev-libs/libffi[pax_kernel]; then
+diff --git a/dev-lang/python/python-3.5.4.ebuild b/dev-lang/python/python-3.5.4.ebuild
+index f4ff5b8cc75..a3dca3b6e86 100644
+--- a/dev-lang/python/python-3.5.4.ebuild
++++ b/dev-lang/python/python-3.5.4.ebuild
+@@ -175,7 +175,7 @@ src_compile() {
+ 
+ 	cd "${BUILD_DIR}" || die
+ 
+-	emake CPPFLAGS= CFLAGS= LDFLAGS=
++	emake profile-opt PROFILE_TASK="-m test.regrtest -w -uall,-audio -x test_gdb test_multiprocessing test_subprocess test_tokenize test_signal test_faulthandler"
+ 
+ 	# Work around bug 329499. See also bug 413751 and 457194.
+ 	if has_version dev-libs/libffi[pax_kernel]; then
+diff --git a/dev-lang/python/python-3.6.3.ebuild b/dev-lang/python/python-3.6.3.ebuild
+index 4cf258819ee..4ae90dcf92c 100644
+--- a/dev-lang/python/python-3.6.3.ebuild
++++ b/dev-lang/python/python-3.6.3.ebuild
+@@ -159,7 +159,7 @@ src_compile() {
+ 	# https://bugs.gentoo.org/594768
+ 	local -x LC_ALL=C
+ 
+-	emake CPPFLAGS= CFLAGS= LDFLAGS=
++	emake profile-opt PROFILE_TASK="-m test.regrtest -w -uall,-audio -x test_gdb test_multiprocessing test_subprocess test_tokenize test_signal test_faulthandler"
+ 
+ 	# Work around bug 329499. See also bug 413751 and 457194.
+ 	if has_version dev-libs/libffi[pax_kernel]; then

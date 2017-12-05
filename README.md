@@ -110,6 +110,18 @@ Most Gentoo-ers have `-march=native -O2` in their `CFLAGS` and `CXXFLAGS`.  Usin
 
 My Portage profile is `default/linux/amd64/17.0/desktop/plasma`.
 
+## PGO support
+
+### GCC
+
+One result of this project has been upstreamed PGO support in the GCC ebuilds.  It is highly recommended that you compile GCC with PGO, as it really helps with compile times.  Simply add `pgo` to your `sys-devel/gcc` USE flags and emerge and you're all set.
+The initial GCC compilation time will increase, however all subsequent compilations will be much faster.
+
+### Python
+
+This repository also contains PGO-enabled ebuilds of the Python interpreters.  PGO is off by default, but can be enabled by adding `pgo` to your `dev-lang/python` USE flags.
+The initial Python interpreter builds will take much longer to complete, however the interpreters that are built will run much faster than otherwise.  This is the default on many binary distributions, including Debian and Arch Linux.
+
 ## Conclusions
 
 After running this configuration for long enough, it seems stable for personal use, and it is the configuration I use on my desktop right now.  I see no need to revert anything, but YMMV.  If anything this repository can be used as a canary to see which packages exhibit undefined behaviour in C or C++.

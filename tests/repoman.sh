@@ -7,6 +7,8 @@ export FEATURES="-news" PORTAGE_RSYNC_EXTRA_OPTS="-q"
 
 mkdir -p /etc/portage/repos.conf
 
+ln -sf /usr/portage/profiles/default/linux/amd64/17.0/desktop/plasma /etc/portage/make.profile
+
 # Update the portage tree and install dependencies
 emerge --sync
 emerge -1 portage

@@ -161,7 +161,7 @@ src_compile() {
 	local -x LC_ALL=C
 
 	if use pgo; then
-		emake profile-opt PROFILE_TASK="-m test.regrtest -w -uall,-audio -x test_gdb test_multiprocessing test_subprocess test_tokenize test_signal test_faulthandler"
+		emake profile-opt PROFILE_TASK="-m test.regrtest -w -uall,-audio -x test_gdb test_multiprocessing test_subprocess test_tokenize test_signal test_faulthandler test_asyncio"
 	else
 		emake CPPFLAGS= CFLAGS= LDFLAGS=
 	fi

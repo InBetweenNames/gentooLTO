@@ -14,7 +14,7 @@ that explains the specific LTO-related error encountered.
 If the PR is to remove an override, make sure it is moved to the `fixed` section of the file.
 
 If the PR contains a patch that allows an LTO program to build, prefer to keep the patch as a user-patch
-in the `patches` directory.  If this is not possible (perhaps the `EAPI` is too old, for example), then duplicate
+in the `patches` directory, incrementing the revision of `sys-config/ltoize` as necessary.  If this is not possible (perhaps the `EAPI` is too old, for example), then duplicate
 the ebuild in this repo and add your patch to the `PATCHES` variable, incrementing the `EAPI` as necessary.
 
 For all other PRs, it is recommended that you make an issue on the issue tracker first so we can discuss the problem being solved

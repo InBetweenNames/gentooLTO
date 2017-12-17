@@ -27,7 +27,7 @@ The biggest gotcha with `-O3` is that it does not play nice at all with Undefine
 
 ## How to use this configuration
 
-Add the `mv` overlay (`layman -a mv`) and then add this overlay (`layman -a lto-overlay`) to your system and `emerge sys-config/ltoize`.  This will add in the necessary overrides to your `/etc/portage/`, but it won't modify your `make.conf`.
+Add the `mv` overlay (`layman -a mv`) and then add this overlay (`layman -a lto-overlay`) to your system and `emerge sys-config/ltoize`, adding it to your `/etc/portage/package.accept_keywords` if necessary.  This will add in the necessary overrides to your `/etc/portage/`, but it won't modify your `make.conf`.
 It will create a `make.conf.lto` in `/etc/portage` with the recommended settings for LTO.  Modify your own `make.conf` accordingly--there are comments in `make.conf.lto` to help
 guide you through the process, including for enabling Graphite.
 
@@ -60,7 +60,7 @@ Graphite and -O3 overrides are included in that file as well, but they won't aff
 
 Binutils needs a way to obtain the LTO plugin from GCC in order to properly perform LTO and other linking tasks.  Currently `ld`, `ar`, `nm`, and `ranlib` are known to use this plugin in LTO builds.
 There are two ways to do this: pass the path to the plugin manually to each of those utilities, or install a symlink to the plugin in binutils `bfd_plugins` directory and have binutils automatically load it.  Support for automatically loading the LTO plugin from this directory was added in [2014](https://sourceware.org/ml/binutils/2014-01/msg00213.html) (thanks @pchome!).
-I have a patch for `gcc-config` that creates this symlink for you, which is included in the `gcc-config` contained in this repo.  A [bug report](https://bugs.gentoo.org/630066#c1) was created upstream as this should definitely be something included in the official `gcc-config`.
+I have a patch for `gcc-config` that creates this symlink for you, which thankfully has been merged upstream as of December 17 2017.  A [bug report](https://bugs.gentoo.org/630066#c1) was created upstream for LTO support in `gcc-config`.  `sys-config/ltoize` now depends on the git version of `sys-devel/gcc-config` instead of the one in this repository.
 
 This is the recommended way of doing LTO.  Previously, it was required that you set your `AR`, `NM`, and `RANLIB` variables to point to GCC wrappers, which would in turn pass the linker plugin to their corresponding programs, but this causes problems in legitimate cases, such as building toolchains.
 

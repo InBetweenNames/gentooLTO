@@ -1,0 +1,14 @@
+Title: LTO-overlay gcc-config patch merged
+Author: Shane Peelar <lookatyouhacker@gmail.com>
+Display-If-Installed: sys-config/ltoize
+Content-Type: text/plain
+Posted: 2017-12-17
+Revision: 1
+News-Item-Format: 1.0
+
+The patch used for LTO support in gcc-config has been merged upstream,
+and we now directly use the upstream version.  As a result, the gcc-config
+fork in this overlay has been removed.
+
+You will likely need to add sys-config/ltoize to your package.accept_keywords as a
+result of this change.

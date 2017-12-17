@@ -7,7 +7,7 @@ inherit versionator toolchain-funcs
 
 DESCRIPTION="A configuration for portage to make building with LTO easy."
 HOMEPAGE="https://github.com/InBetweenNames/gentooLTO"
-#KEYWORDS="~amd64 ~x86"
+KEYWORDS="~amd64 ~x86"
 
 SRC_URI=""
 
@@ -16,7 +16,7 @@ SLOT="0"
 IUSE=""
 
 #portage-bashrc-mv can be obtained from mv overlay
-DEPEND=">=sys-devel/gcc-4.9.4:* >=sys-devel/binutils-2.28.1:* app-portage/portage-bashrc-mv[cflags] =sys-devel/gcc-config-9999"
+DEPEND=">=sys-devel/gcc-4.9.4:* >=sys-devel/binutils-2.28.1:* app-portage/portage-bashrc-mv[cflags] >=sys-devel/gcc-config-1.9.1"
 #DEPEND="graphite ? ( gcc[graphite] )"
 
 RDEPEND="${DEPEND}"

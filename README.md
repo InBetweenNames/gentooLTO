@@ -108,7 +108,7 @@ Right now I'm on glibc 2.26, so some packages fail to build because of that alon
 Most Gentoo-ers have `-march=native -O2` in their `CFLAGS` and `CXXFLAGS`.  Using `-march` is a good idea as it allows GCC to tune it's code generation to your specific processor.  I've enabled LTO, Graphite, and `-O3` in mine, which can be found in `make.conf.lto`.  I also pass all compiler options to the linker as well in `LDFLAGS`, which is necessary for LTO to work.
 
 
-My Portage profile is `default/linux/amd64/17.0/desktop/plasma`.
+My Portage profile is `default/linux/amd64/17.1/desktop/plasma`.
 
 ## PGO support
 

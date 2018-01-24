@@ -1,13 +1,13 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI="5"
+EAPI="6"
 WANT_LIBTOOL="none"
 
-inherit autotools eutils flag-o-matic multilib pax-utils python-utils-r1 toolchain-funcs
+inherit autotools flag-o-matic pax-utils python-utils-r1 toolchain-funcs
 
 MY_P="Python-${PV}"
-PATCHSET_VERSION="3.6.2-0"
+PATCHSET_VERSION="3.6.4"
 
 DESCRIPTION="An interpreted, interactive, object-oriented programming language"
 HOMEPAGE="https://www.python.org/"
@@ -16,8 +16,9 @@ SRC_URI="https://www.python.org/ftp/python/${PV}/${MY_P}.tar.xz
 
 LICENSE="PSF-2"
 SLOT="3.6/3.6m"
-KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~amd64-fbsd ~sparc-fbsd ~x86-fbsd"
-IUSE="build examples gdbm hardened ipv6 libressl +ncurses +readline sqlite +ssl +threads tk wininst +xml pgo"
+KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~amd64-fbsd ~x86-fbsd"
+IUSE="build examples gdbm hardened ipv6 libressl +ncurses +readline sqlite +ssl test +threads tk wininst +xml pgo"
+RESTRICT="!test? ( test )"
 
 # Do not add a dependency on dev-lang/python to this ebuild.
 # If you need to apply a patch which requires python for bootstrapping, please
@@ -48,6 +49,7 @@ RDEPEND="app-arch/bzip2:0=
 	xml? ( >=dev-libs/expat-2.1:0= )
 	!!<sys-apps/sandbox-2.6-r1"
 DEPEND="${RDEPEND}
+	test? ( app-arch/xz-utils[extra-filters(+)] )
 	virtual/pkgconfig
 	!sys-devel/gcc[libffi(-)]"
 RDEPEND+=" !build? ( app-misc/mime-types )"
@@ -62,12 +64,13 @@ src_prepare() {
 	rm -fr Modules/_ctypes/libffi*
 	rm -fr Modules/zlib
 
-	EPATCH_SUFFIX="patch" epatch "${WORKDIR}/patches"
-	epatch "${FILESDIR}/${PN}-3.5-distutils-OO-build.patch"
-	epatch "${FILESDIR}/3.6-blake2.patch"
-	epatch "${FILESDIR}/3.6-disable-nis.patch"
+	local PATCHES=(
+		"${WORKDIR}/patches"
+		"${FILESDIR}/${PN}-3.5-distutils-OO-build.patch"
+		"${FILESDIR}/3.6-disable-nis.patch"
+	)
 
-	epatch_user
+	default
 
 	sed -i -e "s:@@GENTOO_LIBDIR@@:$(get_libdir):g" \
 		Lib/distutils/command/install.py \
@@ -161,7 +164,7 @@ src_compile() {
 	local -x LC_ALL=C
 
 	if use pgo; then
-		emake profile-opt PROFILE_TASK="-m test.regrtest -w -uall,-audio -x test_gdb test_multiprocessing test_subprocess test_tokenize test_signal test_faulthandler test_asyncio"
+		emake profile-opt PROFILE_TASK="-m test.regrtest -w -uall,-audio -x test_gdb test_multiprocessing test_subprocess test_tokenize test_signal test_faulthandler test_asyncio test_ctypes"
 	else
 		emake CPPFLAGS= CFLAGS= LDFLAGS=
 	fi

@@ -176,7 +176,7 @@ src_compile() {
 
 	cd "${BUILD_DIR}" || die
 	if use pgo; then
-		emake profile-opt PROFILE_TASK="-m test.regrtest -w -uall,-audio -x test_gdb test_multiprocessing test_subprocess test_tokenize test_signal test_faulthandler test_asyncio"
+		emake profile-opt PROFILE_TASK="-m test.regrtest -w -uall,-audio -x test_gdb test_multiprocessing test_subprocess test_tokenize test_signal test_faulthandler test_asyncio test_compileall test_pyexpat test_runpy test_support test_threaded_import test_xmlrpc_net"
 	else
 		emake CPPFLAGS= CFLAGS= LDFLAGS=
 	fi

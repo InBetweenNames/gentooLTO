@@ -4,10 +4,10 @@
 EAPI="5"
 WANT_LIBTOOL="none"
 
-inherit autotools eutils flag-o-matic multilib pax-utils python-utils-r1 toolchain-funcs
+inherit autotools eutils flag-o-matic multilib pax-utils python-utils-r1 toolchain-funcs multiprocessing
 
 MY_P="Python-${PV/_/}"
-PATCHSET_VERSION="3.5.4-0"
+PATCHSET_VERSION="3.4.6-0"
 
 DESCRIPTION="An interpreted, interactive, object-oriented programming language"
 HOMEPAGE="https://www.python.org/"
@@ -15,9 +15,9 @@ SRC_URI="https://www.python.org/ftp/python/${PV%_rc*}/${MY_P}.tar.xz
 	https://dev.gentoo.org/~floppym/python/python-gentoo-patches-${PATCHSET_VERSION}.tar.xz"
 
 LICENSE="PSF-2"
-SLOT="3.5/3.5m"
+SLOT="3.4/3.4m"
 KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~amd64-fbsd ~x86-fbsd"
-IUSE="build elibc_uclibc examples gdbm hardened ipv6 libressl +ncurses +readline sqlite +ssl +threads tk wininst +xml pgo"
+IUSE="bluetooth build elibc_uclibc examples gdbm hardened ipv6 libressl +ncurses +readline sqlite +ssl +threads tk wininst +xml"
 
 # Do not add a dependency on dev-lang/python to this ebuild.
 # If you need to apply a patch which requires python for bootstrapping, please
@@ -47,8 +47,11 @@ RDEPEND="app-arch/bzip2:0=
 	)
 	xml? ( >=dev-libs/expat-2.1:0= )
 	!!<sys-apps/sandbox-2.6-r1"
+# bluetooth requires headers from bluez
 DEPEND="${RDEPEND}
+	bluetooth? ( net-wireless/bluez )
 	virtual/pkgconfig
+	>=sys-devel/autoconf-2.65
 	!sys-devel/gcc[libffi(-)]"
 RDEPEND+=" !build? ( app-misc/mime-types )"
 PDEPEND=">=app-eselect/eselect-python-20140125-r1"
@@ -70,8 +73,10 @@ src_prepare() {
 
 	EPATCH_SUFFIX="patch" epatch "${WORKDIR}/patches"
 	epatch "${FILESDIR}/${PN}-3.4.3-ncurses-pkg-config.patch"
-	epatch "${FILESDIR}/${PN}-3.5-distutils-OO-build.patch"
+	epatch "${FILESDIR}/${PN}-3.4.5-cross.patch"
+	epatch "${FILESDIR}/3.4-getentropy-linux.patch"
 	epatch "${FILESDIR}/3.6-disable-nis.patch"
+	epatch "${FILESDIR}/python-3.5.5-hash-unaligned.patch"
 
 	epatch_user
 
@@ -83,8 +88,8 @@ src_prepare() {
 		Lib/sysconfig.py \
 		Lib/test/test_site.py \
 		Makefile.pre.in \
-		Modules/getpath.c \
 		Modules/Setup.dist \
+		Modules/getpath.c \
 		setup.py || die "sed failed to replace @@GENTOO_LIBDIR@@"
 
 	eautoreconf
@@ -92,6 +97,8 @@ src_prepare() {
 
 src_configure() {
 	local disable
+	# disable automagic bluetooth headers detection
+	use bluetooth || export ac_cv_header_bluetooth_bluetooth_h=no
 	use gdbm     || disable+=" gdbm"
 	use ncurses  || disable+=" _curses _curses_panel"
 	use readline || disable+=" readline"
@@ -144,23 +151,21 @@ src_configure() {
 	mkdir -p "${BUILD_DIR}" || die
 	cd "${BUILD_DIR}" || die
 
-	local myeconfargs=(
-		--with-fpectl
-		--enable-shared
-		$(use_enable ipv6)
-		$(use_with threads)
-		--infodir='${prefix}/share/info'
-		--mandir='${prefix}/share/man'
-		--with-computed-gotos
-		--with-dbmliborder="${dbmliborder}"
-		--with-libc=
-		--enable-loadable-sqlite-extensions
+	ECONF_SOURCE="${S}" OPT="" \
+	econf \
+		--with-fpectl \
+		--enable-shared \
+		$(use_enable ipv6) \
+		$(use_with threads) \
+		--infodir='${prefix}/share/info' \
+		--mandir='${prefix}/share/man' \
+		--with-computed-gotos \
+		--with-dbmliborder="${dbmliborder}" \
+		--with-libc="" \
+		--enable-loadable-sqlite-extensions \
+		--with-system-expat \
+		--with-system-ffi \
 		--without-ensurepip
-		--with-system-expat
-		--with-system-ffi
-	)
-
-	ECONF_SOURCE="${S}" OPT="" econf "${myeconfargs[@]}"
 
 	if use threads && grep -q "#define POSIX_SEMAPHORES_NOT_ENABLED 1" pyconfig.h; then
 		eerror "configure has detected that the sem_open function is broken."
@@ -174,9 +179,12 @@ src_compile() {
 	# https://bugs.gentoo.org/594768
 	local -x LC_ALL=C
 
+	# Avoid invoking pgen for cross-compiles.
+	touch Include/graminit.h Python/graminit.c || die
+
 	cd "${BUILD_DIR}" || die
 	if use pgo; then
-		emake profile-opt PROFILE_TASK="-m test.regrtest -w -uall,-audio -x test_gdb test_multiprocessing test_subprocess test_tokenize test_signal test_faulthandler test_asyncio test_compileall test_pyexpat test_runpy test_support test_threaded_import test_xmlrpc_net"
+		emake profile-opt PROFILE_TASK="-m test.regrtest -w -uall,-audio -x test_gdb test_multiprocessing test_subprocess test_tokenize test_signal test_faulthandler test_sundry test_curses test_distutils test_imaplib test_import test_asyncio test_compileall test_pyexpat test_runpy test_support test_threaded_import test_xmlrpc_net"
 	else
 		emake CPPFLAGS= CFLAGS= LDFLAGS=
 	fi
@@ -252,14 +260,6 @@ src_install() {
 		dosym "${abiver}-config" "/usr/bin/python${PYVER}-config"
 		# Create python-3.5m.pc symlink
 		dosym "python-${PYVER}.pc" "/usr/$(get_libdir)/pkgconfig/${abiver/${PYVER}/-${PYVER}}.pc"
-	fi
-
-	# python seems to get rebuilt in src_install (bug 569908)
-	# Work around it for now.
-	if has_version dev-libs/libffi[pax_kernel]; then
-		pax-mark E "${ED}usr/bin/${abiver}"
-	else
-		pax-mark m "${ED}usr/bin/${abiver}"
 	fi
 
 	use elibc_uclibc && rm -fr "${libdir}/test"

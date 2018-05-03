@@ -12,9 +12,8 @@ STRIP_MASK="*.a"
 
 #GRAPHITE contains Graphite specific optimizations and other optimizations that are disabled at O3
 #but don't influence the compiler's judgement.
-#These should be updated with GCC 7.2.1 (-ftree-loop-distribution may be enabled
-#by -O3 by default)
-GRAPHITE="-fgraphite-identity -ftree-loop-distribution -floop-nest-optimize" 
+#With GCC 8.1.0, -ftree-loop-distribution is enabled by default at -O3
+GRAPHITE="-fgraphite-identity -floop-nest-optimize" 
 #NOTE: To use graphite, make sure you have gcc compiled with graphite support (add graphite to your USE).  Otherwise GCC will complain!
 
 #FLTO and GRAPHITE are variables used in the LTO and Graphite overrides as well.  If you don't want Graphite or LTO,

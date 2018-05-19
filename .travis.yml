@@ -9,7 +9,7 @@ env:
     - PORTAGE_VER="2.3.38"
 before_install:
     - sudo apt-get -qq update
-    - pip install lxml
+    - pip install lxml pyyaml
 before_script:
     - sudo chmod a+rwX /etc/passwd /etc/group /etc /usr /usr/local
     - mkdir -p travis-overlay /etc/portage /usr/portage/distfiles

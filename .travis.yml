@@ -26,7 +26,7 @@ before_script:
     - mkdir -p /etc/portage/repos.conf
     - ln -s $TRAVIS_BUILD_DIR/portage-portage-${PORTAGE_VER}/cnf/repos.conf /etc/portage/repos.conf/gentoo.conf
     - ln -s $TRAVIS_BUILD_DIR/travis-overlay/testconfig/mv.conf /etc/portage/repos.conf/mv.conf
-    - ln -s /usr/portage/profiles/default/linux/amd64/17.0 /etc/portage/make.profile
+    - ln -s /usr/portage/profiles/default/linux/amd64/17.1 /etc/portage/make.profile
     - cd /usr/local
     - git clone --depth 1 https://github.com/vaeth/mv-overlay mv
     - sudo chmod a+rwX mv

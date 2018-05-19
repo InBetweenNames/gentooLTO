@@ -212,8 +212,21 @@ src_compile() {
 	touch Include/graminit.h Python/graminit.c
 
 	cd "${BUILD_DIR}" || die
+
+	#The following code borrowed from https://github.com/stefantalpalaru/gentoo-overlay
+
+	# extract the number of parallel jobs in MAKEOPTS
+	echo ${MAKEOPTS} | egrep -o '(\-j|\-\-jobs)(=?|[[:space:]]*)[[:digit:]]+' > /dev/null
+	if [ $? -eq 0 ]; then
+		par_arg="-j$(echo ${MAKEOPTS} | egrep -o '(\-j|\-\-jobs)(=?|[[:space:]]*)[[:digit:]]+' | tail -n1 | egrep -o '[[:digit:]]+')"
+	else
+		par_arg=""
+	fi
+	export par_arg
+
+	#NOTE: upstream has a bug where PGO builds don't use the libpython*.so in the build directory. See: https://www.reddit.com/r/Gentoo/comments/7ya7gm/build_python_27_with_optimizations_lto_and_pgo/dug7cnu/
 	if use pgo; then
-		emake profile-opt PROFILE_TASK="-m test.regrtest -w -uall,-audio -x test_gdb test_multiprocessing"
+		emake profile-opt LLVM_PROF_FILE="_PYTHONNOSITEPACKAGES=1 \$(RUNSHARED)" PROFILE_TASK="-E \$(TESTPROG) ${par_arg} --pgo -w -uall,-audio -x test_gdb test_multiprocessing"
 	else
 		emake
 	fi

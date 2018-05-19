@@ -167,8 +167,19 @@ src_compile() {
 	# https://bugs.gentoo.org/594768
 	local -x LC_ALL=C
 
+	#The following code borrowed from https://github.com/stefantalpalaru/gentoo-overlay
+
+	# extract the number of parallel jobs in MAKEOPTS
+	echo ${MAKEOPTS} | egrep -o '(\-j|\-\-jobs)(=?|[[:space:]]*)[[:digit:]]+' > /dev/null
+	if [ $? -eq 0 ]; then
+		par_arg="-j$(echo ${MAKEOPTS} | egrep -o '(\-j|\-\-jobs)(=?|[[:space:]]*)[[:digit:]]+' | tail -n1 | egrep -o '[[:digit:]]+')"
+	else
+		par_arg=""
+	fi
+	export par_arg
+
 	if use pgo; then
-		emake profile-opt PROFILE_TASK="-m test.regrtest -w -uall,-audio -x test_gdb test_multiprocessing test_subprocess test_tokenize test_signal test_faulthandler test_asyncio test_ctypes test_compileall test_pyexpat test_runpy test_support test_threaded_import test_xmlrpc_net"
+		emake profile-opt PROFILE_TASK="-m test.regrtest ${par_arg} -w -uall,-audio -x test_gdb test_multiprocessing test_subprocess test_tokenize test_signal test_faulthandler test_asyncio test_ctypes test_compileall test_pyexpat test_runpy test_support test_threaded_import test_xmlrpc_net"
 	else
 		emake CPPFLAGS= CFLAGS= LDFLAGS=
 	fi

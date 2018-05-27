@@ -1,12 +1,12 @@
 # Gentoo O3-Graphite-LTO configuration overlay
 
+This is a living document -- it will be kept in sync with the project as it grows.
+
 [![Build Status](https://travis-ci.org/InBetweenNames/gentooLTO.svg?branch=master)](https://travis-ci.org/InBetweenNames/gentooLTO)
 
 > Warning: this configuration is not for the faint of heart.  It is probably not a good idea to use this on a production system!  Against my better judgement, I do anyways...
 
 Interested in running Gentoo at (theoretically) maximum speed?  Want to have a nearly fully [LTOed](https://gcc.gnu.org/wiki/LinkTimeOptimization) system?  Read on to see how it can be done!
-
-[Chat with us on Freenode! ##gentoolto](https://webchat.freenode.net/?url=irc://irc.freenode.net/##gentoolto)
 
 ## Introduction
 
@@ -31,7 +31,7 @@ Add the `mv` overlay (`layman -a mv`) and then add this overlay (`layman -a lto-
 It will create a `make.conf.lto` in `/etc/portage` with the recommended settings for LTO.  Modify your own `make.conf` accordingly--there are comments in `make.conf.lto` to help
 guide you through the process, including for enabling Graphite.
 
-It is strongly recommended to use the latest GCC (8.1.0 at the time of writing), latest binutils, and latest glibc.
+It is strongly recommended to use the latest GCC (8.1.0 at the time of writing), latest binutils (2.30 currently), and latest glibc (2.27 currently).
 
 When you find a problem, whether it's a package not playing nice with -O3, Graphite, or LTO, consider opening an issue here or sending a pull request with the overrides needed to get the package working.  Over time, we should be able to achieve full coverage of `/usr/portage` this way and provide a one size fits all solution, and not to mention help improve some open source software through the bug reports that will no doubt be generated! 
 
@@ -55,16 +55,15 @@ The actual `/etc/portage` modifications are in `sys-config/ltoize/files`.  This 
 Not all packages build cleanly.  Environment overrides are used to allow packages to build that have trouble with O3, Graphite, and LTO.  These can be found in `package.cflags/ltoworkarounds.conf`.  I have tried to categorize the overrides based on the kind of failure were being exhibited, but in some cases this was difficult.
 Graphite and -O3 overrides are included in that file as well, but they won't affect you if you are not using those compiler flags.
 
-`ltoize` will also obtain patches which help certain packages build with LTO.  It installs symlinks to these patches in `/etc/portage/patches`, so that you can have your own patches alongside the ones maintained in this repository.  These aren't automatically updated.  If a modification is made to an existing match, you will transparently receive that patch in your own `/etc/portage/patches` since a symlink will be used.  However, if a patch is created for a new package, you will need to re-run `ltoize` to get the new symlink.  I'm still thinking about a good way to handle this.  `/etc/portage/patches` unfortunately can't have a subdirectory like `lto` since it is used to match against the package being installed.
+`ltoize` will also obtain patches which help certain packages build with LTO.  It installs symlinks to these patches in `/etc/portage/patches`, so that you can have your own patches alongside the ones maintained in this repository.  These aren't automatically updated.  If a modification is made to an existing match, you will transparently receive that patch in your own `/etc/portage/patches` since a symlink will be used.  However, if a patch is created for a new package, you will need to re-run `ltoize` to get the new symlink.  I'm still thinking about a good way to handle this.  `/etc/portage/patches` unfortunately can't have a subdirectory like `lto` since it is used to match against the package being installed.  This system is due for an overhaul and I advise against using it for now.  If you have a patch, submit an ebuild to this repo instead for the time being.
 
 
-### A note about the GCC LTO plugin
+### The GCC LTO linker plugin
 
 Binutils needs a way to obtain the LTO plugin from GCC in order to properly perform LTO and other linking tasks.  Currently `ld`, `ar`, `nm`, and `ranlib` are known to use this plugin in LTO builds.
 There are two ways to do this: pass the path to the plugin manually to each of those utilities, or install a symlink to the plugin in binutils `bfd_plugins` directory and have binutils automatically load it.  Support for automatically loading the LTO plugin from this directory was added in [2014](https://sourceware.org/ml/binutils/2014-01/msg00213.html) (thanks @pchome!).
-I have a patch for `gcc-config` that creates this symlink for you, which thankfully has been merged upstream as of December 17 2017.  `sys-config/ltoize` now depends on the upstream version of `sys-devel/gcc-config` with this change, and the fork previously featured in this overlay has been removed.
-
-This is the recommended way of doing LTO.  Previously, it was required that you set your `AR`, `NM`, and `RANLIB` variables to point to GCC wrappers, which would in turn pass the linker plugin to their corresponding programs, but this causes problems in legitimate cases, such as building toolchains.
+In this overlay, we choose the automatic approach because passing in the path manually (i.e., setting your `AR`, `NM`, and `RANLIB` variables to point to GCC wrappers) causes problems in legitimate cases, such as building toolchains. 
+To facilitate this, I created a patch for `gcc-config` that creates this symlink for you, which thankfully has been merged upstream as of December 17 2017.  Therefore, no action is required on the user's part -- `sys-config/ltoize` depends on a recent enough version of `sys-devel/gcc-config` that is guaranteed to have LTO linker plugin support.
 
 (Thanks @rx80!) If you're interested in seeing where the symlink points, you can check it as follows (on `amd64`):
 
@@ -85,30 +84,25 @@ Expect breakages when you emerge new packages or update existing ones.  There ar
 
 ### LTO problems
 
-Some packages don't fully respect LDFLAGS, for various reasons.  These tend to manifest around link time with unresolved symbol errors.  My first strategy for dealing with these is to try building the package with `-ffat-lto-objects` enabled (that's in `env/ltofat.conf`).  If the unresolved symbols belong to an external library, I usually rebuild that one with `-ffat-lto-objects` too, because the current package being emerged isn't properly handling the LTO flags and it wants to link against the non LTOed symbols.  Sometimes, however, the package itself just doesn't like LTO for some reason, and you have to disable it.  That's when I make it use the "no-LTO" configuration in `env/nolto.conf`.
+Some packages don't fully respect LDFLAGS, for various reasons.  These tend to manifest around link time with unresolved symbol errors.  My first strategy for dealing with these is to try building the package with `-ffat-lto-objects` enabled (`*FLAGS+=-ffat-lto-objects`).  If the unresolved symbols belong to an external library, I usually rebuild that one with `-ffat-lto-objects` too, because the current package being emerged isn't properly handling the LTO flags and it wants to link against the non LTOed symbols.  Sometimes, however, the package itself just doesn't like LTO for some reason, and you have to disable it entirely (`*FLAGS-=-flto*`)
 
 ### Graphite problems
 
-I've never actually yet emerged a package that causes the Graphite optimizations to emit bad code with, but sometimes the Graphite optimizer itself crashes during compiletime.  If this is the case, I'll usually use the "LTO-with-no-Graphite" configuration in `env/ltonographite.conf` and this will work.
+I've never actually yet emerged a package that causes the Graphite optimizations to emit bad code with, but sometimes the Graphite optimizer itself crashes during compilation.  If this is the case, I'll usually use the "LTO-with-no-Graphite" configuration: `*FLAGS-="${GRAPHITE}"`
 
 ### -O3 problems
 
 These are rare, but they do happen.  When this happens, I usually force down to `-O2` (which disables Graphite implicitly in this configuration) using the `env/O2*.conf` configs.  Some packages are sensitive to both `-O3` and `LTO`, so I've included both an LTOed and non-LTOed `-O2` configurations for this purpose.
 
-### Patches
-
-I do include a small patch to Firefox in the `patches` directory to allow it to build with LTO.  It's a small buildsystem patch that was on a bug report.  I usually only go through the trouble to include a patch in `patches` if one already exists.  The `ltoize` tool will automatically grab this for you.
-
 ### A special note about Perl 5
 
-Perl 5 in general does not play nice with LTO ([see this reddit comment](https://www.reddit.com/r/Gentoo/comments/6z8s8m/a_gentoo_portage_configuration_for_building_with/dmuhohy/)).  Packages which use Perl 5 or have `perl` in their USE flags may require the `ltofat.conf` configuration, or in the worst case `nolto.conf`.  This does not appear to be something that can be fixed easily for Perl 5, so we'll have exercise caution. Perl 6 is unaffected, however.
+Perl 5 in general does not play nice with LTO ([see this reddit comment](https://www.reddit.com/r/Gentoo/comments/6z8s8m/a_gentoo_portage_configuration_for_building_with/dmuhohy/)).  Packages which use Perl 5 or have `perl` in their USE flags may require the `-ffat-lto-objects` configuration, or in the worst case no LTO at all.  This does not appear to be something that can be fixed easily for Perl 5, so we'll have exercise caution. Perl 6 is unaffected, however.
 
 ## My own configuration
 
-Right now I'm on glibc 2.26, so some packages fail to build because of that alone.  Notably versions of GCC < 7.0 have some problems here currently.  I also run the latest stable binutils (2.29) as well.  My compiler at this time is GCC 8.1.0.  I do have [SSP](http://wiki.osdev.org/Stack_Smashing_Protector) and [PIE](https://en.wikipedia.org/wiki/Position-independent_code#Position-independent_executables) disabled for the time being, but this is by means no requirement to run this config.
+Right now I'm on glibc 2.27, so some packages fail to build because of that alone.  Notably versions of GCC < 7.0 have some problems here currently.  I also run the latest stable binutils (2.30) as well.  My compiler at this time is GCC 8.1.0.  I do have [SSP](http://wiki.osdev.org/Stack_Smashing_Protector) and [PIE](https://en.wikipedia.org/wiki/Position-independent_code#Position-independent_executables) disabled for the time being, but this is by means no requirement to run this config.
 
 Most Gentoo-ers have `-march=native -O2` in their `CFLAGS` and `CXXFLAGS`.  Using `-march` is a good idea as it allows GCC to tune it's code generation to your specific processor.  I've enabled LTO, Graphite, and `-O3` in mine, which can be found in `make.conf.lto`.  I also pass all compiler options to the linker as well in `LDFLAGS`, which is necessary for LTO to work.
-
 
 My Portage profile is `default/linux/amd64/17.1/desktop/plasma`.
 
@@ -122,17 +116,13 @@ The initial GCC compilation time will increase, however all subsequent compilati
 ### Python
 
 This repository also contains PGO-enabled ebuilds of the Python interpreters.  PGO is off by default, but can be enabled by adding `pgo` to your `dev-lang/python` USE flags.
-The initial Python interpreter builds will take much longer to complete, however the interpreters that are built will run much faster than otherwise.  This is the default on many binary distributions, including Debian and Arch Linux.
+The initial Python interpreter builds will take much longer to complete, however the interpreters that are built will run much faster than otherwise.  This is the default on many binary distributions, including Debian and Arch Linux. The actual PGO training set differs between different Python versions. I rely heavily on the community to test these ebuilds.
+
+Python PGO builds should now be parallelized, which should really help with the build times. The number of parallel jobs is taken from `MAKEOPTS` in Portage.
 
 ## Conclusions
 
 After running this configuration for long enough, it seems stable for personal use, and it is the configuration I use on my desktop right now.  I see no need to revert anything, but YMMV.  If anything this repository can be used as a canary to see which packages exhibit undefined behaviour in C or C++.
-
-The packages I've found so far that don't play nice with glibc 2.26 are as follows:
-
-* sys-devel/flex
-* sys-libs/gpm
-* =sys-libs/compiler-rt-sanitizers-4.0.1 (5.0.0 seems unaffected)
 
 I have over 1500 packages installed on my system at this time, and I did an `emerge -e @world` before I uploaded my configuration to this repository.  All currently installed packages in my system, including deep dependencies, can be found in the file `worldsetdeep`.  Considering how few exceptions I have listed here, I find these results encouraging.  Perhaps we are closer than we think to an LTOed default Gentoo system?
 

@@ -1,13 +1,13 @@
 # Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI="5"
+EAPI="6"
 WANT_LIBTOOL="none"
 
-inherit autotools eutils flag-o-matic multilib pax-utils python-utils-r1 toolchain-funcs multiprocessing
+inherit autotools flag-o-matic pax-utils python-utils-r1 toolchain-funcs
 
 MY_P="Python-${PV}"
-PATCHSET_VERSION="2.7.14-0"
+PATCHSET_VERSION="2.7.15"
 
 DESCRIPTION="An interpreted, interactive, object-oriented programming language"
 HOMEPAGE="https://www.python.org/"
@@ -17,7 +17,7 @@ SRC_URI="https://www.python.org/ftp/python/${PV}/${MY_P}.tar.xz
 LICENSE="PSF-2"
 SLOT="2.7"
 KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~amd64-fbsd ~x86-fbsd"
-IUSE="-berkdb build doc elibc_uclibc examples gdbm hardened ipv6 libressl +ncurses +readline sqlite +ssl +threads tk +wide-unicode wininst +xml pgo"
+IUSE="-berkdb bluetooth build doc elibc_uclibc examples gdbm hardened ipv6 libressl +ncurses +readline sqlite +ssl +threads tk +wide-unicode wininst +xml pgo"
 
 # Do not add a dependency on dev-lang/python to this ebuild.
 # If you need to apply a patch which requires python for bootstrapping, please
@@ -30,7 +30,9 @@ RDEPEND="app-arch/bzip2:0=
 	virtual/libintl
 	berkdb? ( || (
 		sys-libs/db:5.3
+		sys-libs/db:5.2
 		sys-libs/db:5.1
+		sys-libs/db:5.0
 		sys-libs/db:4.8
 		sys-libs/db:4.7
 		sys-libs/db:4.6
@@ -40,14 +42,12 @@ RDEPEND="app-arch/bzip2:0=
 		sys-libs/db:4.2
 	) )
 	gdbm? ( sys-libs/gdbm:0=[berkdb] )
-	ncurses? (
-		>=sys-libs/ncurses-5.2:0=
-		readline? ( >=sys-libs/readline-4.1:0= )
-	)
+	ncurses? ( >=sys-libs/ncurses-5.2:0= )
+	readline? ( >=sys-libs/readline-4.1:0= )
 	sqlite? ( >=dev-db/sqlite-3.3.8:3= )
 	ssl? (
 		!libressl? ( dev-libs/openssl:0= )
-		libressl? ( dev-libs/libressl:= )
+		libressl? ( dev-libs/libressl:0= )
 	)
 	tk? (
 		>=dev-lang/tcl-8.0:0=
@@ -57,7 +57,9 @@ RDEPEND="app-arch/bzip2:0=
 	)
 	xml? ( >=dev-libs/expat-2.1 )
 	!!<sys-apps/portage-2.1.9"
+# bluetooth requires headers from bluez
 DEPEND="${RDEPEND}
+	bluetooth? ( net-wireless/bluez )
 	virtual/pkgconfig
 	>=sys-devel/autoconf-2.65
 	!sys-devel/gcc[libffi(-)]"
@@ -89,19 +91,19 @@ src_prepare() {
 	rm -r Modules/zlib || die
 
 	if tc-is-cross-compiler; then
-		local EPATCH_EXCLUDE="*_regenerate_platform-specific_modules.patch"
+		rm "${WORKDIR}/patches/0006-Regenerate-platform-specific-modules.patch" || die
 	fi
 
-	EPATCH_SUFFIX="patch" epatch "${WORKDIR}/patches"
+	local PATCHES=(
+		"${WORKDIR}/patches"
+		# Fix for cross-compiling.
+		"${FILESDIR}/python-2.7.5-nonfatal-compileall.patch"
+		"${FILESDIR}/python-2.7.9-ncurses-pkg-config.patch"
+		"${FILESDIR}/python-2.7.10-cross-compile-warn-test.patch"
+		"${FILESDIR}/python-2.7.10-system-libffi.patch"
+	)
 
-	# Fix for cross-compiling.
-	epatch "${FILESDIR}/python-2.7.5-nonfatal-compileall.patch"
-	epatch "${FILESDIR}/python-2.7.9-ncurses-pkg-config.patch"
-	epatch "${FILESDIR}/python-2.7.10-cross-compile-warn-test.patch"
-	epatch "${FILESDIR}/python-2.7.10-system-libffi.patch"
-	epatch "${FILESDIR}/2.7-disable-nis.patch"
-
-	epatch_user
+	default
 
 	sed -i -e "s:@@GENTOO_LIBDIR@@:$(get_libdir):g" \
 		Lib/distutils/command/install.py \
@@ -123,6 +125,8 @@ src_configure() {
 		local disable
 		use berkdb   || use gdbm || disable+=" dbm"
 		use berkdb   || disable+=" _bsddb"
+		# disable automagic bluetooth headers detection
+		use bluetooth || export ac_cv_header_bluetooth_bluetooth_h=no
 		use gdbm     || disable+=" gdbm"
 		use ncurses  || disable+=" _curses _curses_panel"
 		use readline || disable+=" readline"
@@ -341,24 +345,17 @@ src_install() {
 	local pymajor=${SLOT%.*}
 	mkdir -p "${D}${PYTHON_SCRIPTDIR}" || die
 	# python and pythonX
-	ln -s "../../../bin/python${SLOT}" \
-		"${D}${PYTHON_SCRIPTDIR}/python${pymajor}" || die
-	ln -s "python${pymajor}" \
-		"${D}${PYTHON_SCRIPTDIR}/python" || die
+	ln -s "../../../bin/python${SLOT}" "${D}${PYTHON_SCRIPTDIR}/python${pymajor}" || die
+	ln -s "python${pymajor}" "${D}${PYTHON_SCRIPTDIR}/python" || die
 	# python-config and pythonX-config
-	ln -s "../../../bin/python${SLOT}-config" \
-		"${D}${PYTHON_SCRIPTDIR}/python${pymajor}-config" || die
-	ln -s "python${pymajor}-config" \
-		"${D}${PYTHON_SCRIPTDIR}/python-config" || die
+	ln -s "../../../bin/python${SLOT}-config" "${D}${PYTHON_SCRIPTDIR}/python${pymajor}-config" || die
+	ln -s "python${pymajor}-config" "${D}${PYTHON_SCRIPTDIR}/python-config" || die
 	# 2to3, pydoc, pyvenv
-	ln -s "../../../bin/2to3-${SLOT}" \
-		"${D}${PYTHON_SCRIPTDIR}/2to3" || die
-	ln -s "../../../bin/pydoc${SLOT}" \
-		"${D}${PYTHON_SCRIPTDIR}/pydoc" || die
+	ln -s "../../../bin/2to3-${SLOT}" "${D}${PYTHON_SCRIPTDIR}/2to3" || die
+	ln -s "../../../bin/pydoc${SLOT}" "${D}${PYTHON_SCRIPTDIR}/pydoc" || die
 	# idle
 	if use tk; then
-		ln -s "../../../bin/idle${SLOT}" \
-			"${D}${PYTHON_SCRIPTDIR}/idle" || die
+		ln -s "../../../bin/idle${SLOT}" "${D}${PYTHON_SCRIPTDIR}/idle" || die
 	fi
 }
 

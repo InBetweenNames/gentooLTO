@@ -31,7 +31,7 @@ Add the `mv` overlay (`layman -a mv`) and then add this overlay (`layman -a lto-
 It will create a `make.conf.lto` in `/etc/portage` with the recommended settings for LTO.  Modify your own `make.conf` accordingly--there are comments in `make.conf.lto` to help
 guide you through the process, including for enabling Graphite.
 
-It is strongly recommended to use the latest GCC (8.1.0 at the time of writing), latest binutils (2.30 currently), and latest glibc (2.27 currently).
+It is strongly recommended to use the latest GCC (8.2.0 at the time of writing), latest binutils (2.31.1 currently), and latest glibc (2.27 currently).
 
 When you find a problem, whether it's a package not playing nice with -O3, Graphite, or LTO, consider opening an issue here or sending a pull request with the overrides needed to get the package working.  Over time, we should be able to achieve full coverage of `/usr/portage` this way and provide a one size fits all solution, and not to mention help improve some open source software through the bug reports that will no doubt be generated! 
 
@@ -71,11 +71,11 @@ To facilitate this, I created a patch for `gcc-config` that creates this symlink
 ls -l /usr/x86_64-pc-linux-gnu/binutils-bin/lib/bfd-plugins/liblto_plugin.so
 ~~~
 
-This should point to your active GCC's `liblto_plugin.so`.  For example, for GCC 8.1.0, it should look something like:
+This should point to your active GCC's `liblto_plugin.so`.  For example, for GCC 8.2.0, it should look something like:
 
 ~~~
-> ls /usr/libexec/gcc/x86_64-pc-linux-gnu/8.1.0/liblto_plugin.so -la
-> lrwxrwxrwx 1 root root 22 Oct 13 09:17 /usr/libexec/gcc/x86_64-pc-linux-gnu/8.1.0/liblto_plugin.so -> liblto_plugin.so.0.0.0*
+> ls /usr/libexec/gcc/x86_64-pc-linux-gnu/8.2.0/liblto_plugin.so -la
+> lrwxrwxrwx 1 root root 22 Oct 13 09:17 /usr/libexec/gcc/x86_64-pc-linux-gnu/8.2.0/liblto_plugin.so -> liblto_plugin.so.0.0.0*
 ~~~
 
 ## Caveats
@@ -100,7 +100,7 @@ Perl 5 in general does not play nice with LTO ([see this reddit comment](https:/
 
 ## My own configuration
 
-Right now I'm on glibc 2.27, so some packages fail to build because of that alone.  Notably versions of GCC < 7.0 have some problems here currently.  I also run the latest stable binutils (2.30) as well.  My compiler at this time is GCC 8.1.0.  I do have [SSP](http://wiki.osdev.org/Stack_Smashing_Protector) and [PIE](https://en.wikipedia.org/wiki/Position-independent_code#Position-independent_executables) disabled for the time being, but this is by means no requirement to run this config.
+I follow the posted recommended configuration in this repo.  I also have [SSP](http://wiki.osdev.org/Stack_Smashing_Protector) and [PIE](https://en.wikipedia.org/wiki/Position-independent_code#Position-independent_executables) disabled for the time being, but this is by means no requirement to run this config.
 
 Most Gentoo-ers have `-march=native -O2` in their `CFLAGS` and `CXXFLAGS`.  Using `-march` is a good idea as it allows GCC to tune it's code generation to your specific processor.  I've enabled LTO, Graphite, and `-O3` in mine, which can be found in `make.conf.lto`.  I also pass all compiler options to the linker as well in `LDFLAGS`, which is necessary for LTO to work.
 

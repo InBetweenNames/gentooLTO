@@ -7,7 +7,7 @@ WANT_LIBTOOL="none"
 inherit autotools flag-o-matic pax-utils python-utils-r1 toolchain-funcs
 
 MY_P="Python-${PV}"
-PATCHSET_VERSION="3.6.4"
+PATCHSET_VERSION="3.6.6"
 
 DESCRIPTION="An interpreted, interactive, object-oriented programming language"
 HOMEPAGE="https://www.python.org/"
@@ -66,10 +66,6 @@ src_prepare() {
 
 	local PATCHES=(
 		"${WORKDIR}/patches"
-		"${FILESDIR}/${PN}-3.5-distutils-OO-build.patch"
-		"${FILESDIR}/3.6.5-disable-nis.patch"
-		"${FILESDIR}/python-3.6.5-libressl-compatibility.patch"
-		"${FILESDIR}/python-3.6.5-hash-unaligned.patch"
 	)
 
 	default
@@ -205,6 +201,9 @@ src_test() {
 	for test in ${skipped_tests}; do
 		mv "${S}"/Lib/test/test_${test}.py "${T}"
 	done
+
+	# bug 660358
+	local -x COLUMNS=80
 
 	local -x PYTHONDONTWRITEBYTECODE=
 

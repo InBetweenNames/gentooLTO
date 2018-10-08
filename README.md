@@ -78,6 +78,25 @@ This should point to your active GCC's `liblto_plugin.so`.  For example, for GCC
 > lrwxrwxrwx 1 root root 22 Oct 13 09:17 /usr/libexec/gcc/x86_64-pc-linux-gnu/8.2.0/liblto_plugin.so -> liblto_plugin.so.0.0.0*
 ~~~
 
+### Static archives and LTO
+
+Static library archives (`*.a` files) are tricky right now due to a bug in the GNU strip utility found in `sys-devel/binutils` that mangles archives containing LTO symbols.
+This is because unlike other binutils programs (such as `ar`, `nm`, and `ranlib`), `strip` doesn't support the LTO linker plugin necessary for processing these symbols.
+The result is an archive with all of the same symbols, but with a mangled index.
+To work around this, `ltoize` contains a patch for Portage that automatically restores the index of any static archive built that has been subsequently stripped using
+the `ranlib` utility.  Additional details about this can be found in issue #49.  If you have a better solution, please let us know!
+
+Previously, we used `STRIP_MASK` to simply avoid stripping any static archives, however this functionality has been removed in EAPI version 7, so a more intrusive
+solution is necessary.
+
+Existing users of `sys-config/ltoize` can migrate to the new configuration by:
+
+* Removing STRIP_MASK="*.a" from `make.conf`
+* Updating `sys-config/ltoize` to the latest version
+* Re-emerging `sys-apps/portage` (`emerge -1 sys-apps/portage`) to ensure the patch is applied
+
+Please report any issues with the new configuration in issue #49.
+
 ## Caveats
 
 Expect breakages when you emerge new packages or update existing ones.  There are a number of potential ways that an emerge might not work.  My observations are as follows.

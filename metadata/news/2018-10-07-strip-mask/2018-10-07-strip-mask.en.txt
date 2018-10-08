@@ -1,0 +1,31 @@
+Title: LTO-Overlay now has a Portage patch to fix the STRIP_MASK issue 
+Author: Shane Peelar <lookatyouhacker@gmail.com>
+Display-If-Installed: sys-config/ltoize
+Content-Type: text/plain
+Posted: 2018-10-07
+Revision: 1
+News-Item-Format: 1.0
+
+LTO-Overlay now has a patch for portage to automatically rebuild the index of
+all static libraries built in LTO configurations using ranlib.  This is the
+recommended way of fixing up stripped libraries according to the upstream
+developers of sys-devel/binutils.  The patch is three lines and should apply
+cleanly to both stable and unstable portage installations.  
+With this change, STRIP_MASK is no longer necessary and LTO can be used safely
+with EAPI version 7 packages.
+
+To start using the patch, update `sys-config/ltoize` to the latest version,
+remove STRIP_MASK from your `make.conf`, and re-emerge `sys-apps/portage`.
+You will see a new message show up during emerges when static libraries are
+built:
+
+~~~
+${RANLIB}: rebuilding index for ${STATIC_ARCHIVE}
+~~~
+
+This means that the patch is working as expected.
+Users of LTO-Overlay are strongly encouraged to comment on issue #49 on GitHub (URL:
+https://github.com/InBetweenNames/gentooLTO ) if any problems occur.
+Alternatively, feel free to email me directly at the address indicated in the
+header of this message.
+

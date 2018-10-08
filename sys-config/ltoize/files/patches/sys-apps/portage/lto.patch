@@ -1,0 +1,14 @@
+diff --git a/bin/estrip b/bin/estrip
+index 3ee4b01ac..787764c8d 100755
+--- a/bin/estrip
++++ b/bin/estrip
+@@ -424,6 +424,9 @@ do
+ 			# retain the debug info in the archive itself.
+ 			if ! ${FEATURES_splitdebug} || ${RESTRICT_splitdebug} ; then
+ 				${STRIP} -g "${x}"
++				RANLIB=${RANLIB:-"${CHOST}-ranlib"}
++				${RANLIB} "${x}"
++				echo "${RANLIB}: rebuilding index for ${x}"
+ 			fi
+ 		fi
+ 	elif [[ ${f} == *"SB executable"* || ${f} == *"SB pie executable"* ||

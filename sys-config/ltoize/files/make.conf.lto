@@ -8,7 +8,11 @@ FLTO="-flto=8"
 # After enabling this you must rebuild all packages providing static libraries with LTO support.
 # Use $ `equery b -n $(find /lib* /usr/lib* -type f -name "*.a" 2>/dev/null)` | sort | uniq
 # or # `emerge -1va $(find /lib* /usr/lib* -type f -name "*.a" 2>/dev/null)` commands to get corresponding list.
-STRIP_MASK="*.a"
+#STRIP_MASK="*.a"
+#### NOTE: a patch exists for portage in this repo that negates the need to use STRIP_MASK.
+# So long as you have ltoize installed, you should not need this.  ranlib will be run automatically after every static library
+# is built to rebuild the index and enable working functionality once again.
+
 
 #GRAPHITE contains Graphite specific optimizations and other optimizations that are disabled at O3
 #but don't influence the compiler's judgement.

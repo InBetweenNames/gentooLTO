@@ -20,14 +20,20 @@ FLTO="-flto=8"
 GRAPHITE="-fgraphite-identity -floop-nest-optimize" 
 #NOTE: To use graphite, make sure you have gcc compiled with graphite support (add graphite to your USE).  Otherwise GCC will complain!
 
-#FLTO and GRAPHITE are variables used in the LTO and Graphite overrides as well.  If you don't want Graphite or LTO,
+IPA="-fipa-pta"
+#IPA contains -fipa* opts that are disabled by default in GCC.  These are interprocedural optimizations.  For now this is only -fipa-pta.
+#This option increases compile times, but can potentially produce better binaries, especially with LTO.
+#Essentially, it allows the compiler to look into called function bodies when performing alias analysis
+
+#FLTO, GRAPHITE and IPA are variables used in the LTO and Graphite overrides as well.  If you don't want Graphite, LTO or -fipa-pta,
 #just unset these variables--no further action is necessary.  Don't rename these variables as the overrides depend on them.
+#Ensure these variables are defined BEFORE your CFLAGS (i.e., in the exact order defined by this document)
 
 #Your CFLAGS should contain ${FLTO} and, depending on your gcc, -fuse-linker-plugin
 #Newer GCCs enable -fuse-linker-plugin by default.
 #${GRAPHITE} should be included here as well.  If you do not want Graphite, just unset the GRAPHITE variable and keep CFLAGS the same.
 #It will be easier for you to experiment that way.
-CFLAGS="-march=native -O3 ${GRAPHITE} ${FLTO} -fuse-linker-plugin -pipe"
+CFLAGS="-march=native -O3 ${GRAPHITE} ${FLTO} ${IPA} -fuse-linker-plugin -pipe"
 
 #Your CXXFLAGS should be a superset of your CFLAGS.  Most people will never need to add anything extra to their CXXFLAGS.
 CXXFLAGS="${CFLAGS}"

@@ -1,0 +1,39 @@
+From d6fa8fba207ba8d8eeaef0794a769d578e189b33 Mon Sep 17 00:00:00 2001
+From: Shane Peelar <lookatyouhacker@gmail.com>
+Date: Thu, 16 Aug 2018 17:59:18 -0400
+Subject: [PATCH] Fix bash_cv_must_reinstall_sighandlers check
+
+---
+ aclocal.m4 | 2 +-
+ configure  | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/aclocal.m4 b/aclocal.m4
+index d3bac077..8462326b 100644
+--- a/aclocal.m4
++++ b/aclocal.m4
+@@ -1307,7 +1307,7 @@ AC_CACHE_VAL(bash_cv_must_reinstall_sighandlers,
+ 
+ typedef RETSIGTYPE sigfunc();
+ 
+-int nsigint;
++volatile sig_atomic_t nsigint;
+ 
+ #ifdef HAVE_POSIX_SIGNALS
+ sigfunc *
+diff --git a/configure b/configure
+index 60f86d64..1e25d707 100755
+--- a/configure
++++ b/configure
+@@ -15141,7 +15141,7 @@ else
+ 
+ typedef RETSIGTYPE sigfunc();
+ 
+-int nsigint;
++volatile sig_atomic_t nsigint;
+ 
+ #ifdef HAVE_POSIX_SIGNALS
+ sigfunc *
+-- 
+2.18.0
+

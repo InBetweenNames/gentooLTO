@@ -1,9 +1,9 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=6
+EAPI=7
 
-inherit versionator toolchain-funcs
+inherit toolchain-funcs
 
 DESCRIPTION="A configuration for portage to make building with LTO easy."
 HOMEPAGE="https://github.com/InBetweenNames/gentooLTO"
@@ -27,7 +27,7 @@ pkg_setup() {
 
 	ACTIVE_GCC=$(gcc-fullversion)
 
-	if ! version_is_at_least 7.2.0 "${ACTIVE_GCC}"; then
+	if ver_test "${ACTIVE_GCC}" -lt 8.2.0; then
 		ewarn "Warning: Active GCC version < 7.2.0, it is recommended that you use the newest GCC if you want LTO."
 		if [ "${I_KNOW_WHAT_I_AM_DOING}" != "y" ]; then
 			eerror "Aborting LTOize installation due to older GCC -- set I_KNOW_WHAT_I_AM_DOING=y if you want to override this behaviour."
@@ -80,9 +80,9 @@ pkg_postinst()
 	echo
 	ewarn "This is an experimental project and should not be used on a stable system in its current state."
 
-	BINUTILS_VER=$(binutils-config -c | sed -e "s/.*-//")
+	BINUTILS_VER=$(binutils-config ${CHOST} -c | sed -e "s/.*-//")
 
-	if ! version_is_at_least 2.29.1 "${BINUTILS_VER}"; then
+	if ver_test "${BINUTILS_VER}" -lt 2.29.1; then
 		ewarn "Warning: active binutils version < 2.29.1, it is recommended that you use the newest binutils for LTO."
 	fi
 

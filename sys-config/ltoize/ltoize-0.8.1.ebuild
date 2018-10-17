@@ -46,7 +46,7 @@ pkg_setup() {
 
 pkg_preinst() {
 
-	GENTOOLTO_PORTDIR=$(portageq get_repo_path / lto-overlay)
+	GENTOOLTO_PORTDIR=$(portageq get_repo_path ${PORTAGE_CONFIGROOT} lto-overlay)
 	LTO_PORTAGE_DIR="${GENTOOLTO_PORTDIR}/${CATEGORY}/${PN}/files"
 
 	ACTIVE_GCC=$(gcc-fullversion)

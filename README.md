@@ -60,7 +60,7 @@ Graphite and -O3 overrides are included in that file as well, but they won't aff
 In addition to the above, a number of packages call `strip-flags`, `replace-flags`, and `filter-flags` to manipulate the `*FLAGS` variables.
 LTOize has an experimental `USE` flag `override-flagomatic` to override `strip-flags` and `replace-flags` globally to turn these functions into no-ops.
 `filter-flags` is left alone as in the cases I've looked at, the uses of it are legitimate.  `override-flagomatic` is disabled by default.  Users who use this 
-functionality should report breakages as issues, so they can be manually resolved.  To enable flag-o-matic for a package, set the variable `LTO_FLAGOMATIC_ENABLE=yes` for
+functionality should report breakages as issues, so they can be manually resolved.  To enable flag-o-matic for a package, set the variable `LTO_ENABLE_FLAGOMATIC=yes` for
 that package in `package.cflags`.
 
 The relevant issue for this work is [#57](https://github.com/InBetweenNames/gentooLTO/issues/57).  Any ideas/suggestions, please post!

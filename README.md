@@ -55,7 +55,12 @@ The actual `/etc/portage` modifications are in `sys-config/ltoize/files`.  This 
 Not all packages build cleanly.  Environment overrides are used to allow packages to build that have trouble with O3, Graphite, and LTO.  These can be found in `package.cflags/ltoworkarounds.conf`.  I have tried to categorize the overrides based on the kind of failure were being exhibited, but in some cases this was difficult.
 Graphite and -O3 overrides are included in that file as well, but they won't affect you if you are not using those compiler flags.
 
-`ltoize` will also obtain patches which help certain packages build with LTO.  It installs symlinks to these patches in `/etc/portage/patches`, so that you can have your own patches alongside the ones maintained in this repository.  These aren't automatically updated.  If a modification is made to an existing match, you will transparently receive that patch in your own `/etc/portage/patches` since a symlink will be used.  However, if a patch is created for a new package, you will need to re-run `ltoize` to get the new symlink.  I'm still thinking about a good way to handle this.  `/etc/portage/patches` unfortunately can't have a subdirectory like `lto` since it is used to match against the package being installed.  This system is due for an overhaul and I advise against using it for now.  If you have a patch, submit an ebuild to this repo instead for the time being.
+### LTO patches
+
+This overlay also contains patches to help certain packages build under LTO that have not been accepted upstream yet.  A script, `41-lto-patch.sh`, is symlinked to your portage `bashrc.d` directory
+to apply these patches automatically in the same way user patches do.  Previously, we installed these patches as symlinkes in the `/etc/portage/patches` directory, but this caused problems for
+some users and required a version bump whenever the patch set changed.  The relevant issue in the issue tracker is [#105](https://github.com/InBetweenNames/gentooLTO/issues/105).  Please post here
+if you are having trouble with the new patch application system.
 
 
 ### The GCC LTO linker plugin

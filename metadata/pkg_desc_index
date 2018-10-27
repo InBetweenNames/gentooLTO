@@ -1,1 +1,4 @@
-sys-config/ltoize 0.2: A configuration for portage to make building with LTO easy.
+dev-lang/python 2.7.15-r1 3.4.8-r2 3.5.5-r2 3.6.6-r1 3.7.0-r1: An interpreted, interactive, object-oriented programming language
+media-libs/x264 0.0.20170701-r1: A free library for encoding X264/AVC streams
+media-video/x264-encoder 0.0.20170701-r1: A free commandline encoder for X264/AVC streams
+sys-config/ltoize 0.8.1 0.8.2 0.9.0: A configuration for portage to make building with LTO easy.

@@ -8,4 +8,5 @@
 <longdescription lang="en">
 LTOize is a set of configuration files and overrides to make building your system Link Time Optimization easy.  This is part of a bigger initiative to find errors in C and C++ programs that are caused by undefined behaviour.  Users are strongly encouraged to contribute their configuration changes upstream.  For more information, see the gentooLTO project on GitHub.
 </longdescription>
+<use><flag name="override-flagomatic">Override strip-flags and replace-flags in flag-o-matic.eclass (EXPERIMENTAL)</flag></use>
 </pkgmetadata>

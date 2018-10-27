@@ -55,6 +55,15 @@ The actual `/etc/portage` modifications are in `sys-config/ltoize/files`.  This 
 Not all packages build cleanly.  Environment overrides are used to allow packages to build that have trouble with O3, Graphite, and LTO.  These can be found in `package.cflags/ltoworkarounds.conf`.  I have tried to categorize the overrides based on the kind of failure were being exhibited, but in some cases this was difficult.
 Graphite and -O3 overrides are included in that file as well, but they won't affect you if you are not using those compiler flags.
 
+### Flag-O-Matic flag manipulation
+
+In addition to the above, a number of packages call `strip-flags`, `replace-flags`, and `filter-flags` to manipulate the `*FLAGS` variables.
+LTOize has an experimental `USE` flag `override-flagomatic` to override `strip-flags` and `replace-flags` globally to turn these functions into no-ops.
+`filter-flags` is left alone as in the cases I've looked at, the uses of it are legitimate.  `override-flagomatic` is disabled by default.  Users who use this 
+functionality should report breakages as issues, so they can be manually resolved in a configuration file (probably in `package.cflags` to start).
+
+The relevant issue for this work is [#57](https://github.com/InBetweenNames/gentooLTO/issues/57).  Any ideas/suggestions, please post!
+
 ### LTO patches
 
 This overlay also contains patches to help certain packages build under LTO that have not been accepted upstream yet.  A script, `41-lto-patch.sh`, is symlinked to your portage `bashrc.d` directory

@@ -68,7 +68,7 @@ LTOPatch() {
 
 	${prev_shopt}
 
-	[[ -n ${applied} ]] && ewarn "LTO patches applied."
+	[[ -n ${applied} ]] && ewarn "lto-overlay: LTO patches applied."
 
 }
 

@@ -60,7 +60,8 @@ Graphite and -O3 overrides are included in that file as well, but they won't aff
 In addition to the above, a number of packages call `strip-flags`, `replace-flags`, and `filter-flags` to manipulate the `*FLAGS` variables.
 LTOize has an experimental `USE` flag `override-flagomatic` to override `strip-flags` and `replace-flags` globally to turn these functions into no-ops.
 `filter-flags` is left alone as in the cases I've looked at, the uses of it are legitimate.  `override-flagomatic` is disabled by default.  Users who use this 
-functionality should report breakages as issues, so they can be manually resolved in a configuration file (probably in `package.cflags` to start).
+functionality should report breakages as issues, so they can be manually resolved.  To enable flag-o-matic for a package, set the variable `LTO_FLAGOMATIC_ENABLE=yes` for
+that package in `package.cflags`.
 
 The relevant issue for this work is [#57](https://github.com/InBetweenNames/gentooLTO/issues/57).  Any ideas/suggestions, please post!
 
@@ -125,7 +126,7 @@ I've never actually yet emerged a package that causes the Graphite optimizations
 
 ### -O3 problems
 
-These are rare, but they do happen.  When this happens, I usually force down to `-O2` (which disables Graphite implicitly in this configuration) using the `env/O2*.conf` configs.  Some packages are sensitive to both `-O3` and `LTO`, so I've included both an LTOed and non-LTOed `-O2` configurations for this purpose.
+These are rare, but they do happen.  When this happens, I usually force down to `-O2` (which disables Graphite implicitly in this configuration) using `package.cflags`.
 
 ### A special note about Perl 5
 

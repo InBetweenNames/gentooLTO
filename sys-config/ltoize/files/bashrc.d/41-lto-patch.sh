@@ -48,11 +48,18 @@ LTOPatch() {
 		done
 	done
 
+	local lto_patch_cmd
+	if [[ "${EAPI}" -ge 6 ]]; then
+		lto_patch_cmd=eapply
+	else
+		lto_patch_cmd=epatch
+	fi
+
 	if [[ ${#_eapply_lto_patches[@]} -gt 0 ]]; then
 		while read -r -d '' f; do
 			f=${_eapply_lto_patches[${f}]}
 			if [[ -s ${f} ]]; then
-				eapply "${f}"
+				${lto_patch_cmd} "${f}"
 				applied=1
 			fi
 		done < <(printf -- '%s\0' "${!_eapply_lto_patches[@]}" |

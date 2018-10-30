@@ -1,0 +1,34 @@
+#This file contains the definitions for the optimization settings used by GentooLTO.
+#source this file directly in your make.conf if you want to cherry-pick settings
+#and don't want to use the make.conf.lto default configuration, defining the number of threads
+#to use during the LTO process beforehand:
+
+#NTHREADS="12"
+
+#source make.conf.lto.defines
+
+#Guidelines:
+#* Your CFLAGS should contain ${FLTO} and, depending on your gcc, -fuse-linker-plugin
+#* Newer GCCs enable -fuse-linker-plugin by default.
+#* If you want Graphite, include "${GRAPHITE}" in your CFLAGS
+#* If you want -fipa-pta, include "${IPA}" in your CFLAGS
+#* Anything else is up to you, such as -march, -pipe, -O{3,2,s,1}, etc...
+#* CXXFLAGS should be set to CFLAGS
+#* LDFLAGS of your Gentoo profile should be respected.  Consider adding -Wl,--hash-style=gnu.
+#  See make.conf.lto for details.
+
+#FLTO is of the form -flto[=n] where n is the number of threads to use during linking.
+#It's usually a good idea to set this to the number of hardware threads in your system
+FLTO="-flto=${NTHREADS}"
+
+#GRAPHITE contains Graphite specific optimizations and other optimizations that are disabled at O3
+#but don't influence the compiler's judgement.
+#With GCC 8.1.0, -ftree-loop-distribution is enabled by default at -O3
+GRAPHITE="-fgraphite-identity -floop-nest-optimize" 
+#NOTE: To use graphite, make sure you have gcc compiled with graphite support (add graphite to your USE).  Otherwise GCC will complain!
+
+IPA="-fipa-pta"
+
+#IPA contains -fipa* opts that are disabled by default in GCC.  These are interprocedural optimizations.  For now this is only -fipa-pta.
+#This option increases compile times, but can potentially produce better binaries, especially with LTO.
+#Essentially, it allows the compiler to look into called function bodies when performing alias analysis

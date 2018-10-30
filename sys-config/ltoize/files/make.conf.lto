@@ -1,49 +1,87 @@
-#FLTO should be of the form -flto[=n] where n is the number of threads to use during linking.
-#It's usually a good idea to set this to the number of hardware threads in your system
-FLTO="-flto=8"
+#This file contains the optimization defaults that GentooLTO uses
+#This includes O3, Graphite, LTO, and -fipa-pta
+#More will be added in the future.
+#Sourcing this file will enable you to transparently receive these new settings
+#without intervention.  If this is not desirable, see the file make.conf.lto.defines for custom configurations.
 
-# https://bugs.gentoo.org/603594
-# Keep all static libraries unstripped.
-# This should allow you to omit almost all -ffat-lto-objects flags and build many more packages with LTO.
-# After enabling this you must rebuild all packages providing static libraries with LTO support.
-# Use $ `equery b -n $(find /lib* /usr/lib* -type f -name "*.a" 2>/dev/null)` | sort | uniq
-# or # `emerge -1va $(find /lib* /usr/lib* -type f -name "*.a" 2>/dev/null)` commands to get corresponding list.
-#STRIP_MASK="*.a"
-#### NOTE: a patch exists for portage in this repo that negates the need to use STRIP_MASK.
-# So long as you have ltoize installed, you should not need this.  ranlib will be run automatically after every static library
-# is built to rebuild the index and enable working functionality once again.
+#To use this file, first define NTHREADS to the number of threads you want the LTO
+#processes to use on your system at the top of your make.conf:
 
+#NTHREADS="12" 
 
-#GRAPHITE contains Graphite specific optimizations and other optimizations that are disabled at O3
-#but don't influence the compiler's judgement.
-#With GCC 8.1.0, -ftree-loop-distribution is enabled by default at -O3
-GRAPHITE="-fgraphite-identity -floop-nest-optimize" 
-#NOTE: To use graphite, make sure you have gcc compiled with graphite support (add graphite to your USE).  Otherwise GCC will complain!
+#A good number is the number of hardware threads you have available on your system.
+#After this, but before any other variables are defined, source this file directly:
 
-IPA="-fipa-pta"
-#IPA contains -fipa* opts that are disabled by default in GCC.  These are interprocedural optimizations.  For now this is only -fipa-pta.
-#This option increases compile times, but can potentially produce better binaries, especially with LTO.
-#Essentially, it allows the compiler to look into called function bodies when performing alias analysis
+#source make.conf.lto
 
-#FLTO, GRAPHITE and IPA are variables used in the LTO and Graphite overrides as well.  If you don't want Graphite, LTO or -fipa-pta,
-#just unset these variables--no further action is necessary.  Don't rename these variables as the overrides depend on them.
-#Ensure these variables are defined BEFORE your CFLAGS (i.e., in the exact order defined by this document)
+#Then, afterwards, define your CFLAGS with your own options:
 
-#Your CFLAGS should contain ${FLTO} and, depending on your gcc, -fuse-linker-plugin
-#Newer GCCs enable -fuse-linker-plugin by default.
-#${GRAPHITE} should be included here as well.  If you do not want Graphite, just unset the GRAPHITE variable and keep CFLAGS the same.
-#It will be easier for you to experiment that way.
-CFLAGS="-march=native -O3 ${GRAPHITE} ${FLTO} ${IPA} -fuse-linker-plugin -pipe"
+#CFLAGS="-march=native ${CFLAGS} -pipe"
+
+#This enables your CFLAGS to inherit the default flags that GentooLTO uses.
+#Next, set your CXXFLAGS to CFLAGS:
+
+#CXXFLAGS="${CFLAGS}"
+
+#Your LDFLAGS should contain *ALL* of your CFLAGS for LTO to work.  It must receieve all optimization options, march, etc.
+#package.cflags takes care of this for you--no need to manually add your {C,CXX}FLAGS here.
+#It's usually a good idea to enable -Wl,--hash-style=gnu as well to help find packages which don't respect LDFLAGS
+#Ensure that your profile's LDFLAGS are respected by including them first.
+
+#LDFLAGS="${LDFLAGS} -Wl,--hash-style=gnu"
+
+#NOTE: your profile likely contains -Wl,--as-needed and -Wl,-O1.
+#The -Wl,-01 here is a separate option sent to the linker that optimizes shared object binary sizes
+#It is NOT related to the -O option given to gcc and has no bearing on that option.
+#For example, compiling using: -fuse-linker-plugin -flto -O3 -Wl,-O1:
+#This will produce an LTO binary with -O3
+#level optimization and also pass -O1 to the linker to reduce the shared object size.
+
+#!!!Consider also using cpuid2cpuflags to set your CPU_FLAGS_* variable in your make.conf for packages that rely on explicit optimizations such as intrinsics!!!
+
+#Some quality of life things:
+
+#You may want to lower Portage's niceness level, seeing as your emerges will take longer.
+#The effectiveness of this depends on what CPU scheduler you use.
+
+#PORTAGE_NICENESS=15
+
+#LTO takes a lot more memory than non-LTO processes.  You will likely not be able to emerge many packages
+#in parallel unless you have a lot of memory available.  As an alternative, consider setting MAKEOPTS
+#to parallelize according to NTHREADS, which should avoid that problem.  You may consider balancing between
+#emerging in parallel with parallizing make as a compromise.
+
+#MAKEOPTS="-j${NTHREADS}"
+
+#Lastly, for cmake packages, you may want to set the default generator to Ninja.
+#It is considerably faster than GNU make and can help build times.
+
+#CMAKE_MAKEFILE_GENERATOR=ninja
+
+#Only one package, kde-plasma/kinfocenter, needs CMAKE_MAKEFILE_GENERATOR=emake.  It can be overridden
+#in your own package.cflags/kinfocenter.conf file like so:
+
+#kde-plasma/kinfocenter CMAKE_MAKEFILE_GENERATOR=emake
+
+#This concludes setup for GentooLTO using the default settings.
+#If you want to cherry pick these settings, source make.conf.lto.defines directly
+#and read the comments in that file.
+
+source make.conf.lto.defines
+
+#Thanks to issue #49, no action necessary for preventing stripping of static libraries
+
+CFLAGS="-O3 ${GRAPHITE} ${IPA} ${FLTO} -fuse-linker-plugin"
 
 #Your CXXFLAGS should be a superset of your CFLAGS.  Most people will never need to add anything extra to their CXXFLAGS.
-CXXFLAGS="${CFLAGS}"
+#CXXFLAGS="${CFLAGS}"
 
 #Your LDFLAGS should contain *ALL* of your CFLAGS for LTO to work.  It must receieve all optimization options, march, etc.
 #package.cflags takes care of this for you--no need to manually add your {C,CXX}FLAGS here.
 #
 #It's usually a good idea to enable -Wl,--hash-style=gnu as well to help find packages which don't respect LDFLAGS
 #Ensure that your profile's LDFLAGS are respected by including them first.
-LDFLAGS="${LDFLAGS} -Wl,--hash-style=gnu"
+#LDFLAGS="${LDFLAGS} -Wl,--hash-style=gnu"
 #NOTE: your profile likely contains -Wl,--as-needed and -Wl,-O1.
 #The -Wl,-01 here is a separate option sent to the linker that optimizes shared object binary sizes
 #It is NOT related to the -O option given to gcc and has no bearing on that option.
@@ -51,4 +89,3 @@ LDFLAGS="${LDFLAGS} -Wl,--hash-style=gnu"
 #This will produce an LTO binary with -O3
 #level optimization and also pass -O1 to the linker to reduce the shared object size.
 
-#Consider also using cpuid2cpuflags to set your CPU_FLAGS_* variable in your make.conf for packages that rely on explicit optimizations such as intrinsics

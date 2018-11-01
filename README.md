@@ -42,6 +42,7 @@ CXXFLAGS="${CFLAGS}"
 LDFLAGS="${LDFLAGS} -Wl,--hash-style=gnu"
 
 #Obtained from app-portage/cpuid2cpuflags utility
+#Highly recommended to add these
 CPU_FLAGS_X86="aes avx avx2 f16c fma3 mmx mmxext pclmul popcnt sse sse2 sse3 sse4_1 sse4_2 ssse3"
 ...
 ~~~
@@ -72,10 +73,21 @@ LDFLAGS="${LDFLAGS} -Wl,--hash-style=gnu"
 ...
 ~~~
 
+
 For more details, there are extensive comments in both files.
 Regardless of which approach you choose, you should ensure that `CXXFLAGS` is set to `CFLAGS`,
 and your Portage profile's `LDFLAGS` are respected.  I also enable `-Wl,--hash-style=gnu` as it
 can help catch packages that don't respect `LDFLAGS`, but this is optional.
+
+Additionally, you may want to set environment variables for other languages compiled by GCC as well, for
+cross-language LTO:
+
+~~~
+FCFLAGS="${CFLAGS}"
+FFLAGS="${CFLAGS}"
+OBJCFLAGS="${CFLAGS}"
+OBJCXXFLAGS="${CFLAGS}"
+~~~
 
 It is strongly recommended to use the latest GCC (8.2.0 at the time of writing), latest binutils (2.31.1 currently), and latest glibc (2.28 currently).
 

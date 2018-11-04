@@ -37,7 +37,7 @@ NTHREADS="12"
 
 source make.conf.lto
 
-CFLAGS="-march=native ${CFLAGS} -pipe"
+CFLAGS="-march=native ${CFLAGS} -pipe" #NOTE: Consider using -falign-functions=32 if you use an Intel processor.  See issue #164.
 CXXFLAGS="${CFLAGS}"
 LDFLAGS="${LDFLAGS} -Wl,--hash-style=gnu"
 
@@ -55,6 +55,7 @@ The default configuration of GentooLTO enables the following:
 * O3
 * Graphite
 * -fipa-pta
+* -fno-semantic-interposition
 * LTO
 
 If you'd like to override the default configuration, you can source another file, `make.conf.lto.defines` instead.
@@ -66,13 +67,16 @@ NTHREADS="12"
 
 source make.conf.lto.defines
 
-CFLAGS="-march=native -O3 ${FLTO} ${GRAPHITE} ${IPA} -fuse-linker-plugin -pipe"
+CFLAGS="-march=native -O3 ${SEMINTERPOS} ${GRAPHITE} ${IPA} ${FLTO} -fuse-linker-plugin -pipe" #NOTE: consider using -falign-functions=32 if you use an Intel processor.  See issue #164.
 CXXFLAGS="${CFLAGS}"
 LDFLAGS="${LDFLAGS} -Wl,--hash-style=gnu"
 
 ...
 ~~~
 
+In addition to this, if you use an Intel processor, you may want to enable `-falign-functions=32` in your `CFLAGS`.
+See issue [#164](https://github.com/InBetweenNames/gentooLTO/issues/164) for a discussion on default function
+alignment.  This flag is optional and appears to be Intel-specific.
 
 For more details, there are extensive comments in both files.
 Regardless of which approach you choose, you should ensure that `CXXFLAGS` is set to `CFLAGS`,

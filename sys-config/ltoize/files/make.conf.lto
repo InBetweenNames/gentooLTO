@@ -19,6 +19,9 @@
 #CFLAGS="-march=native ${CFLAGS} -pipe"
 
 #This enables your CFLAGS to inherit the default flags that GentooLTO uses.
+#Note that you may want to enable -falign-functions=32 if you use an Intel processor.
+#See issue #164 for details.
+
 #Next, set your CXXFLAGS to CFLAGS:
 
 #CXXFLAGS="${CFLAGS}"

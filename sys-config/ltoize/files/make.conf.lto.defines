@@ -33,3 +33,12 @@ IPA="-fipa-pta"
 #IPA contains -fipa* opts that are disabled by default in GCC.  These are interprocedural optimizations.  For now this is only -fipa-pta.
 #This option increases compile times, but can potentially produce better binaries, especially with LTO.
 #Essentially, it allows the compiler to look into called function bodies when performing alias analysis
+
+SEMINTERPOS="-fno-semantic-interposition"
+
+# With -fno-semantic-interposition the compiler assumes that if interposition happens for functions the overwriting function will have precisely the same semantics (and side effects). Similarly if interposition happens for variables, the constructor of the variable will be the same. The flag has no effect for functions explicitly declared inline (where it is never allowed for interposition to change semantics) and for symbols explicitly declared weak.
+
+NOCOMMON="-fno-common"
+
+# This option only affects C code.  Only non-conformant C code needs -fcommon, which is enabled by default.  Clear Linux leaves this flag off by default.
+# We may enable this at some point.  For now, there's a lot of breakages to work through.

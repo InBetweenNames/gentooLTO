@@ -79,16 +79,6 @@ Regardless of which approach you choose, you should ensure that `CXXFLAGS` is se
 and your Portage profile's `LDFLAGS` are respected.  I also enable `-Wl,--hash-style=gnu` as it
 can help catch packages that don't respect `LDFLAGS`, but this is optional.
 
-Additionally, you may want to set environment variables for other languages compiled by GCC as well, for
-cross-language LTO:
-
-~~~
-FCFLAGS="${CFLAGS}"
-FFLAGS="${CFLAGS}"
-OBJCFLAGS="${CFLAGS}"
-OBJCXXFLAGS="${CFLAGS}"
-~~~
-
 It is strongly recommended to use the latest GCC (8.2.0 at the time of writing), latest binutils (2.31.1 currently), and latest glibc (2.28 currently).
 
 When you find a problem, whether it's a package not playing nice with -O3, Graphite, or LTO, consider opening an issue here or sending a pull request with the overrides needed to get the package working.  Over time, we should be able to achieve full coverage of `/usr/portage` this way and provide a one size fits all solution, and not to mention help improve some open source software through the bug reports that will no doubt be generated! 

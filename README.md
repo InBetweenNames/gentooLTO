@@ -67,14 +67,14 @@ NTHREADS="12"
 
 source make.conf.lto.defines
 
-CFLAGS="-march=native -O3 ${SEMINTERPOS} ${GRAPHITE} ${IPA} ${FLTO} -fuse-linker-plugin -pipe" #NOTE: consider using -falign-functions=32 if you use an Intel processor.  See issue #164.
+CFLAGS="-march=native -O3 ${SEMINTERPOS} ${GRAPHITE} ${IPA} ${FLTO} -fuse-linker-plugin -pipe" #NOTE: consider using -falign-functions=32 if you use an Intel processor (Sandy Bridge or later).  See issue #164.
 CXXFLAGS="${CFLAGS}"
 LDFLAGS="${LDFLAGS} -Wl,--hash-style=gnu"
 
 ...
 ~~~
 
-In addition to this, if you use an Intel processor, you may want to enable `-falign-functions=32` in your `CFLAGS`.
+In addition to this, if you use an Intel processor (Sandy Bridge or later), you may want to enable `-falign-functions=32` in your `CFLAGS`.
 See issue [#164](https://github.com/InBetweenNames/gentooLTO/issues/164) for a discussion on default function
 alignment.  This flag is optional and appears to be Intel-specific.
 

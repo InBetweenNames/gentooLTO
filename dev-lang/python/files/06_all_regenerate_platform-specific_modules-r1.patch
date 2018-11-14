@@ -1,0 +1,126 @@
+diff -ur Python-2.7.15.original/Lib/plat-aix4/regen Python-2.7.15/Lib/plat-aix4/regen
+--- Python-2.7.15.original/Lib/plat-aix4/regen	2018-04-30 00:47:33.000000000 +0200
++++ Python-2.7.15/Lib/plat-aix4/regen	2018-05-01 22:06:44.005966530 +0200
+@@ -5,4 +5,4 @@
+         exit 1;;
+ esac
+ set -v
+-h2py.py -i '(u_long)' /usr/include/netinet/in.h
++python$EXE ../../Tools/scripts/h2py.py -i '(u_long)' /usr/include/netinet/in.h
+diff -ur Python-2.7.15.original/Lib/plat-linux2/regen Python-2.7.15/Lib/plat-linux2/regen
+--- Python-2.7.15.original/Lib/plat-linux2/regen	2018-04-30 00:47:33.000000000 +0200
++++ Python-2.7.15/Lib/plat-linux2/regen	2018-05-01 22:06:44.005966530 +0200
+@@ -5,4 +5,4 @@
+ 	exit 1;;
+ esac
+ set -v
+-h2py -i '(u_long)' /usr/include/sys/types.h /usr/include/netinet/in.h /usr/include/dlfcn.h
++python$EXE ../../Tools/scripts/h2py.py -i '(u_long)' /usr/include/sys/types.h /usr/include/netinet/in.h /usr/include/dlfcn.h /usr/include/linux/cdrom.h
+diff -ur Python-2.7.15.original/Lib/plat-sunos5/regen Python-2.7.15/Lib/plat-sunos5/regen
+--- Python-2.7.15.original/Lib/plat-sunos5/regen	2018-04-30 00:47:33.000000000 +0200
++++ Python-2.7.15/Lib/plat-sunos5/regen	2018-05-01 22:06:44.005966530 +0200
+@@ -5,5 +5,4 @@
+ 	exit 1;;
+ esac
+ set -v
+-h2py -i '(u_long)' /usr/include/sys/types.h /usr/include/netinet/in.h /usr/include/sys/stropts.h /usr/include/dlfcn.h
+-
++python$EXE ../../Tools/scripts/h2py.py -i '(u_long)' /usr/include/sys/types.h /usr/include/netinet/in.h /usr/include/sys/stropts.h /usr/include/dlfcn.h
+diff -ur Python-2.7.15.original/Lib/plat-unixware7/regen Python-2.7.15/Lib/plat-unixware7/regen
+--- Python-2.7.15.original/Lib/plat-unixware7/regen	2018-04-30 00:47:33.000000000 +0200
++++ Python-2.7.15/Lib/plat-unixware7/regen	2018-05-01 22:06:44.005966530 +0200
+@@ -5,5 +5,5 @@
+ 	exit 1;;
+ esac
+ set -v
+-h2py -i '(u_long)' /usr/include/netinet/in.h
+-h2py /usr/include/sys/stropts.h
++python$EXE ../../Tools/scripts/h2py.py -i '(u_long)' /usr/include/netinet/in.h
++python$EXE ../../Tools/scripts/h2py.py /usr/include/sys/stropts.h
+diff -ur Python-2.7.15.original/Makefile.pre.in Python-2.7.15/Makefile.pre.in
+--- Python-2.7.15.original/Makefile.pre.in	2018-05-01 22:05:33.918290346 +0200
++++ Python-2.7.15/Makefile.pre.in	2018-05-01 22:09:09.616138703 +0200
+@@ -401,7 +401,7 @@
+ 
+ # Default target
+ all:		@DEF_MAKE_ALL_RULE@
+-build_all:	check-clean-src $(BUILDPYTHON) oldsharedmods sharedmods gdbhooks
++build_all:	check-clean-src $(BUILDPYTHON) oldsharedmods sharedmods platformspecificmods gdbhooks
+ 
+ # Check that the source is clean when building out of source.
+ check-clean-src:
+@@ -527,6 +527,32 @@
+ 		_TCLTK_INCLUDES='$(TCLTK_INCLUDES)' _TCLTK_LIBS='$(TCLTK_LIBS)' \
+ 		$(PYTHON_FOR_BUILD) $(srcdir)/setup.py $$quiet build
+ 
++# Build the platform-specific modules
++platformspecificmods: $(BUILDPYTHON) sharedmods
++	@PLATDIR=$(PLATDIR); \
++	if test ! -f $(srcdir)/Lib/$(PLATDIR)/regen; then \
++		$(INSTALL) -d $(srcdir)/Lib/$(PLATDIR); \
++		if test -f $(srcdir)/Lib/$${PLATDIR%?}/regen; then \
++			cp $(srcdir)/Lib/$${PLATDIR%?}/regen $(srcdir)/Lib/$(PLATDIR)/regen; \
++		else \
++			cp $(srcdir)/Lib/plat-generic/regen $(srcdir)/Lib/$(PLATDIR)/regen; \
++		fi \
++	fi
++	@EXE="$(BUILDEXE)"; export EXE; \
++	PATH="`pwd`:$$PATH"; export PATH; \
++	PYTHONPATH="$(srcdir)/Lib:$(abs_builddir)/`cat pybuilddir.txt`"; export PYTHONPATH; \
++	if [ -n "$(MULTIARCH)" ]; then MULTIARCH=$(MULTIARCH); export MULTIARCH; fi; \
++	if [ "$(build)" = "$(host)" ]; then \
++	  PYTHON_FOR_BUILD="$(BUILDPYTHON)"; \
++	else \
++	  PYTHON_FOR_BUILD="$(PYTHON_FOR_BUILD)"; \
++	fi; export PYTHON_FOR_BUILD; \
++	cd $(srcdir)/Lib/$(PLATDIR); \
++	$(RUNSHARED) ./regen || exit 1; \
++	for module in *.py; do \
++		$(RUNSHARED) $(BUILDPYTHON) -c "with open('$$module', 'rb') as module: compile(module.read(), '$$module', 'exec')" || exit 1; \
++	done
++
+ # Build static library
+ # avoid long command lines, same as LIBRARY_OBJS
+ $(LIBRARY): $(LIBRARY_OBJS)
+@@ -1084,7 +1110,7 @@
+ 		unittest unittest/test \
+ 		lib-old \
+ 		curses pydoc_data $(MACHDEPS)
+-libinstall:	build_all $(srcdir)/Lib/$(PLATDIR) $(srcdir)/Modules/xxmodule.c
++libinstall:	build_all $(srcdir)/Modules/xxmodule.c
+ 	@for i in $(SCRIPTDIR) $(LIBDEST); \
+ 	do \
+ 		if test ! -d $(DESTDIR)$$i; then \
+@@ -1167,23 +1193,6 @@
+ 	-PYTHONPATH=$(DESTDIR)$(LIBDEST) $(RUNSHARED) \
+ 		$(PYTHON_FOR_BUILD) -m lib2to3.pgen2.driver $(DESTDIR)$(LIBDEST)/lib2to3/PatternGrammar.txt
+ 
+-# Create the PLATDIR source directory, if one wasn't distributed..
+-$(srcdir)/Lib/$(PLATDIR):
+-	mkdir $(srcdir)/Lib/$(PLATDIR)
+-	cp $(srcdir)/Lib/plat-generic/regen $(srcdir)/Lib/$(PLATDIR)/regen
+-	export PATH; PATH="`pwd`:$$PATH"; \
+-	export PYTHONPATH; PYTHONPATH="$(srcdir)/Lib:$(abs_builddir)/`cat pybuilddir.txt`"; \
+-	export DYLD_FRAMEWORK_PATH; DYLD_FRAMEWORK_PATH="`pwd`"; \
+-	export EXE; EXE="$(BUILDEXE)"; \
+-	if [ -n "$(MULTIARCH)" ]; then export MULTIARCH; MULTIARCH=$(MULTIARCH); fi; \
+-	export PYTHON_FOR_BUILD; \
+-	if [ "$(build)" = "$(host)" ]; then \
+-	  PYTHON_FOR_BUILD="$(BUILDPYTHON)"; \
+-	else \
+-	  PYTHON_FOR_BUILD="$(PYTHON_FOR_BUILD)"; \
+-	fi; \
+-	cd $(srcdir)/Lib/$(PLATDIR); $(RUNSHARED) ./regen
+-
+ python-config: $(srcdir)/Misc/python-config.in
+ 	# Substitution happens here, as the completely-expanded BINDIR
+ 	# is not available in configure
+@@ -1481,7 +1490,7 @@
+ Python/thread.o: @THREADHEADERS@
+ 
+ # Declare targets that aren't real files
+-.PHONY: all build_all sharedmods check-clean-src oldsharedmods test quicktest memtest
++.PHONY: all build_all sharedmods check-clean-src oldsharedmods platformspecificmods test quicktest memtest
+ .PHONY: install altinstall oldsharedinstall bininstall altbininstall
+ .PHONY: maninstall libinstall inclinstall libainstall sharedinstall
+ .PHONY: frameworkinstall frameworkinstallframework frameworkinstallstructure

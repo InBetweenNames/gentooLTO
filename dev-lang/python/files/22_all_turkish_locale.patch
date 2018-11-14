@@ -1,0 +1,102 @@
+--- Objects/stringobject.c
++++ Objects/stringobject.c
+@@ -1981,10 +1981,14 @@
+ \n\
+ Return a copy of the string S converted to lowercase.");
+ 
+-/* _tolower and _toupper are defined by SUSv2, but they're not ISO C */
+-#ifndef _tolower
+-#define _tolower tolower
+-#endif
++static int
++tolower_C_locale(int c)
++{
++    if (c >= 'A' && c <= 'Z')
++        return c + 0x20;
++    else
++        return c;
++}
+ 
+ static PyObject *
+ string_lower(PyStringObject *self)
+@@ -2004,7 +2008,7 @@
+     for (i = 0; i < n; i++) {
+         int c = Py_CHARMASK(s[i]);
+         if (isupper(c))
+-            s[i] = _tolower(c);
++            s[i] = tolower_C_locale(c);
+     }
+ 
+     return newobj;
+@@ -2015,9 +2019,14 @@
+ \n\
+ Return a copy of the string S converted to uppercase.");
+ 
+-#ifndef _toupper
+-#define _toupper toupper
+-#endif
++static int
++toupper_C_locale(int c)
++{
++    if (c >= 'a' && c <= 'z')
++        return c - 0x20;
++    else
++        return c;
++}
+ 
+ static PyObject *
+ string_upper(PyStringObject *self)
+@@ -2037,7 +2046,7 @@
+     for (i = 0; i < n; i++) {
+         int c = Py_CHARMASK(s[i]);
+         if (islower(c))
+-            s[i] = _toupper(c);
++            s[i] = toupper_C_locale(c);
+     }
+ 
+     return newobj;
+@@ -2065,11 +2074,11 @@
+         int c = Py_CHARMASK(*s++);
+         if (islower(c)) {
+             if (!previous_is_cased)
+-                c = toupper(c);
++                c = toupper_C_locale(c);
+             previous_is_cased = 1;
+         } else if (isupper(c)) {
+             if (previous_is_cased)
+-                c = tolower(c);
++                c = tolower_C_locale(c);
+             previous_is_cased = 1;
+         } else
+             previous_is_cased = 0;
+@@ -2098,7 +2107,7 @@
+     if (0 < n) {
+         int c = Py_CHARMASK(*s++);
+         if (islower(c))
+-            *s_new = toupper(c);
++            *s_new = toupper_C_locale(c);
+         else
+             *s_new = c;
+         s_new++;
+@@ -2106,7 +2115,7 @@
+     for (i = 1; i < n; i++) {
+         int c = Py_CHARMASK(*s++);
+         if (isupper(c))
+-            *s_new = tolower(c);
++            *s_new = tolower_C_locale(c);
+         else
+             *s_new = c;
+         s_new++;
+@@ -2177,10 +2186,10 @@
+     for (i = 0; i < n; i++) {
+         int c = Py_CHARMASK(*s++);
+         if (islower(c)) {
+-            *s_new = toupper(c);
++            *s_new = toupper_C_locale(c);
+         }
+         else if (isupper(c)) {
+-            *s_new = tolower(c);
++            *s_new = tolower_C_locale(c);
+         }
+         else
+             *s_new = c;

@@ -1,0 +1,79 @@
+diff -ur Python-2.7.15.orig/Lib/distutils/ccompiler.py Python-2.7.15/Lib/distutils/ccompiler.py
+--- Python-2.7.15.orig/Lib/distutils/ccompiler.py	2018-04-30 00:47:33.000000000 +0200
++++ Python-2.7.15/Lib/distutils/ccompiler.py	2018-05-29 11:36:45.021353884 +0200
+@@ -14,7 +14,7 @@
+ from distutils.spawn import spawn
+ from distutils.file_util import move_file
+ from distutils.dir_util import mkpath
+-from distutils.dep_util import newer_group
++from distutils.dep_util import newer_group, newer
+ from distutils.util import split_quoted, execute
+ from distutils import log
+ # following import is for backward compatibility
+@@ -571,7 +571,9 @@
+                 src, ext = build[obj]
+             except KeyError:
+                 continue
+-            self._compile(obj, src, ext, cc_args, extra_postargs, pp_opts)
++            if newer(src, obj):
++                # some extensions share source files so we need to avoid compiling the same source multiple times
++                self._compile(obj, src, ext, cc_args, extra_postargs, pp_opts)
+ 
+         # Return *all* object filenames, not just the ones we just built.
+         return objects
+diff -ur Python-2.7.15.orig/Lib/distutils/dep_util.py Python-2.7.15/Lib/distutils/dep_util.py
+--- Python-2.7.15.orig/Lib/distutils/dep_util.py	2018-04-30 00:47:33.000000000 +0200
++++ Python-2.7.15/Lib/distutils/dep_util.py	2018-05-29 11:37:19.104212189 +0200
+@@ -11,7 +11,7 @@
+ from distutils.errors import DistutilsFileError
+ 
+ def newer(source, target):
+-    """Tells if the target is newer than the source.
++    """Tells if the source is newer than the target.
+ 
+     Return true if 'source' exists and is more recently modified than
+     'target', or if 'source' exists and 'target' doesn't.
+diff -ur Python-2.7.15.orig/Makefile.pre.in Python-2.7.15/Makefile.pre.in
+--- Python-2.7.15.orig/Makefile.pre.in	2018-05-29 11:33:20.860192794 +0200
++++ Python-2.7.15/Makefile.pre.in	2018-05-29 11:35:18.886239204 +0200
+@@ -209,9 +209,10 @@
+ TCLTK_LIBS=	@TCLTK_LIBS@
+ 
+ # The task to run while instrument when building the profile-opt target
+-# We exclude unittests with -x that take a rediculious amount of time to
+-# run in the instrumented training build or do not provide much value.
+-PROFILE_TASK=-m test.regrtest --pgo -x test_asyncore test_gdb test_multiprocessing test_subprocess
++# We exclude unittests with -x that take a ridiculous amount of time to
++# run in the instrumented training build or do not provide much value
++# or fail randomly when run in parallel (test_epoll, test_selectors).
++PROFILE_TASK=-m test.regrtest --pgo -w $(EXTRATESTOPTS) -x test_asyncore test_gdb test_multiprocessing test_subprocess test_epoll test_selectors
+ 
+ # report files for gcov / lcov coverage report
+ COVERAGE_INFO=	$(abs_builddir)/coverage.info
+@@ -437,7 +438,7 @@
+ 
+ run_profile_task:
+ 	: # FIXME: can't run for a cross build
+-	$(LLVM_PROF_FILE) $(RUNSHARED) ./$(BUILDPYTHON) $(PROFILE_TASK) || true
++	$(LLVM_PROF_FILE) _PYTHONNOSITEPACKAGES=1 $(RUNSHARED) ./$(BUILDPYTHON) -E $(PROFILE_TASK)
+ 
+ build_all_merge_profile:
+ 	$(LLVM_PROF_MERGER)
+diff -ur Python-2.7.15.orig/setup.py Python-2.7.15/setup.py
+--- Python-2.7.15.orig/setup.py	2018-05-29 11:33:21.008187836 +0200
++++ Python-2.7.15/setup.py	2018-05-29 11:33:45.017383585 +0200
+@@ -269,11 +269,13 @@
+         # those environment variables passed into the setup.py phase.  Here's
+         # a small set of useful ones.
+         compiler = os.environ.get('CC')
++        # it's important to get CFLAGS from the environment for proper extension PGO support
++        cflags = os.environ.get('CFLAGS', sysconfig.get_config_vars('CFLAGS')[0])
+         args = {}
+         # unfortunately, distutils doesn't let us provide separate C and C++
+         # compilers
+         if compiler is not None:
+-            (ccshared,cflags) = sysconfig.get_config_vars('CCSHARED','CFLAGS')
++            (ccshared,) = sysconfig.get_config_vars('CCSHARED')
+             args['compiler_so'] = compiler + ' ' + ccshared + ' ' + cflags
+         self.compiler.set_executables(**args)
+ 

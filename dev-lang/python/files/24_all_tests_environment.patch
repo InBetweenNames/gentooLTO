@@ -1,0 +1,229 @@
+https://bugs.python.org/issue1674555
+
+--- Lib/site.py
++++ Lib/site.py
+@@ -518,8 +518,12 @@
+     known_paths = removeduppaths()
+     if ENABLE_USER_SITE is None:
+         ENABLE_USER_SITE = check_enableusersite()
+-    known_paths = addusersitepackages(known_paths)
+-    known_paths = addsitepackages(known_paths)
++    if os.environ.get("_PYTHONNOSITEPACKAGES") is None:
++        known_paths = addusersitepackages(known_paths)
++        known_paths = addsitepackages(known_paths)
++    else:
++        # Initialize USER_BASE and USER_SITE.
++        getusersitepackages()
+     if sys.platform == 'os2emx':
+         setBEGINLIBPATH()
+     setquit()
+--- Lib/test/regrtest.py
++++ Lib/test/regrtest.py
+@@ -188,6 +188,7 @@
+ import imp
+ import platform
+ import sysconfig
++from subprocess import Popen, PIPE
+ 
+ 
+ # Some times __path__ and __file__ are not absolute (e.g. while running from
+@@ -599,9 +600,73 @@
+     test_support.use_resources = use_resources
+     save_modules = set(sys.modules)
+ 
++    opt_args = test_support.args_from_interpreter_flags()
++    base_cmd = [sys.executable] + opt_args + ['-m', 'test.regrtest']
++    # required to spawn a new process with PGO flag on/off
++    if pgo:
++        base_cmd = base_cmd + ['--pgo']
++    debug_output_pat = re.compile(r"\[\d+ refs\]$")
++
++    def get_args_tuple(test, verbose, quiet, huntrleaks, use_resources,
++                       failfast, match_tests, pgo):
++        return (
++            (test, verbose, quiet),
++            dict(huntrleaks=huntrleaks, use_resources=use_resources,
++                 failfast=failfast, match_tests=match_tests, pgo=pgo)
++        )
++
++    def _runtest(test, verbose, quiet, huntrleaks=False, use_resources=None,
++                 pgo=False, failfast=False, match_tests=None, testdir=None):
++        if test == "test_site":
++            args_tuple = get_args_tuple(test, verbose, quiet, huntrleaks,
++                                        use_resources, failfast, match_tests,
++                                        pgo)
++            args = base_cmd + ['--slaveargs', json.dumps(args_tuple)]
++            if testdir:
++                args.extend(('--testdir', testdir))
++            env = os.environ.copy()
++            try:
++                del env["_PYTHONNOSITEPACKAGES"]
++            except KeyError:
++                pass
++            popen = Popen(args,
++                          stdout=PIPE, stderr=PIPE,
++                          universal_newlines=True,
++                          close_fds=(os.name != 'nt'),
++                          cwd=test_support.SAVEDCWD,
++                          env=env)
++            stdout, stderr = popen.communicate()
++            retcode = popen.wait()
++            # Strip last refcount output line if it exists, since it
++            # comes from the shutdown of the interpreter in the subcommand.
++            stderr = debug_output_pat.sub("", stderr)
++            if retcode == 0:
++                stdout, _, result = stdout.strip().rpartition("\n")
++                if not result:
++                    return (None, None)
++                result = json.loads(result)
++            else:
++                result = (CHILD_ERROR, None)
++            stdout = stdout.rstrip()
++            stderr = stderr.rstrip()
++            if stdout:
++                print stdout
++            sys.stdout.flush()
++            if stderr and not pgo:
++                print >>sys.stderr, stderr
++            sys.stderr.flush()
++            if result[0] == INTERRUPTED:
++                raise KeyboardInterrupt
++            return result
++        else:
++            return runtest(test, verbose, quiet, huntrleaks=huntrleaks,
++                           use_resources=use_resources, pgo=pgo,
++                           failfast=failfast, match_tests=match_tests,
++                           testdir=testdir)
++
+     def accumulate_result(test, result):
+         ok, test_time = result
+-        if ok not in (CHILD_ERROR, INTERRUPTED):
++        if ok not in (None, CHILD_ERROR, INTERRUPTED):
+             test_times.append((test_time, test))
+         if ok == PASSED:
+             good.append(test)
+@@ -614,7 +679,7 @@
+         elif ok == RESOURCE_DENIED:
+             skipped.append(test)
+             resource_denieds.append(test)
+-        elif ok != INTERRUPTED:
++        elif ok not in (None, INTERRUPTED):
+             raise ValueError("invalid test result: %r" % ok)
+ 
+     if forever:
+@@ -681,25 +746,14 @@
+             print "Multiprocess option requires thread support"
+             sys.exit(2)
+         from Queue import Queue, Empty
+-        from subprocess import Popen, PIPE
+-        debug_output_pat = re.compile(r"\[\d+ refs\]$")
+         output = Queue()
+         def tests_and_args():
+             for test in tests:
+-                args_tuple = (
+-                    (test, verbose, quiet),
+-                    dict(huntrleaks=huntrleaks, use_resources=use_resources,
+-                         failfast=failfast,
+-                         match_tests=match_tests,
+-                         pgo=pgo)
+-                )
++                args_tuple = get_args_tuple(test, verbose, quiet, huntrleaks,
++                                            use_resources, failfast,
++                                            match_tests, pgo)
+                 yield (test, args_tuple)
+         pending = tests_and_args()
+-        opt_args = test_support.args_from_interpreter_flags()
+-        base_cmd = [sys.executable] + opt_args + ['-m', 'test.regrtest']
+-        # required to spawn a new process with PGO flag on/off
+-        if pgo:
+-            base_cmd = base_cmd + ['--pgo']
+ 
+         class MultiprocessThread(Thread):
+             current_test = None
+@@ -830,10 +884,10 @@
+                 display_progress(test_index, text)
+ 
+             def local_runtest():
+-                result = runtest(test, verbose, quiet, huntrleaks, None, pgo,
+-                                 failfast=failfast,
+-                                 match_tests=match_tests,
+-                                 testdir=testdir)
++                result = _runtest(test, verbose, quiet, huntrleaks, None, pgo,
++                                  failfast=failfast,
++                                  match_tests=match_tests,
++                                  testdir=testdir)
+                 accumulate_result(test, result)
+                 return result
+ 
+@@ -851,8 +905,8 @@
+                     if verbose3 and result[0] == FAILED:
+                         if not pgo:
+                             print "Re-running test %r in verbose mode" % test
+-                        runtest(test, True, quiet, huntrleaks, None, pgo,
+-                                testdir=testdir)
++                        _runtest(test, True, quiet, huntrleaks, None, pgo,
++                                 testdir=testdir)
+                 except KeyboardInterrupt:
+                     interrupted = True
+                     break
+@@ -928,8 +982,8 @@
+             sys.stdout.flush()
+             try:
+                 test_support.verbose = True
+-                ok = runtest(test, True, quiet, huntrleaks, None, pgo,
+-                             testdir=testdir)
++                ok = _runtest(test, True, quiet, huntrleaks, None, pgo,
++                              testdir=testdir)
+             except KeyboardInterrupt:
+                 # print a newline separate from the ^C
+                 print
+--- Lib/test/test_site.py
++++ Lib/test/test_site.py
+@@ -9,6 +9,7 @@
+ from test.test_support import captured_output
+ import __builtin__
+ import errno
++import imp
+ import os
+ import sys
+ import re
+@@ -27,12 +28,19 @@
+ 
+ 
+ OLD_SYS_PATH = None
++OLD__PYTHONNOSITEPACKAGES = None
+ 
+ 
+ def setUpModule():
+     global OLD_SYS_PATH
+     OLD_SYS_PATH = sys.path[:]
+ 
++    if "_PYTHONNOSITEPACKAGES" in os.environ:
++        global OLD__PYTHONNOSITEPACKAGES
++        OLD__PYTHONNOSITEPACKAGES = os.environ.get("_PYTHONNOSITEPACKAGES")
++        del os.environ["_PYTHONNOSITEPACKAGES"]
++        imp.reload(site)
++
+     if site.ENABLE_USER_SITE and not os.path.isdir(site.USER_SITE):
+         # need to add user site directory for tests
+         try:
+@@ -49,6 +57,8 @@
+ 
+ def tearDownModule():
+     sys.path[:] = OLD_SYS_PATH
++    if OLD__PYTHONNOSITEPACKAGES is not None:
++        os.environ["_PYTHONNOSITEPACKAGES"] = OLD__PYTHONNOSITEPACKAGES
+ 
+ 
+ class HelperFunctionsTests(unittest.TestCase):
+--- Makefile.pre.in
++++ Makefile.pre.in
+@@ -871,7 +871,7 @@
+ 
+ TESTOPTS=	-l $(EXTRATESTOPTS)
+ TESTPROG=	$(srcdir)/Lib/test/regrtest.py
+-TESTPYTHON=	$(RUNSHARED) ./$(BUILDPYTHON) -Wd -3 -E -tt $(TESTPYTHONOPTS)
++TESTPYTHON=	_PYTHONNOSITEPACKAGES=1 $(RUNSHARED) ./$(BUILDPYTHON) -Wd -3 -E -tt $(TESTPYTHONOPTS)
+ test:		@DEF_MAKE_RULE@ platform
+ 		-find $(srcdir)/Lib -name '*.py[co]' -print | xargs rm -f
+ 		-$(TESTPYTHON) $(TESTPROG) $(TESTOPTS)

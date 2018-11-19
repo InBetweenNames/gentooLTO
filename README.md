@@ -150,22 +150,18 @@ This should point to your active GCC's `liblto_plugin.so`.  For example, for GCC
 Static library archives (`*.a` files) are tricky right now due to a bug in the GNU strip utility found in `sys-devel/binutils` that mangles archives containing LTO symbols.
 This is because unlike other binutils programs (such as `ar`, `nm`, and `ranlib`), `strip` doesn't support the LTO linker plugin necessary for processing these symbols.
 The result is an archive with all of the same symbols, but with a mangled index.
-To work around this, `ltoize` contains a patch for Portage that automatically restores the index of any static archive built that has been subsequently stripped using
-the `ranlib` utility.  Additional details about this can be found in [issue #49](https://github.com/InBetweenNames/gentooLTO/issues/49).  If you have a better solution, please let us know!
+A patch for Portage, which was previously included in GentooLTO, has been accepted upstream to automatically restore the index of any static archive that has been subsequently stripped.
+
+Additional details about this can be found in [issue #49](https://github.com/InBetweenNames/gentooLTO/issues/49).
 
 Previously, we used `STRIP_MASK` to simply avoid stripping any static archives, however this functionality has been removed in EAPI version 7, so a more intrusive
-solution is necessary.
-
-Existing users of `sys-config/ltoize` can migrate to the new configuration by:
+solution is necessary.  If you are one of these users, you can migrate to the new configuration by:
 
 * Removing STRIP_MASK="*.a" from `make.conf`
-* Updating `sys-config/ltoize` to the latest version
-* Re-emerging `sys-apps/portage` (`emerge -1 sys-apps/portage`) to ensure the patch is applied
+* Ensuring you have `>=sys-apps/portage-2.3.52` installed
 
-Please report any issues with the new configuration in [issue #49](https://github.com/InBetweenNames/gentooLTO/issues/49).
-
-The portage patch applies only to `sys-apps/portage`, not `sys-apps/portage-mgorny`.  If you are using `sys-apps/portage-mgorny`,
-ensure you are on `sys-apps/portage-mgorny-9999`, as the patch was accepted upstream there.
+If you are using `sys-apps/portage-mgorny`, ensure you have the equivalent version installed.  The patch was accepted upstream there before it
+landed in mainstream Portage.
 
 ## Caveats
 

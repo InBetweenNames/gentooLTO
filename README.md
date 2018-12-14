@@ -186,7 +186,7 @@ These make great candidates for bug reports.
 
 ### Workflow for debugging a build failure
 
-* First try adding `-ffat-lto-flags`
+* First try adding `-ffat-lto-objects`
 * If that doesn't work, try removing Graphite: `*FLAGS-="${GRAPHITE}"`
 * If that doesn't work, try removing -fipa-pta: `*FLAGS-="${IPA}"`
 * If that doesn't work, try removing -O3: `/-O3/-O2`

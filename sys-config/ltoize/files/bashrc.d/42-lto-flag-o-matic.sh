@@ -24,8 +24,4 @@ LTOOverrideFlagOMatic()
 }
 
 
-BashrcdPhase setup LTOOverrideFlagOMatic
-BashrcdPhase unpack LTOOverrideFlagOMatic
-BashrcdPhase prepare LTOOverrideFlagOMatic
-BashrcdPhase configure LTOOverrideFlagOMatic
-BashrcdPhase compile LTOOverrideFlagOMatic
+BashrcdPhase all LTOOverrideFlagOMatic

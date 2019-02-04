@@ -236,7 +236,7 @@ src_compile() {
 	fi
 	export par_arg
 
-	emake EXTRATESTOPTS="${par_arg} -uall,-audio -x test_asyncore test_gdb test_multiprocessing test_subprocess test_epoll test_selectors test_distutils test_xpickle test_locale"
+	emake EXTRATESTOPTS="${par_arg} -uall,-audio -x test_asyncore test_gdb test_multiprocessing test_subprocess test_epoll test_selectors test_distutils test_xpickle test_locale test_urllib2net test_urllibnet"
 
 	# Work around bug 329499. See also bug 413751 and 457194.
 	if has_version dev-libs/libffi[pax_kernel]; then

@@ -54,7 +54,6 @@ update process.
 The default configuration of GentooLTO enables the following:
 * O3
 * Graphite
-* -fipa-pta
 * -fno-semantic-interposition
 * LTO
 
@@ -181,14 +180,13 @@ These are rare, but they do happen.  When this happens, I usually force down to 
 
 ### -fipa-pta problems
 
-This is a newer optimization I've started including by default, which sometimes causes ICEs in the same way Graphite does.
-These make great candidates for bug reports.
+`-fipa-pta` is broken in GCC right now (#257), but hopefully it will be fixed in the next major release.
+I was enabling it by default until this issue was posted.  It has been disabled globally for now.
 
 ### Workflow for debugging a build failure
 
 * First try adding `-ffat-lto-objects`
 * If that doesn't work, try removing Graphite: `*FLAGS-="${GRAPHITE}"`
-* If that doesn't work, try removing -fipa-pta: `*FLAGS-="${IPA}"`
 * If that doesn't work, try removing -O3: `/-O3/-O2`
 * If that doesn't work, try removing LTO: `*FLAGS-=-flto*`
 * If that doesn't work, try switching linkers (from ld.bfd to ld.gold or backwards)

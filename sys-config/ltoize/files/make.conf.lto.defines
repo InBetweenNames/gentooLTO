@@ -11,7 +11,7 @@
 #* Your CFLAGS should contain ${FLTO} and, depending on your gcc, -fuse-linker-plugin
 #* Newer GCCs enable -fuse-linker-plugin by default.
 #* If you want Graphite, include "${GRAPHITE}" in your CFLAGS
-#* If you want -fipa-pta, include "${IPA}" in your CFLAGS
+#* If you want -fipa-pta, include "${IPA}" in your CFLAGS (undefined for now, issue #257)
 #* Anything else is up to you, such as -march, -pipe, -O{3,2,s,1}, etc...
 #* CXXFLAGS should be set to CFLAGS
 #* Optionally, set other *FLAGS for languages compiled with GCC as well (See make.conf.lto)
@@ -28,7 +28,8 @@ FLTO="-flto=${NTHREADS}"
 GRAPHITE="-fgraphite-identity -floop-nest-optimize" 
 #NOTE: To use graphite, make sure you have gcc compiled with graphite support (add graphite to your USE).  Otherwise GCC will complain!
 
-IPA="-fipa-pta"
+#Issue #257, disable -fipa-pta
+#IPA="-fipa-pta"
 
 #IPA contains -fipa* opts that are disabled by default in GCC.  These are interprocedural optimizations.  For now this is only -fipa-pta.
 #This option increases compile times, but can potentially produce better binaries, especially with LTO.

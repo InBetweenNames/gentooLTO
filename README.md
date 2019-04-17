@@ -13,7 +13,10 @@ Interested in running Gentoo at (theoretically) maximum speed?  Want to have a n
 Based on the submissions from the survey that has been running since October 27 2018, we have the following findings:
 
 * ~27.4% of /usr/portage is confirmed working with GentooLTO's default configuration
-* ~27% of /usr/portage can be built with LTO without any workarounds required from GentooLTO
+* ~27% of /usr/portage confirmed can be built with LTO without any workarounds required from GentooLTO
+
+The rest are untested and are unknown!  They may work or may not.  It would be great to achieve full coverage eventually!
+In any case, I find these results quite encouraging.
 
 The full report can be viewed in the [news item](metadata/news/2019-04-17-results/2019-04-17-results.en.txt) "GentooLTO survey results" -- thanks to everyone who contributed.
 Credits are at the end of the news item.

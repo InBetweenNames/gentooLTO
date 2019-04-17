@@ -8,6 +8,19 @@ This is a living document -- it will be kept in sync with the project as it grow
 
 Interested in running Gentoo at (theoretically) maximum speed?  Want to have a nearly fully [LTOed](https://gcc.gnu.org/wiki/LinkTimeOptimization) system?  Read on to see how it can be done!
 
+## NEW: Coverage report as of April 17 2019
+
+Based on the submissions from the survey that has been running since October 27 2018, we have the following findings:
+
+* ~27.4% of /usr/portage is confirmed working with GentooLTO's default configuration
+* ~27% of /usr/portage can be built with LTO without any workarounds required from GentooLTO
+
+The full report can be viewed in the [news item](metadata/news/2019-04-17-results/2019-04-17-results.en.txt) "GentooLTO survey results" -- thanks to everyone who contributed.
+Credits are at the end of the news item.
+
+If you haven't had a chance to submit anything, don't worry, you still can -- your results just won't be included until the next report.
+I figure it makes sense to have these on an ongoing (perhaps yearly) basis.
+
 ## Introduction
 
 This overlay contains a set of configuration files extracted from my own Gentoo Portage configuration to enable system-wide LTO.  It is intended to be used with aggressive compiler optimizations to help catch bugs in programs, including GCC.  However, it can also be used for plain LTO without any aggressive compiler optimizations.  Read on to see how to use it.

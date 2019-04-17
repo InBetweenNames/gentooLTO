@@ -50,7 +50,7 @@ Aleksander Wabik
 @althorion
 @asaparov
 Jason Mayfield-Lewis
-@bmeurer
+Bernardo Meurer
 Emmanuel Andry
 Eugene Shalygin
 Jan Killius

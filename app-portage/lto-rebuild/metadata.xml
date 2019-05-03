@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+<maintainer type="person">
+<email>lookatyouhacker@gmail.com</email>
+<name>Shane Peelar</name>
+</maintainer>
+<longdescription lang="en">
+lto-rebuild eases transitions to newer GCC versions when using GentooLTO.  It rebuilds any packages that have installed static libraries, preventing linker errors later on.
+</longdescription>
+</pkgmetadata>

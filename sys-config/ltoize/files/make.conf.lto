@@ -76,8 +76,6 @@ source make.conf.lto.defines
 
 #Thanks to issue #49, no action necessary for preventing stripping of static libraries
 
-#NOTE: Issue #257 -fipa-pta is broken in GCC currently (8.3.0), disable by default.
-
 CFLAGS="-O3 ${GRAPHITE} ${SEMINTERPOS} ${FLTO} -fuse-linker-plugin"
 
 #Your LDFLAGS should contain *ALL* of your CFLAGS for LTO to work.  It must receieve all optimization options, march, etc.

@@ -28,8 +28,7 @@ FLTO="-flto=${NTHREADS}"
 GRAPHITE="-fgraphite-identity -floop-nest-optimize" 
 #NOTE: To use graphite, make sure you have gcc compiled with graphite support (add graphite to your USE).  Otherwise GCC will complain!
 
-#Issue #257, disable -fipa-pta
-#IPA="-fipa-pta"
+IPA="-fipa-pta"
 
 #IPA contains -fipa* opts that are disabled by default in GCC.  These are interprocedural optimizations.  For now this is only -fipa-pta.
 #This option increases compile times, but can potentially produce better binaries, especially with LTO.

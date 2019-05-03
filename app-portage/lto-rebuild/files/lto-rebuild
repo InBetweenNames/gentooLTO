@@ -1,0 +1,31 @@
+#! /bin/sh
+
+if [ "$#" -eq 0 ] || [ "$1" == "-h" ]; then
+
+	echo "Usage: lto-rebuild [OPTION]"
+	echo
+	echo "lto-rebuild can be used to avoid a full system rebuild after upgrading"
+	echo "GCC when using GentooLTO. It searches for all installed static archives"
+	echo "on your system in /usr/lib, /usr/lib32, and /usr/lib64 and rebuilds them"
+	echo "with the your new GCC version."
+	echo
+	echo "Note: make sure your system is as up to date as possible before doing this."
+	echo "If an installed package does not have a corresponding ebuild available, this"
+	echo "command will fail.  You can use -l to manually intervene."
+	echo
+	echo "Options:"
+	echo -e "-h\tDisplay this help"
+	echo -e "-l\tOnly list the packages that would be rebuilt and their slots"
+	echo -e "-r\tRebuild the packages using emerge (will ask for confirmation)"
+
+else
+	if [ "$1" == "-l" ]; then
+		find /usr/lib /usr/lib64 -name "*.a" | xargs qfile -S -q | sort -u
+	elif [ "$1" == "-r" ]; then
+		emerge -1a $(find /usr/lib /usr/lib64 -name "*.a" | xargs qfile -S -q | sort -u)
+	else 
+		exit 1
+	fi
+	exit 0
+fi
+

@@ -98,14 +98,33 @@ Regardless of which approach you choose, you should ensure that `CXXFLAGS` is se
 and your Portage profile's `LDFLAGS` are respected.  I also enable `-Wl,--hash-style=gnu` as it
 can help catch packages that don't respect `LDFLAGS`, but this is optional.
 
-It is strongly recommended to use the latest GCC (8.2.0 at the time of writing), latest binutils (2.31.1 currently), and latest glibc (2.28 currently).
+It is strongly recommended to use the latest GCC (9.1.0 at the time of writing), latest binutils (2.32 currently), and latest glibc (2.29 currently).
 
 When you find a problem, whether it's a package not playing nice with -O3, Graphite, or LTO, consider opening an issue here or sending a pull request with the overrides needed to get the package working.  Over time, we should be able to achieve full coverage of `/usr/portage` this way and provide a one size fits all solution, and not to mention help improve some open source software through the bug reports that will no doubt be generated! 
 
 **After you've set everything up, run an `emerge -e @world` to rebuild your system with LTO and any optimizations you have chosen.**
 
-Note: if you upgrade compilers, a world rebuild is **required** because compiler object files are generally NOT backwards or forwards compatible.
-This means you **will** get LTO linker errors eventually if you don't do a world rebuild!
+#lto-rebuild: Avoiding a full system rebuild when upgrading compilers
+
+Normally, you would have to do a full system rebuild after upgrading GCC.  This is because compiler object files are generally
+not backwards or forwards compatible, especially ones containing LTO symbols.  If action isn't taken to rebuild the static libraries
+on your system, you **will** encounter LTO linker errors when emerging dependent packages.
+
+**Fortunately, this is no longer the case**.  A new tool, `app-portage/lto-rebuild` has been provided to ease transitions to new compilers.
+It searches for any installed static archives on the system and requests a oneshot emerge of them.
+Doing this requires that the ebuilds for your installed packages are available -- the easiest way to guarantee this is the following:
+
+* Ensure your system is up to date (including installing the new GCC)
+* Switch to the new GCC (using `eselect gcc` or `gcc-config`)
+* Run `lto-rebuild -r`
+* Complete the emerge
+
+If you encounter problems with `lto-rebuild -r`, you may be able to resolve them manually with `lto-rebuild -l` and
+rebuilding the offending packages one by one.  If that's not possible, you must do a full system rebuild as you would have
+previously.  An `emerge -e @world` should suffice.
+
+Of course, if you want to realize the performance improvements from the newer compiler across your entire system, you will
+have to do a world rebuild -- no getting around that!
 
 ## Additional details about LTOize
 
@@ -196,13 +215,15 @@ These are rare, but they do happen.  When this happens, I usually force down to 
 
 ### -fipa-pta problems
 
-`-fipa-pta` is broken in GCC right now (#257), but hopefully it will be fixed in the next major release.
-I was enabling it by default until this issue was posted.  It has been disabled globally for now.
+`-fipa-pta` was broken until GCC 9.1.0.  It is disabled by default but will be re-enabled in the near future.
+All users are expected to migrate to GCC 9.1.0 as soon as possible.  An ebuild is provided in the overlay.
+Interested users can opt-in manually by adding `-fipa-pta` to their `CFLAGS` for now.
 
 ### Workflow for debugging a build failure
 
 * First try adding `-ffat-lto-objects`
 * If that doesn't work, try removing Graphite: `*FLAGS-="${GRAPHITE}"`
+* If that doesn't work, try removing -fipa-pta: `*FLAGS-="-fipa-pta`
 * If that doesn't work, try removing -O3: `/-O3/-O2`
 * If that doesn't work, try removing LTO: `*FLAGS-=-flto*`
 * If that doesn't work, try switching linkers (from ld.bfd to ld.gold or backwards)

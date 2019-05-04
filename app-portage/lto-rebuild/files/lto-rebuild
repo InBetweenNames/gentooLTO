@@ -1,6 +1,6 @@
 #! /bin/sh
 
-if [ "$#" -eq 0 ] || [ "$1" == "-h" ]; then
+if [ "$#" -eq 0 ] || [ "$1" = "-h" ]; then
 
 	echo "Usage: lto-rebuild [OPTION]"
 	echo
@@ -14,14 +14,14 @@ if [ "$#" -eq 0 ] || [ "$1" == "-h" ]; then
 	echo "command will fail.  You can use -l to manually intervene."
 	echo
 	echo "Options:"
-	echo -e "-h\tDisplay this help"
-	echo -e "-l\tOnly list the packages that would be rebuilt and their slots"
-	echo -e "-r\tRebuild the packages using emerge (will ask for confirmation)"
+	printf -- "-h\tDisplay this help\n"
+	printf -- "-l\tOnly list the packages that would be rebuilt and their slots\n"
+	printf -- "-r\tRebuild the packages using emerge (will ask for confirmation)\n"
 
 else
-	if [ "$1" == "-l" ]; then
+	if [ "$1" = "-l" ]; then
 		find /usr/lib /usr/lib64 -name "*.a" | xargs qfile -S -q | sort -u
-	elif [ "$1" == "-r" ]; then
+	elif [ "$1" = "-r" ]; then
 		emerge -1a $(find /usr/lib /usr/lib64 -name "*.a" | xargs qfile -S -q | sort -u)
 	else 
 		exit 1

@@ -20,9 +20,9 @@ if [ "$#" -eq 0 ] || [ "$1" = "-h" ]; then
 
 else
 	if [ "$1" = "-l" ]; then
-		find /usr/lib /usr/lib64 -name "*.a" | xargs qfile -S -q | sort -u
+		find "${EPREFIX}"/usr/lib "${EPREFIX}"/usr/lib64 "${EPREFIX}"/usr/lib32 -name "*.a" 2>/dev/null | xargs qfile -S -q | sort -u
 	elif [ "$1" = "-r" ]; then
-		emerge -1a $(find /usr/lib /usr/lib64 -name "*.a" | xargs qfile -S -q | sort -u)
+		emerge -1a $(find "${EPREFIX}"/usr/lib "${EPREFIX}"/usr/lib64 "${EPREFIX}"/usr/lib32 -name "*.a" 2>/dev/null | xargs qfile -S -q | sort -u)
 	else 
 		exit 1
 	fi

@@ -25,7 +25,7 @@ FLTO="-flto=${NTHREADS}"
 #GRAPHITE contains Graphite specific optimizations and other optimizations that are disabled at O3
 #but don't influence the compiler's judgement.
 #With GCC 8.1.0, -ftree-loop-distribution is enabled by default at -O3
-GRAPHITE="-fgraphite-identity -floop-nest-optimize" 
+GRAPHITE="-fgraphite-identity -floop-nest-optimize"
 #NOTE: To use graphite, make sure you have gcc compiled with graphite support (add graphite to your USE).  Otherwise GCC will complain!
 
 IPA="-fipa-pta"

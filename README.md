@@ -104,7 +104,7 @@ When you find a problem, whether it's a package not playing nice with -O3, Graph
 
 **After you've set everything up, run an `emerge -e @world` to rebuild your system with LTO and any optimizations you have chosen.**
 
-#lto-rebuild: Avoiding a full system rebuild when upgrading compilers
+## lto-rebuild: Avoiding a full system rebuild when upgrading compilers
 
 Normally, you would have to do a full system rebuild after upgrading GCC.  This is because compiler object files are generally
 not backwards or forwards compatible, especially ones containing LTO symbols.  If action isn't taken to rebuild the static libraries

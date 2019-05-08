@@ -1,4 +1,4 @@
-# Gentoo O3-Graphite-LTO configuration overlay
+# GentooLTO overlay
 
 This is a living document -- it will be kept in sync with the project as it grows.
 

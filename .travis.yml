@@ -10,7 +10,7 @@ env:
 before_install:
     - sudo apt-get -qq update
     - pip install lxml pyyaml
-    - sudo apt install devscripts
+    - sudo apt install shellcheck
 before_script:
     - sudo mkdir -p /var/db/repos/gentoo /var/cache/distfiles
     - sudo chmod a+rwX /etc/passwd /etc/group /etc /usr /usr/local /var/db/repos/gentoo /var/cache/distfiles
@@ -37,6 +37,6 @@ before_script:
     #- if ! cmp -n $SIZE -s .travis.yml .travis.yml.upstream; then echo -e "\e[31m !!! .travis.yml outdated! Update available https://github.com/mrueg/repoman-travis \e[0m" > /tmp/update ; fi
     - cd travis-overlay
 script:
-    - ./../spinner.sh "checkbashisms -n -x app-portage/lto-rebuild/files/lto-rebuild" #Tests to ensure lto-rebuild plays nice with shells other than Bash
+    - ./../spinner.sh "shellcheck app-portage/lto-rebuild/files/lto-rebuild" #Tests to ensure lto-rebuild plays nice with shells other than Bash
     - ./../spinner.sh "python ../portage-portage-${PORTAGE_VER}/repoman/bin/repoman full -dx"
 # You can append own scripts after this line

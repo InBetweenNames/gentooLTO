@@ -6,6 +6,6 @@
 <name>Shane Peelar</name>
 </maintainer>
 <longdescription lang="en">
-lto-rebuild eases transitions to newer GCC versions when using GentooLTO.  It rebuilds any packages that have installed static libraries, preventing linker errors later on.
+lto-rebuild eases transitions to newer GCC versions when using GentooLTO.  It rebuilds any packages built using different GCCs that have installed static libraries, preventing linker errors later on.
 </longdescription>
 </pkgmetadata>

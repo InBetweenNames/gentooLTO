@@ -111,7 +111,7 @@ not backwards or forwards compatible, especially ones containing LTO symbols.  I
 on your system, you **will** encounter LTO linker errors when emerging dependent packages.
 
 **Fortunately, this is no longer the case**.  A new tool, `app-portage/lto-rebuild` has been provided to ease transitions to new compilers.
-It searches for any installed static archives on the system and requests a oneshot emerge of them.
+It searches for any installed static archives on the system and requests a oneshot emerge of the ones that were built using a different GCC.
 Doing this requires that the ebuilds for your installed packages are available -- the easiest way to guarantee this is the following:
 
 * Ensure your system is up to date (including installing the new GCC)

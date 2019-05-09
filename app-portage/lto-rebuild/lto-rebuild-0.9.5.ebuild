@@ -11,7 +11,12 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
 
-DEPEND="app-portage/portage-utils"
+DEPEND="
+	app-portage/portage-utils
+	app-shells/bash:*
+	sys-devel/binutils:*
+	sys-devel/gcc:*
+	"
 RDEPEND="${DEPEND}"
 BDEPEND=""
 

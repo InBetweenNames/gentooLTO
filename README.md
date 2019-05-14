@@ -250,6 +250,8 @@ My Portage profile is `default/linux/amd64/17.1/desktop/plasma`.
 
 One result of this project has been upstreamed PGO support in the GCC ebuilds.  It is highly recommended that you compile GCC with PGO, as it really helps with compile times.  Simply add `pgo` to your `sys-devel/gcc` USE flags and emerge and you're all set.
 The initial GCC compilation time will increase, however all subsequent compilations will be much faster.
+As of May 2019, GCC may be built using LTO and PGO in conjunction -- add `lto` to your `USE` when emerging gcc.
+If you want to enable all optimizations that you normally would use, add `CFLAGS` to `BOOT_CFLAGS` when emerging.
 
 ### Python
 

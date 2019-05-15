@@ -5,20 +5,20 @@ display_help()
 echo -e "
 Usage: lto-rebuild [OPTION]
 
-lto-rebuild can be used to avoid a full system rebuild after upgrading
-GCC when using GentooLTO. It searches for all installed static archives
-on your system in /usr/lib, /usr/lib32, and /usr/lib64 that were built
-using a different GCC than the current one.
+lto-rebuild can be used to avoid a full system rebuild after upgrading GCC
+when using GentooLTO. It searches in /usr/lib, /usr/lib32, and /usr/lib64
+on your system for all installed static archives that were built using
+a different GCC than the current one.
 
 Note: make sure your system is as up to date as possible before doing this.
-If an installed package does not have a corresponding ebuild available, this
-command will fail. You can use -l to manually intervene.
+If an installed package does not have a corresponding ebuild available,
+this command will fail. You can use -l to manually intervene.
 
 Options:
 
 -h	Display this help
 -a	Only list the archives that were built with other GCC versions
--l	Only list the packages that would be rebuilt and their slots
+-l	Only list the packages that would be rebuilt (and their slots)
 -r	Rebuild the packages using emerge (will ask for confirmation)
 "
 }
@@ -36,26 +36,38 @@ echo -e "Searching in
 	${prefix}32
 for static archives that were built using a different GCC...\n" >&2
 
-#Exclude /usr/lib/gcc/<arch> because these are internal to the [cross-]compilers on the system
+# Exclude /usr/lib/gcc/<arch> because these are internal
+# to the [cross-]compilers on the system
 mapfile -t archives < <(
-	find "${prefix}"{,64,32} -type f -name "*${suffix}" -exec readelf -p .comment {} + \
+	find "${prefix}"{,64,32} -type f -name "*${suffix}" \
+	-exec readelf -p .comment {} + \
 	-o -path "${prefix}64/gcc" -prune \
 	-o -path "${prefix}32/gcc" -prune \
 	-o -path "${prefix}/gcc" -prune 2> /dev/null | \
-	grep -v "${GCC_VER}" | grep -B3 "GCC:" | grep -o "${prefix}.*${suffix}" | uniq
+	grep -v "${GCC_VER}" | grep -B3 "GCC:" | \
+	grep -o "${prefix}.*${suffix}" | uniq
 )
 
-[[ ${#archives[@]} -eq 0 ]] && echo "No problems found!" >&2 && exit 0
+if [[ ${#archives[@]} -eq 0 ]]
+then
+	echo "No problems found!" >&2
+	exit 0
+fi
 
-[[ "${1}" != "-l" ]] && mapfile -t packages < <(qfile -qS "${archives[@]}" | sort -u)
+if [[ "${1}" != "-l" ]]
+then
+	mapfile -t packages < <(qfile -qS "${archives[@]}" | sort -u)
+fi
 
 case "${1}" in
 	"-l")
-		echo -e "The following static archives were built using a different GCC:\n" >&2
+		echo -e "The following static archives were built" >&2
+		echo -e "using a different GCC:\n" >&2
 		printf "%s\n" "${archives[@]}"
 		;;
 	"-a")
-		echo -e "The following packages installed static archives that were built using a different GCC:\n" >&2 
+		echo -e "The following packages installed static archives" >&2
+		echo -e "that were built using a different GCC:\n" >&2 
 		printf "%s\n" "${packages[@]}"
 		;;
 	"-r")

@@ -1,66 +1,93 @@
 #! /bin/bash
 
-if [ "$#" -eq 0 ] || [ "$1" = "-h" ]; then
+display_help()
+{
+echo -e "
+Usage: lto-rebuild [OPTION]
 
-	echo "Usage: lto-rebuild [OPTION]"
-	echo
-	echo "lto-rebuild can be used to avoid a full system rebuild after upgrading"
-	echo "GCC when using GentooLTO. It searches for all installed static archives"
-	echo "on your system in /usr/lib, /usr/lib32, and /usr/lib64 that were built"
-	echo "using a different GCC than the current one."
-	echo
-	echo "Note: make sure your system is as up to date as possible before doing this."
-	echo "If an installed package does not have a corresponding ebuild available, this"
-	echo "command will fail.  You can use -l to manually intervene."
-	echo
-	echo "Options:"
-	echo -e "-h\tDisplay this help\n"
-	echo -e "-a\tOnly list the archives that were built with other GCC versions"
-	echo -e "-l\tOnly list the packages that would be rebuilt and their slots"
-	echo -e "-r\tRebuild the packages using emerge (will ask for confirmation)"
+lto-rebuild can be used to avoid a full system rebuild after upgrading GCC
+when using GentooLTO. It searches in /usr/lib, /usr/lib32, and /usr/lib64
+on your system for all installed static archives that were built using
+a different GCC than the current one.
 
-else
-	#TODO: support cross compilers by selecting the right GCC for them.
-	GCC_VER=$(gcc -dumpversion)
-	STAGE=0
-	if [[ "$1" = "-l" ]]; then
-		STAGE=1
-	elif [[ "$1" == "-a" ]]; then
-		STAGE=2
-	elif [[ "$1" == "-r" ]]; then
-		STAGE=3
-	else
-		exit 1
-	fi
+Note: make sure your system is as up to date as possible before doing this.
+If an installed package does not have a corresponding ebuild available,
+this command will fail. You can use -l to manually intervene.
 
-	echo -e "Searching for static archives in ${EROOT%/}/usr/lib ${EROOT%/}/usr/lib64 ${EROOT%/}/usr/lib32 that were built using a different GCC...\n" >&2
+Options:
 
-	#Exclude /usr/lib/gcc/<arch> because these are internal to the [cross-]compilers on the system
-	mapfile -t ARCHIVES < <( find "${EROOT%/}/usr/lib" "${EROOT%/}/usr/lib64" "${EROOT%/}/usr/lib32" -name "*.a" -o -path '/usr/lib/gcc' -prune 2>/dev/null |
-		while IFS= read -r ARCHIVE
-		do
-			OUT=$(readelf -p .comment "${ARCHIVE}" 2>/dev/null | grep "GCC:" | grep -v "${GCC_VER}")
-			if [[ -n "${OUT}" ]]; then
-				echo "${ARCHIVE}"
-			fi
-		done )
-	
-	if [[ ${STAGE} -eq 1 ]]; then
-		printf "%s\n" "${ARCHIVES[@]}"
-	else
-		mapfile -t PACKAGES < <( qfile -S -q "${ARCHIVES[@]}" | sort -u )
-		if [[ ${STAGE} -eq 3 ]]; then
-			if [[ ${#PACKAGES[@]} -ne 0 ]]; then
-				emerge -1a "${PACKAGES[@]}"
-			else
-				echo "No problems found!" >&2
-			fi
-		else
-			echo -e "The following packages installed static archives that were built with a different GCC:\n" >&2
-			printf "%s\n" "${PACKAGES[@]}"
-		fi
-	fi
-	
+-h	Display this help
+-a	Only list the archives that were built with other GCC versions
+-l	Only list the packages that would be rebuilt (and their slots)
+-r	Rebuild the packages using emerge (will ask for confirmation)
+"
+}
+
+perform_action()
+{
+local prefix="${EROOT%/}/usr/lib"
+local suffix="\.a"
+local archives=()
+local packages=()
+
+echo -e "Searching in
+	${prefix}
+	${prefix}64
+	${prefix}32
+for static archives that were built using a different GCC...\n" >&2
+
+# Exclude /usr/lib/gcc/<arch> because these are internal
+# to the [cross-]compilers on the system
+mapfile -t archives < <(
+	find "${prefix}"{,64,32} -type f -name "*${suffix}" \
+	-exec readelf -p .comment {} + \
+	-o -path "${prefix}64/gcc" -prune \
+	-o -path "${prefix}32/gcc" -prune \
+	-o -path "${prefix}/gcc" -prune 2> /dev/null | \
+	grep -v "${GCC_VER}" | grep -B3 "GCC:" | \
+	grep -o "${prefix}.*${suffix}" | uniq
+)
+
+if [[ ${#archives[@]} -eq 0 ]]
+then
+	echo "No problems found!" >&2
 	exit 0
 fi
+
+if [[ "${1}" != "-l" ]]
+then
+	mapfile -t packages < <(qfile -qS "${archives[@]}" | sort -u)
+fi
+
+case "${1}" in
+	"-l")
+		echo "The following static archives were built" >&2
+		echo -e "using a different GCC:\n" >&2
+		printf "%s\n" "${archives[@]}"
+		;;
+	"-a")
+		echo "The following packages installed static archives" >&2
+		echo -e "that were built using a different GCC:\n" >&2 
+		printf "%s\n" "${packages[@]}"
+		;;
+	"-r")
+		emerge -1a "${packages[@]}"
+		;;
+	*)
+		exit 1
+		;;
+esac
+}
+
+case "${1}" in
+	"" | "-h")
+		display_help
+		;;
+	"-l" | "-a" | "-r")
+		perform_action "${1}"
+		;;
+	*)
+		exit 1
+		;;
+esac
 

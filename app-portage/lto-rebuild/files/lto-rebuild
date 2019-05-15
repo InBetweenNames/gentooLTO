@@ -61,12 +61,12 @@ fi
 
 case "${1}" in
 	"-l")
-		echo -e "The following static archives were built" >&2
+		echo "The following static archives were built" >&2
 		echo -e "using a different GCC:\n" >&2
 		printf "%s\n" "${archives[@]}"
 		;;
 	"-a")
-		echo -e "The following packages installed static archives" >&2
+		echo "The following packages installed static archives" >&2
 		echo -e "that were built using a different GCC:\n" >&2 
 		printf "%s\n" "${packages[@]}"
 		;;

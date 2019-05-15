@@ -38,7 +38,10 @@ for static archives that were built using a different GCC...\n" >&2
 
 #Exclude /usr/lib/gcc/<arch> because these are internal to the [cross-]compilers on the system
 mapfile -t archives < <(
-	find "${prefix}"{,64,32} -type f -name "*${suffix}" -exec readelf -p .comment {} + 2> /dev/null |\
+	find "${prefix}"{,64,32} -type f -name "*${suffix}" -exec readelf -p .comment {} + \
+	-o -path "${prefix}64/gcc" -prune \
+	-o -path "${prefix}32/gcc" -prune \
+	-o -path "${prefix}/gcc" -prune 2> /dev/null | \
 	grep -v "${GCC_VER}" | grep -B3 "GCC:" | grep -o "${prefix}.*${suffix}" | uniq
 )
 

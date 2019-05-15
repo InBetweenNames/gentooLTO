@@ -16,7 +16,16 @@ SLOT="0"
 IUSE="override-flagomatic"
 
 #portage-bashrc-mv can be obtained from mv overlay
-DEPEND=">=sys-devel/gcc-4.9.4:*[graphite] >=sys-devel/binutils-2.28.1:* app-portage/portage-bashrc-mv[cflags] >=sys-devel/gcc-config-1.9.1 || ( >=sys-apps/portage-2.3.52 >=sys-apps/portage-mgorny-2.3.51.1 )"
+DEPEND="
+	>=sys-devel/gcc-4.9.4:*[graphite]
+	>=sys-devel/binutils-2.28.1:*
+	>=sys-devel/gcc-config-1.9.1
+	|| (
+		>=sys-apps/portage-2.3.52
+		>=sys-apps/portage-mgorny-2.3.51.1
+	)
+	app-portage/portage-bashrc-mv[cflags]
+	"
 #DEPEND="graphite ? ( gcc[graphite] )"
 
 RDEPEND="${DEPEND}"

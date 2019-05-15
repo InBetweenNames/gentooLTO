@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -13,14 +13,19 @@ SRC_URI=""
 
 LICENSE="GPL-2+"
 SLOT="0"
-IUSE="override-flagomatic"
+IUSE="override-flagomatic +utils"
 
 #portage-bashrc-mv can be obtained from mv overlay
 DEPEND="
 	>=sys-devel/gcc-4.9.4:*[graphite]
 	>=sys-devel/binutils-2.28.1:*
 	>=sys-devel/gcc-config-1.9.1
+	|| (
+		>=sys-apps/portage-2.3.52
+		>=sys-apps/portage-mgorny-2.3.51.1
+	)
 	app-portage/portage-bashrc-mv[cflags]
+	utils? ( app-portage/lto-rebuild )
 	"
 #DEPEND="graphite ? ( gcc[graphite] )"
 

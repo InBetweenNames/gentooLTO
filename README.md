@@ -8,6 +8,8 @@ This is a living document -- it will be kept in sync with the project as it grow
 
 Interested in running Gentoo at (theoretically) maximum speed?  Want to have a nearly fully [LTOed](https://gcc.gnu.org/wiki/LinkTimeOptimization) system?  Read on to see how it can be done!
 
+## This documentation is being migrated over to the [GentooLTO Wiki](https://github.com/InBetweenNames/gentooLTO/wiki)!
+
 ## NEW: Coverage report as of April 17 2019
 
 Based on the submissions from the survey that has been running since October 27 2018, we have the following findings:
@@ -196,53 +198,6 @@ solution is necessary.  If you are one of these users, you can migrate to the ne
 
 If you are using `sys-apps/portage-mgorny`, ensure you have the equivalent version installed.  The patch was accepted upstream there before it
 landed in mainstream Portage.
-
-## Caveats
-
-Expect breakages when you emerge new packages or update existing ones.  There are a number of potential ways that an emerge might not work.  My observations are as follows.
-
-### LTO problems
-
-Some packages don't fully respect LDFLAGS, for various reasons.  These tend to manifest around link time with unresolved symbol errors.  My first strategy for dealing with these is to try building the package with `-ffat-lto-objects` enabled (`*FLAGS+=-ffat-lto-objects`).  If the unresolved symbols belong to an external library, I usually rebuild that one with `-ffat-lto-objects` too, because the current package being emerged isn't properly handling the LTO flags and it wants to link against the non LTOed symbols.  Sometimes, however, the package itself just doesn't like LTO for some reason, and you have to disable it entirely (`*FLAGS-=-flto*`)
-
-### Graphite problems
-
-I've never actually yet emerged a package that causes the Graphite optimizations to emit bad code with, but sometimes the Graphite optimizer itself crashes during compilation.  If this is the case, I'll usually use the "LTO-with-no-Graphite" configuration: `*FLAGS-="${GRAPHITE}"`.  Please consider making a bug report in GCC if you get an ICE.
-
-### -O3 problems
-
-These are rare, but they do happen.  When this happens, I usually force down to `-O2` (which disables Graphite implicitly in this configuration) using `package.cflags`.
-
-### -fipa-pta problems
-
-`-fipa-pta` was broken until GCC 9.1.0.  It is disabled by default but will be re-enabled in the near future.
-All users are expected to migrate to GCC 9.1.0 as soon as possible.  An ebuild is provided in the overlay.
-Interested users can opt-in manually by adding `-fipa-pta` to their `CFLAGS` for now.
-
-### Workflow for debugging a build failure
-
-* First try adding `-ffat-lto-objects`
-* If that doesn't work, try removing Graphite: `*FLAGS-="${GRAPHITE}"`
-* If that doesn't work, try removing -fipa-pta: `*FLAGS-="-fipa-pta`
-* If that doesn't work, try removing -O3: `/-O3/-O2`
-* If that doesn't work, try removing LTO: `*FLAGS-=-flto*`
-* If that doesn't work, try switching linkers (from ld.bfd to ld.gold or backwards)
-* If that doesn't work, it's probably not an LTO error, but submit it anyway and we'll take a look.
-
-Once you get a package building with one or more of the above workarounds, work backwards and try and see what the minimum
-number of workarounds are for the package.  If you're having trouble, don't hesitate to file an issue.
-
-### A special note about Perl 5
-
-Perl 5 in general does not play nice with LTO ([see this reddit comment](https://www.reddit.com/r/Gentoo/comments/6z8s8m/a_gentoo_portage_configuration_for_building_with/dmuhohy/)).  Packages which use Perl 5 or have `perl` in their USE flags may require the `-ffat-lto-objects` configuration, or in the worst case no LTO at all.  This does not appear to be something that can be fixed easily for Perl 5, so we'll have exercise caution. Perl 6 is unaffected, however.
-
-## My own configuration
-
-I follow the posted recommended configuration in this repo.  I also have [SSP](http://wiki.osdev.org/Stack_Smashing_Protector) and [PIE](https://en.wikipedia.org/wiki/Position-independent_code#Position-independent_executables) disabled for the time being, but this is by means no requirement to run this config.
-
-Most Gentoo-ers have `-march=native -O2` in their `CFLAGS` and `CXXFLAGS`.  Using `-march` is a good idea as it allows GCC to tune it's code generation to your specific processor.  I've enabled all of the GentooLTO default flags in mine, which can be found in `make.conf.lto`.
-
-My Portage profile is `default/linux/amd64/17.1/desktop/plasma`.
 
 ## PGO support
 

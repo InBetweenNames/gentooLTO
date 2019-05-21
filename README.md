@@ -101,32 +101,12 @@ and your Portage profile's `LDFLAGS` are respected.  I also enable `-Wl,--hash-s
 can help catch packages that don't respect `LDFLAGS`, but this is optional.
 
 It is strongly recommended to use the latest GCC (9.1.0 at the time of writing), latest binutils (2.32 currently), and latest glibc (2.29 currently).
+Other compilers and libcs may be supported in the future.
 
 When you find a problem, whether it's a package not playing nice with -O3, Graphite, or LTO, consider opening an issue here or sending a pull request with the overrides needed to get the package working.  Over time, we should be able to achieve full coverage of `/usr/portage` this way and provide a one size fits all solution, and not to mention help improve some open source software through the bug reports that will no doubt be generated! 
 
-**After you've set everything up, run an `emerge -e @world` to rebuild your system with LTO and any optimizations you have chosen.**
-
-## lto-rebuild: Avoiding a full system rebuild when upgrading compilers
-
-Normally, you would have to do a full system rebuild after upgrading GCC.  This is because compiler object files are generally
-not backwards or forwards compatible, especially ones containing LTO symbols.  If action isn't taken to rebuild the static libraries
-on your system, you **will** encounter LTO linker errors when emerging dependent packages.
-
-**Fortunately, this is no longer the case**.  A new tool, `app-portage/lto-rebuild` has been provided to ease transitions to new compilers.
-It searches for any installed static archives on the system and requests a oneshot emerge of the ones that were built using a different GCC.
-Doing this requires that the ebuilds for your installed packages are available -- the easiest way to guarantee this is the following:
-
-* Ensure your system is up to date (including installing the new GCC)
-* Switch to the new GCC (using `eselect gcc` or `gcc-config`)
-* Run `lto-rebuild -r`
-* Complete the emerge
-
-If you encounter problems with `lto-rebuild -r`, you may be able to resolve them manually with `lto-rebuild -l` and
-rebuilding the offending packages one by one.  If that's not possible, you must do a full system rebuild as you would have
-previously.  An `emerge -e @world` should suffice.
-
-Of course, if you want to realize the performance improvements from the newer compiler across your entire system, you will
-have to do a world rebuild -- no getting around that!
+**After you've set everything up, run an `emerge -e @world` to rebuild your system with LTO and any optimizations you have chosen, or alternatively use [lto-rebuild](https://github.com/InBetweenNames/gentooLTO/wiki/lto-rebuild) to gradually
+convert your system over to GentooLTO.**
 
 ## Additional details about LTOize
 

@@ -73,7 +73,15 @@ The default configuration of GentooLTO enables the following:
 * O3
 * Graphite
 * -fno-semantic-interposition
+* -fipa-pta
+* -fdevirtualize-at-ltrans
 * LTO
+
+** Please set your system linker to ld.gold: **
+
+~~~
+binutils-config --linker ld.gold
+~~~
 
 If you'd like to override the default configuration, you can source another file, `make.conf.lto.defines` instead.
 This file contains the definitions for the variables that `sys-config/ltoize` uses for the optimization flags.

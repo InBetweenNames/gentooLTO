@@ -76,7 +76,7 @@ source make.conf.lto.defines
 
 #Thanks to issue #49, no action necessary for preventing stripping of static libraries
 
-CFLAGS="-O3 ${GRAPHITE} ${SEMINTERPOS} ${FLTO} -fuse-linker-plugin"
+CFLAGS="-O3 ${GRAPHITE} ${DEVIRTLTO} ${IPAPTA} ${SEMINTERPOS} ${FLTO} -fuse-linker-plugin"
 
 #Your LDFLAGS should contain *ALL* of your CFLAGS for LTO to work.  It must receieve all optimization options, march, etc.
 #package.cflags takes care of this for you--no need to manually add your {C,CXX}FLAGS here.

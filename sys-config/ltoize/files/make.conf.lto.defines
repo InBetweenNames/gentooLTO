@@ -11,7 +11,7 @@
 #* Your CFLAGS should contain ${FLTO} and, depending on your gcc, -fuse-linker-plugin
 #* Newer GCCs enable -fuse-linker-plugin by default.
 #* If you want Graphite, include "${GRAPHITE}" in your CFLAGS
-#* If you want -fipa-pta, include "${IPA}" in your CFLAGS (undefined for now, issue #257)
+#* If you want -fipa-pta, include "${IPAPTA}" in your CFLAGS (undefined for now, issue #257)
 #* Anything else is up to you, such as -march, -pipe, -O{3,2,s,1}, etc...
 #* CXXFLAGS should be set to CFLAGS
 #* Optionally, set other *FLAGS for languages compiled with GCC as well (See make.conf.lto)
@@ -28,9 +28,9 @@ FLTO="-flto=${NTHREADS}"
 GRAPHITE="-fgraphite-identity -floop-nest-optimize"
 #NOTE: To use graphite, make sure you have gcc compiled with graphite support (add graphite to your USE).  Otherwise GCC will complain!
 
-IPA="-fipa-pta"
+IPAPTA="-fipa-pta"
 
-#IPA contains -fipa* opts that are disabled by default in GCC.  These are interprocedural optimizations.  For now this is only -fipa-pta.
+#IPAPTA contains -fipa* opts that are disabled by default in GCC.  These are interprocedural optimizations.  For now this is only -fipa-pta.
 #This option increases compile times, but can potentially produce better binaries, especially with LTO.
 #Essentially, it allows the compiler to look into called function bodies when performing alias analysis
 
@@ -43,9 +43,20 @@ NOCOMMON="-fno-common"
 # This option only affects C code.  Only non-conformant C code needs -fcommon, which is enabled by default.  Clear Linux leaves this flag off by default.
 # We may enable this at some point.  For now, there's a lot of breakages to work through.
 
-FASTMATH="-fno-math-errno -fno-trapping-math"
+SAFERFASTMATH="-fno-math-errno -fno-trapping-math"
 
 #These are flags left off by default that we're planning to start using.  Clear Linux uses these in lieu of full -ffast-math optimizations
 #They DO break compliance with ISO C++, so we'll be careful about introducing these.
 #Relevant discussion: https://gcc.gnu.org/ml/gcc/2017-09/msg00079.html
 #We may end up just going full -Ofast, with exceptions done in the usual way.
+
+DEVIRTLTO="-fdevirtualize-at-ltrans"
+
+#This allows GCC to perform devirtualization across object file boundaries using LTO.  It's off by default because it
+#increases compilation time.
+
+NOPLT="-fno-plt"
+
+#This option omits the PLT from the executable, making calls go through the GOT directly.
+#It inhibits lazy binding, so this is not enabled by default.  If you use prelink, this is
+#strictly better than lazy binding.

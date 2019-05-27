@@ -55,7 +55,7 @@ diff -ur Python-2.7.15.orig/Makefile.pre.in Python-2.7.15/Makefile.pre.in
  run_profile_task:
  	: # FIXME: can't run for a cross build
 -	$(LLVM_PROF_FILE) $(RUNSHARED) ./$(BUILDPYTHON) $(PROFILE_TASK) || true
-+	$(LLVM_PROF_FILE) _PYTHONNOSITEPACKAGES=1 $(RUNSHARED) ./$(BUILDPYTHON) -E $(PROFILE_TASK)
++	$(LLVM_PROF_FILE) _PYTHONNOSITEPACKAGES=1 $(RUNSHARED) ./$(BUILDPYTHON) -E $(PROFILE_TASK) || true
  
  build_all_merge_profile:
  	$(LLVM_PROF_MERGER)

@@ -43,7 +43,9 @@ NOCOMMON="-fno-common"
 # This option only affects C code.  Only non-conformant C code needs -fcommon, which is enabled by default.  Clear Linux leaves this flag off by default.
 # We may enable this at some point.  For now, there's a lot of breakages to work through.
 
-SAFERFASTMATH="-fno-math-errno -fno-trapping-math"
+SAFEST_FAST_MATH="-fno-math-errno -fno-trapping-math"
+SAFER_UNSAFE_MATH_OPTS="-fno-signed-zeros -fno-trapping-math -fassociative-math -freciprocal-math"
+SAFER_FAST_MATH="${SAFER_UNSAFE_MATH_OPTS} -fno-math-errno -ffinite-math-only -fno-rounding-math -fno-signaling-nans -fcx-limited-range -fexcess-precision=fast"
 
 #These are flags left off by default that we're planning to start using.  Clear Linux uses these in lieu of full -ffast-math optimizations
 #They DO break compliance with ISO C++, so we'll be careful about introducing these.

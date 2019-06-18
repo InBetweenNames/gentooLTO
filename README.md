@@ -77,11 +77,12 @@ The default configuration of GentooLTO enables the following:
 * -fdevirtualize-at-ltrans
 * LTO
 
-** GentooLTO uses ld.gold as the default linker **
+*** GentooLTO uses ld.bfd as the default linker ***
 
-Ensure that `sys-devel/binutils` has `USE=gold default-gold` set and re-emerge if necessary.
-Alternatively, you can use `binutils-config --linker ld.gold` to manage this yourself, although
-it will go back to `ld.bfd` every time you re-emerge `sys-devel/binutils`.
+GentooLTO was previously using `ld.gold` as the default linker, but it appears that it is 
+not being maintained upstream except for minor bugfixes.  `ld.gold` is still supported by GentooLTO
+and workarounds are still being accepted in `ltoworkarounds.conf`, but going forward the recommended
+linker will be `ld.bfd`.
 
 If you'd like to override the default configuration, you can source another file, `make.conf.lto.defines` instead.
 This file contains the definitions for the variables that `sys-config/ltoize` uses for the optimization flags.

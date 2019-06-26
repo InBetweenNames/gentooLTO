@@ -15,7 +15,7 @@
 #* Anything else is up to you, such as -march, -pipe, -O{3,2,s,1}, etc...
 #* CXXFLAGS should be set to CFLAGS
 #* Optionally, set other *FLAGS for languages compiled with GCC as well (See make.conf.lto)
-#* LDFLAGS of your Gentoo profile should be respected.  Consider adding -Wl,--hash-style=gnu.
+#* LDFLAGS of your Gentoo profile should be respected.
 #  See make.conf.lto for more details.
 
 #FLTO is of the form -flto[=n] where n is the number of threads to use during linking.

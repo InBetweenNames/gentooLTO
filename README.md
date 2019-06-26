@@ -57,7 +57,8 @@ source make.conf.lto
 
 CFLAGS="-march=native ${CFLAGS} -pipe" #NOTE: Consider using -falign-functions=32 if you use an Intel processor.  See issue #164.
 CXXFLAGS="${CFLAGS}"
-LDFLAGS="${LDFLAGS} -Wl,--hash-style=gnu"
+#If you modify LDFLAGS, source the original first to respect your profile's LDFLAGS:
+#LDFLAGS="${LDFLAGS} -Wl,--your-modifications=here"
 
 #Obtained from app-portage/cpuid2cpuflags utility
 #Highly recommended to add these
@@ -95,7 +96,6 @@ source make.conf.lto.defines
 
 CFLAGS="-march=native -O3 ${SEMINTERPOS} ${GRAPHITE} ${IPA} ${FLTO} -fuse-linker-plugin -pipe" #NOTE: consider using -falign-functions=32 if you use an Intel processor (Sandy Bridge or later).  See issue #164.
 CXXFLAGS="${CFLAGS}"
-LDFLAGS="${LDFLAGS} -Wl,--hash-style=gnu"
 
 ...
 ~~~
@@ -106,8 +106,14 @@ alignment.  This flag is optional and appears to be Intel-specific.
 
 For more details, there are extensive comments in both files.
 Regardless of which approach you choose, you should ensure that `CXXFLAGS` is set to `CFLAGS`,
-and your Portage profile's `LDFLAGS` are respected.  I also enable `-Wl,--hash-style=gnu` as it
-can help catch packages that don't respect `LDFLAGS`, but this is optional.
+and your Portage profile's `LDFLAGS` are respected.  That is, if you modify `LDFLAGS`, source the original first as in the following: 
+
+~~~
+LDFLAGS="${LDFLAGS} -Wl,--your-modifications=here"
+~~~
+
+Previously we set `-Wl,--hash-style=gnu` in `LDFLAGS`, but this is not necessary anymore as it is the Gentoo default except on MIPS, where it's not supported.
+See issue #362 for details.
 
 It is strongly recommended to use the latest GCC (9.1.0 at the time of writing), latest binutils (2.32 currently), and latest glibc (2.29 currently).
 Other compilers and libcs may be supported in the future.

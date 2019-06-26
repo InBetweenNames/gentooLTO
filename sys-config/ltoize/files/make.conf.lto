@@ -29,11 +29,10 @@
 #Your CXXFLAGS should be a superset of your CFLAGS.  Most people will never need to add anything extra to their CXXFLAGS.
 
 #Your LDFLAGS should contain *ALL* of your CFLAGS for LTO to work.  It must receieve all optimization options, march, etc.
-#package.cflags takes care of this for you--no need to manually add your {C,CXX}FLAGS here.
-#It's usually a good idea to enable -Wl,--hash-style=gnu as well to help find packages which don't respect LDFLAGS
-#Ensure that your profile's LDFLAGS are respected by including them first.
+#Fortunately, package.cflags takes care of this for you--no need to manually add your {C,CXX}FLAGS here or anywhere else.
+#If you modify LDFLAGS, ensure that your profile's LDFLAGS are respected by including them first:
 
-#LDFLAGS="${LDFLAGS} -Wl,--hash-style=gnu"
+#LDFLAGS="${LDFLAGS} -Wl,--your-modifications=here"
 
 #NOTE: your profile likely contains -Wl,--as-needed and -Wl,-O1.
 #The -Wl,-01 here is a separate option sent to the linker that optimizes shared object binary sizes

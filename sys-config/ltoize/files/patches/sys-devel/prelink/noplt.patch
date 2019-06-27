@@ -1,0 +1,31 @@
+From 2cc1d58caaba994855516b50d5af057854c94fe8 Mon Sep 17 00:00:00 2001
+From: Shane Peelar <lookatyouhacker@gmail.com>
+Date: Sat, 25 May 2019 08:45:45 -0400
+Subject: [PATCH] arch-x86_64.c: Make assert conditional
+
+Make the assert in arch_prelink a condition instead of an assert,
+keeping things consistent with the other arches.  This makes
+prelink not bail out on `-fno-plt` executables.
+
+Signed-off-by: Shane Peelar <lookatyouhacker@gmail.com>
+---
+ src/arch-x86_64.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/arch-x86_64.c b/src/arch-x86_64.c
+index 2f6c551..aa739e6 100644
+--- a/src/arch-x86_64.c
++++ b/src/arch-x86_64.c
+@@ -418,7 +418,8 @@ x86_64_arch_prelink (struct prelink_info *info)
+ 			 ".plt"))
+ 	break;
+ 
+-      assert (i < dso->ehdr.e_shnum);
++      if (i == dso->ehdr.e_shnum)
++	return 0;
+       data = dso->shdr[i].sh_addr + 0x16;
+       write_le64 (dso, dso->info[DT_PLTGOT] + 8, data);
+     }
+-- 
+2.21.0
+

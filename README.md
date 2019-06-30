@@ -1,6 +1,6 @@
 # GentooLTO overlay
 
-English | [Serbo-Croatian, Cyrillic) (Српскохрватски)](/ПРОЧИТАЈ_МЕ.md) | [Serbo-Croatian, Latin (Srpskohrvatski)](/PROČITAJ_ME.md)
+English | [Serbo-Croatian, Cyrillic (Српскохрватски)](/ПРОЧИТАЈ_МЕ.md) | [Serbo-Croatian, Latin (Srpskohrvatski)](/PROČITAJ_ME.md)
 
 This is a living document -- it will be kept in sync with the project as it grows.
 

@@ -1,5 +1,7 @@
 # GentooLTO overlay
 
+English | [Serbian (Српски)](/ПРОЧИТАЈ_МЕ.md) | [Bosnian (Bosanski)](/PROČITAJ_ME.md)
+
 This is a living document -- it will be kept in sync with the project as it grows.
 
 [![Build Status](https://travis-ci.org/InBetweenNames/gentooLTO.svg?branch=master)](https://travis-ci.org/InBetweenNames/gentooLTO)

@@ -29,6 +29,9 @@ local prefix="${EROOT%/}/usr/lib"
 local suffix="\.a"
 local archives=()
 local packages=()
+local GCC_VER=""
+
+GCC_VER=$(gcc -dumpversion)
 
 echo -e "Searching in
 	${prefix}

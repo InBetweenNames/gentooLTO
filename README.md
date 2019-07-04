@@ -7,9 +7,9 @@ This is a living document -- it will be kept in sync with the project as it grow
 [![Build Status](https://travis-ci.org/InBetweenNames/gentooLTO.svg?branch=master)](https://travis-ci.org/InBetweenNames/gentooLTO)
 [![Gitter](https://badges.gitter.im/gentooLTO/community.svg)](https://gitter.im/gentooLTO/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-> Warning: this configuration is not for the faint of heart.  It is probably not a good idea to use this on a production system!  Against my better judgement, I do anyways...
+> Warning: this configuration is not for the faint of heart. It is probably not a good idea to use this on a production system! Against my better judgement, I do anyways...
 
-Interested in running Gentoo at (theoretically) maximum speed?  Want to have a nearly fully [LTOed](https://gcc.gnu.org/wiki/LinkTimeOptimization) system?  Read on to see how it can be done!
+Interested in running Gentoo at (theoretically) maximum speed? Want to have a nearly fully [LTO-ized](https://gcc.gnu.org/wiki/LinkTimeOptimization) system? Read on to see how it can be done!
 
 ## This documentation is being migrated over to the [GentooLTO Wiki](https://github.com/InBetweenNames/gentooLTO/wiki)
 
@@ -20,38 +20,31 @@ Based on the submissions from the survey that has been running since October 27 
 * ~27.4% of /usr/portage is confirmed working with GentooLTO's default configuration
 * ~27% of /usr/portage confirmed can be built with LTO without any workarounds required from GentooLTO
 
-The rest are untested and are unknown!  They may work or may not.  It would be great to achieve full coverage eventually!
-In any case, I find these results quite encouraging.
+The rest are untested and unknown! They may or may not work. It would be great to achieve full coverage eventually! In any case, I find these results quite encouraging.
 
-The full report can be viewed in the [news item](metadata/news/2019-04-17-results/2019-04-17-results.en.txt) "GentooLTO survey results" -- thanks to everyone who contributed.
-Credits are at the end of the news item.
+The full report can be viewed in the [news item](metadata/news/2019-04-17-results/2019-04-17-results.en.txt) "GentooLTO survey results" -- thanks to everyone who contributed. Credits are at the end of the news item.
 
-If you haven't had a chance to submit anything, don't worry, you still can -- your results just won't be included until the next report.
-I figure it makes sense to have these on an ongoing (perhaps yearly) basis.
+If you haven't had a chance to submit anything, don't worry, you still can -- your results just won't be included until the next report. I figure it makes sense to have these on an ongoing (perhaps yearly) basis.
 
 ## Introduction
 
-This overlay contains a set of configuration files extracted from my own Gentoo Portage configuration to enable system-wide LTO.  It is intended to be used with aggressive compiler optimizations to help catch bugs in programs, including GCC.  However, it can also be used for plain LTO without any aggressive compiler optimizations.  Read on to see how to use it.
+This overlay contains a set of configuration files extracted from my own Gentoo Portage configuration to enable system-wide LTO. It is intended to be used with aggressive compiler optimizations to help catch bugs in programs, including GCC. However, it can also be used for plain LTO without any aggressive compiler optimizations. Read on to see how to use it.
 
-The history: earlier in 2017, I set out to do an experiment in building Gentoo using the `-O3` gcc compiler option.  It is well documented on the Gentoo wiki that this is not
-a recommended configuration, but I wanted to see to what extent things would break.  As it turns out, most packages that cannot be built with `-O3` are already forced to build with `-O2` anyways in the ebuilds themselves, so I experienced very few failures.  With the success I had using -`O3`, I decided to make things a little more complicated and toss the [Graphite](https://gcc.gnu.org/wiki/Graphite) optimizations in the mix.  Then I went a bit more daring and tossed in LTO.  After about 8 months of doing this, I feel good enough about my configuration that I decided to publish it for interested parties to see.  This repository will be actively updated and tested, as it is the basis for my own Portage configuration.
+The history: earlier in 2017, I set out to do an experiment in building Gentoo using the `-O3` gcc compiler option. It is well documented on the Gentoo wiki that this is not a recommended configuration, but I wanted to see to what extent things would break. As it turns out, most packages that cannot be built with `-O3` are already forced to build with `-O2` anyways in the ebuilds themselves, so I experienced very few failures. With the success I had using -`O3`, I decided to make things a little more complicated and toss the [Graphite](https://gcc.gnu.org/wiki/Graphite) optimizations in the mix. Then I went a bit more daring and tossed in LTO. After about 8 months of doing this, I feel good enough about my configuration that I decided to publish it for interested parties to see. This repository will be actively updated and tested, as it is the basis for my own Portage configuration.
 
-My original LTO and Graphite experiments were based on [this helpful blog post](http://yuguangzhang.com/blog/enabling-gcc-graphite-and-lto-on-gentoo/).  What this experiment does is expand on the content in that post with an active and updated configuration.
+My original LTO and Graphite experiments were based on [this helpful blog post](http://yuguangzhang.com/blog/enabling-gcc-graphite-and-lto-on-gentoo/). What this experiment does is expand on the content in that post with an active and updated configuration.
 
 ## The philosophy behind this overlay
 
 > All optimizations are transformations, but not all transformations are optimizations.
 
-It is important to note that just because something is compiled with `-O3` and Graphite does not mean that the compiler will necessarily perform more optimizations than it would otherwise.  I only include flags in `make.conf.lto` that allow the compiler to perform a transformation if it is deemed profitable--any "optimization" that doesn't actually optimize, after all, is just a transformation.  The philosophy behind this configuration is to allow the compiler to optimize as it sees fit, without the restrictions normally imposed by `-O2` and friends.  **You won't ever find a flag that intentionally overrides the compiler's judgement in this configuration**.   If you do find a flag in this configuration that does, please file a bug report!  An example of a flag that overrides the compiler's judgement is `-funroll-loops`.
+It is important to note that just because something is compiled with `-O3` and Graphite does not mean that the compiler will necessarily perform more optimizations than it would otherwise. I only include flags in `make.conf.lto` that allow the compiler to perform a transformation if it is deemed profitable--any "optimization" that doesn't actually optimize, after all, is just a transformation. The philosophy behind this configuration is to allow the compiler to optimize as it sees fit, without the restrictions normally imposed by `-O2` and friends. **You won't ever find a flag that intentionally overrides the compiler's judgement in this configuration**. If you do find a flag in this configuration that does, please file a bug report! An example of a flag that overrides the compiler's judgement is `-funroll-loops`.
 
-The biggest gotcha with `-O3` is that it does not play nice at all with Undefined Behaviour.  UB is far more prevalent in C and C++ programs than anyone would like to admit, so the default advice with any source distribution is to build with `-O2` and be done with it.  If `-O3` produces non-working code, that is more often than not the code's fault and not the compiler's.
+The biggest gotcha with `-O3` is that it does not play nice at all with Undefined Behaviour. UB is far more prevalent in C and C++ programs than anyone would like to admit, so the default advice with any source distribution is to build with `-O2` and be done with it. If `-O3` produces non-working code, that is more often than not the code's fault and not the compiler's.
 
 ## How to use this configuration
 
-Add the `mv` overlay (`layman -a mv`) and then add this overlay (`layman -a lto-overlay`) to your system and `emerge sys-config/ltoize`, adding it to your `/etc/portage/package.accept_keywords` if necessary.  This will add in the necessary overrides to your `/etc/portage/`, but it won't modify your `make.conf`.
-It will create a `make.conf.lto` symlink in `/etc/portage` with the default GentooLTO configuration.
-To use the default configuration, define a variable `NTHREADS` with the number of threads you want to use for LTO.
-Then, source the file in your own `make.conf` like in this example:
+Add the `mv` overlay (`layman -a mv`) and then add this overlay (`layman -a lto-overlay`) to your system and `emerge sys-config/ltoize`, adding it to your `/etc/portage/package.accept_keywords` if necessary. This will add in the necessary overrides to your `/etc/portage/`, but it won't modify your `make.conf`. It will create a `make.conf.lto` symlink in `/etc/portage` with the default GentooLTO configuration. To use the default configuration, define a variable `NTHREADS` with the number of threads you want to use for LTO. Then, source the file in your own `make.conf` like in this example:
 
 ~~~ bash
 NTHREADS="12"
@@ -69,9 +62,7 @@ CPU_FLAGS_X86="aes avx avx2 f16c fma3 mmx mmxext pclmul popcnt sse sse2 sse3 sse
 ...
 ~~~
 
-As shown, your own `CFLAGS` inherit the `CFLAGS` defined by GentooLTO in `make.conf.lto`.
-The advantage of this approach is that you will receive new optimization flag updates as part of the standard ltoize
-update process.
+As shown, your own `CFLAGS` inherit the `CFLAGS` defined by GentooLTO in `make.conf.lto`. The advantage of this approach is that you will receive new optimization flag updates as part of the standard ltoize update process.
 
 The default configuration of GentooLTO enables the following:
 

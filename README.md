@@ -11,7 +11,7 @@ This is a living document -- it will be kept in sync with the project as it grow
 
 Interested in running Gentoo at (theoretically) maximum speed?  Want to have a nearly fully [LTOed](https://gcc.gnu.org/wiki/LinkTimeOptimization) system?  Read on to see how it can be done!
 
-## This documentation is being migrated over to the [GentooLTO Wiki](https://github.com/InBetweenNames/gentooLTO/wiki)!
+## This documentation is being migrated over to the [GentooLTO Wiki](https://github.com/InBetweenNames/gentooLTO/wiki)
 
 ## NEW: Coverage report as of April 17 2019
 
@@ -53,7 +53,7 @@ It will create a `make.conf.lto` symlink in `/etc/portage` with the default Gent
 To use the default configuration, define a variable `NTHREADS` with the number of threads you want to use for LTO.
 Then, source the file in your own `make.conf` like in this example:
 
-~~~
+~~~ bash
 NTHREADS="12"
 
 source make.conf.lto
@@ -74,6 +74,7 @@ The advantage of this approach is that you will receive new optimization flag up
 update process.
 
 The default configuration of GentooLTO enables the following:
+
 * O3
 * Graphite
 * -fno-semantic-interposition
@@ -83,16 +84,11 @@ The default configuration of GentooLTO enables the following:
 
 *** GentooLTO uses ld.bfd as the default linker ***
 
-GentooLTO was previously using `ld.gold` as the default linker, but it appears that it is 
-not being maintained upstream except for minor bugfixes.  `ld.gold` is still supported by GentooLTO
-and workarounds are still being accepted in `ltoworkarounds.conf`, but going forward the recommended
-linker will be `ld.bfd`.
+GentooLTO was previously using `ld.gold` as the default linker, but it appears that it is not being maintained upstream except for minor bugfixes. `ld.gold` is still supported by GentooLTO and workarounds are still being accepted in `ltoworkarounds.conf`, but going forward the recommended linker will be `ld.bfd`.
 
-If you'd like to override the default configuration, you can source another file, `make.conf.lto.defines` instead.
-This file contains the definitions for the variables that `sys-config/ltoize` uses for the optimization flags.
-Using this file directly, you can cherry-pick and define your own config.  For example:
+If you'd like to override the default configuration, you can source another file, `make.conf.lto.defines` instead. This file contains the definitions for the variables that `sys-config/ltoize` uses for the optimization flags. Using this file directly, you can cherry-pick and define your own config.  For example:
 
-~~~
+~~~ bash
 NTHREADS="12"
 
 source make.conf.lto.defines
@@ -103,53 +99,43 @@ CXXFLAGS="${CFLAGS}"
 ...
 ~~~
 
-In addition to this, if you use an Intel processor (Sandy Bridge or later), you may want to enable `-falign-functions=32` in your `CFLAGS`.
-See issue [#164](https://github.com/InBetweenNames/gentooLTO/issues/164) for a discussion on default function
-alignment.  This flag is optional and appears to be Intel-specific.
+In addition to this, if you use an Intel processor (Sandy Bridge or later), you may want to enable `-falign-functions=32` in your `CFLAGS`. See issue [#164](https://github.com/InBetweenNames/gentooLTO/issues/164) for a discussion on default function alignment. This flag is optional and appears to be Intel-specific.
 
 For more details, there are extensive comments in both files.
-Regardless of which approach you choose, you should ensure that `CXXFLAGS` is set to `CFLAGS`,
-and your Portage profile's `LDFLAGS` are respected.  That is, if you modify `LDFLAGS`, source the original first as in the following: 
+Regardless of which approach you choose, you should ensure that `CXXFLAGS` is set to `CFLAGS`, and your Portage profile's `LDFLAGS` are respected. That is, if you modify `LDFLAGS`, source the original first as in the following:
 
-~~~
+~~~ bash
 LDFLAGS="${LDFLAGS} -Wl,--your-modifications=here"
 ~~~
 
-Previously we set `-Wl,--hash-style=gnu` in `LDFLAGS`, but this is not necessary anymore as it is the Gentoo default except on MIPS, where it's not supported.
-See issue #362 for details.
+Previously we set `-Wl,--hash-style=gnu` in `LDFLAGS`, but this is not necessary anymore as it is the Gentoo default except on MIPS, where it's not supported. See issue #362 for details.
 
-It is strongly recommended to use the latest GCC (9.1.0 at the time of writing), latest binutils (2.32 currently), and latest glibc (2.29 currently).
-Other compilers and libcs may be supported in the future.
+It is strongly recommended to use the latest GCC (9.1.0 at the time of writing), latest binutils (2.32 currently), and latest glibc (2.29 currently). Other compilers and libcs may be supported in the future.
 
-When you find a problem, whether it's a package not playing nice with -O3, Graphite, or LTO, consider opening an issue here or sending a pull request with the overrides needed to get the package working.  Over time, we should be able to achieve full coverage of `/usr/portage` this way and provide a one size fits all solution, and not to mention help improve some open source software through the bug reports that will no doubt be generated! 
+When you find a problem, whether it's a package not playing nice with -O3, Graphite, or LTO, consider opening an issue here or sending a pull request with the overrides needed to get the package working.  Over time, we should be able to achieve full coverage of `/usr/portage` this way and provide a one size fits all solution, and not to mention help improve some open source software through the bug reports that will no doubt be generated!
 
-**After you've set everything up, run an `emerge -e @world` to rebuild your system with LTO and any optimizations you have chosen, or alternatively use [lto-rebuild](https://github.com/InBetweenNames/gentooLTO/wiki/lto-rebuild) to gradually
-convert your system over to GentooLTO.**
+**After you've set everything up, run an `emerge -e @world` to rebuild your system with LTO and any optimizations you have chosen, or alternatively use [lto-rebuild](https://github.com/InBetweenNames/gentooLTO/wiki/lto-rebuild) to gradually convert your system over to GentooLTO.**
 
 ## Conclusions
 
 After running this configuration for long enough, it seems stable for personal use, and it is the configuration I use on my desktop right now.  I see no need to revert anything, but YMMV.  If anything this repository can be used as a canary to see which packages exhibit undefined behaviour in C or C++.
 
-I have over 1600 packages installed on my system at this time, and I did an `emerge -e @world` before I uploaded my configuration to this repository.  Considering how few exceptions there are listed here, I find these results encouraging.  Perhaps we are closer than we think to an LTOed default Gentoo system?
-
+I have over 1600 packages installed on my system at this time, and I did an `emerge -e @world` before I uploaded my configuration to this repository.  Considering how few exceptions there are listed here, I find these results encouraging.  Perhaps we are closer than we think to an LTO-ed default Gentoo system?
 
 ## Goals of this project
 
-Ideally, it should be possible to build Gentoo with LTO by default, no exceptions.  I'm not sure if we'll ever get to that point, but I think it's worthwhile trying.  At the very least, we'll help catch undefined behaviour and packages that don't respect LDFLAGS, a worthwhile endeavour in its own right.  If we could demonstrate that O3 and Graphite produce tangible benefits, perhaps we could even change the "O2-by-default" perception many people have.  The internal compiler errors produced by GCC with the GentooLTO optimization settings should make for some good bug reports.
+Ideally, it should be possible to build Gentoo with LTO by default, no exceptions. I'm not sure if we'll ever get to that point, but I think it's worthwhile trying. At the very least, we'll help catch undefined behaviour and packages that don't respect LDFLAGS, a worthwhile endeavour in its own right. If we could demonstrate that O3 and Graphite produce tangible benefits, perhaps we could even change the "O2-by-default" perception many people have. The internal compiler errors produced by GCC with the GentooLTO optimization settings should make for some good bug reports.
 
 ## How to contribute
 
-The easiest way to contribute is to try it out!  Then contribute your package overrides here. If you want to contribute new compiler flags, understand that these must keep with the overall philosophy of this repository: allow the compiler
-to make the final call as to whether a transformation should be applied or not.
+The easiest way to contribute is to try it out! Then contribute your package overrides here. If you want to contribute new compiler flags, understand that these must keep with the overall philosophy of this repository: allow the compiler to make the final call as to whether a transformation should be applied or not.
 
-If you are willing to, try investigating things on a per-package basis to see if the problem can be corrected at the ebuild level.  If not, consider sending a patch upstream to fix the problem.  This could be very difficult, but would help a lot in keeping things clean here.
+If you are willing to, try investigating things on a per-package basis to see if the problem can be corrected at the ebuild level. If not, consider sending a patch upstream to fix the problem. This could be very difficult, but would help a lot in keeping things clean here.
 
 If you get internal compiler errors, consider isolating the troubling code and making a GCC bug report with it.
 
-Some packages may perform worse with these configuration options rather than straight O2.  These would also make good candidates for GCC bug reports, as it means the optimizers' cost functions may need to be adjusted.  You may be able to use a package's own test suites to measure this yourself.  I'll create a place to put these overrides when I get a PR about this.
+Some packages may perform worse with these configuration options rather than straight O2. These would also make good candidates for GCC bug reports, as it means the optimizers' cost functions may need to be adjusted. You may be able to use a package's own test suites to measure this yourself. I'll create a place to put these overrides when I get a PR about this.
 
-Some users have expressed interest in seeing benchmarks to measure the effects of this configuration on their systems.  I would have performed such benchmarks myself if I had known of a good "general responsiveness" benchmark to test with.  If you know of any good benchmarks that measure this, or are willing to develop one, please let me know.  I think that this would be very useful to the Linux community as a whole.
+Some users have expressed interest in seeing benchmarks to measure the effects of this configuration on their systems. I would have already performed such benchmarks myself if I knew of a good "general responsiveness" benchmark to test with. If you know of any good benchmarks that measure this, or are willing to develop one, please let me know. I think that this would be very useful to the Linux community as a whole.
 
-When contributing workarounds, you can actually modify the overlay directly in your system and commit to it, as it's just a git repository.
-You can then push your commits to your own fork on GitHub and create a pull request, or email your patches to me.  Either way, I'll make sure your workarounds
-get tested and added to the repository.
+When contributing workarounds, you can actually modify the overlay directly in your system and commit to it, as it's just a git repository. You can then push your commits to your own fork on GitHub and create a pull request, or email your patches to me. Either way, I'll make sure your workarounds get tested and added to the repository.

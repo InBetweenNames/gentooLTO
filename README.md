@@ -13,7 +13,11 @@ This is a living document. It will be kept in sync with the project as it grows.
 
 Interested in running Gentoo at (theoretically) maximum speed? Want to have a nearly fully [LTO-ized](https://gcc.gnu.org/wiki/LinkTimeOptimization) system? Read on to see how it can be done!
 
-## This documentation is being migrated over to the [GentooLTO Wiki](https://github.com/InBetweenNames/gentooLTO/wiki)
+---
+
+**This documentation is being migrated over to the [GentooLTO Wiki](https://github.com/InBetweenNames/gentooLTO/wiki)**
+
+---
 
 ## NEW: Coverage report as of April 17 2019
 

@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="6"
@@ -7,7 +7,7 @@ WANT_LIBTOOL="none"
 inherit autotools flag-o-matic pax-utils python-utils-r1 toolchain-funcs
 
 MY_P="Python-${PV}"
-PATCHSET_VERSION="3.6.6"
+PATCHSET_VERSION="3.6.8"
 
 DESCRIPTION="An interpreted, interactive, object-oriented programming language"
 HOMEPAGE="https://www.python.org/"
@@ -28,7 +28,7 @@ RESTRICT="!test? ( test )"
 RDEPEND="app-arch/bzip2:0=
 	app-arch/xz-utils:0=
 	>=sys-libs/zlib-1.1.3:0=
-	virtual/libffi
+	virtual/libffi:=
 	virtual/libintl
 	gdbm? ( sys-libs/gdbm:0=[berkdb] )
 	ncurses? ( >=sys-libs/ncurses-5.2:0= )

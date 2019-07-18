@@ -1,13 +1,13 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="6"
 WANT_LIBTOOL="none"
 
-inherit autotools flag-o-matic pax-utils python-utils-r1 toolchain-funcs
+inherit autotools eutils flag-o-matic multilib pax-utils python-utils-r1 toolchain-funcs multiprocessing
 
 MY_P="Python-${PV}"
-PATCHSET_VERSION="2.7.15"
+PATCHSET_VERSION="2.7.16"
 
 DESCRIPTION="An interpreted, interactive, object-oriented programming language"
 HOMEPAGE="https://www.python.org/"
@@ -16,8 +16,8 @@ SRC_URI="https://www.python.org/ftp/python/${PV}/${MY_P}.tar.xz
 
 LICENSE="PSF-2"
 SLOT="2.7"
-KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~amd64-fbsd ~x86-fbsd"
-IUSE="-berkdb bluetooth build doc elibc_uclibc examples gdbm hardened ipv6 libressl +ncurses +readline sqlite +ssl +threads tk +wide-unicode wininst +xml pgo"
+KEYWORDS="alpha amd64 arm arm64 hppa ia64 m68k ~mips ppc ppc64 s390 sh sparc x86 ~amd64-fbsd ~x86-fbsd"
+IUSE="-berkdb bluetooth build doc elibc_uclibc examples gdbm hardened ipv6 libressl +lto +ncurses +pgo +readline sqlite +ssl +threads tk +wide-unicode wininst +xml"
 
 # Do not add a dependency on dev-lang/python to this ebuild.
 # If you need to apply a patch which requires python for bootstrapping, please
@@ -26,7 +26,7 @@ IUSE="-berkdb bluetooth build doc elibc_uclibc examples gdbm hardened ipv6 libre
 
 RDEPEND="app-arch/bzip2:0=
 	>=sys-libs/zlib-1.1.3:0=
-	virtual/libffi
+	virtual/libffi:=
 	virtual/libintl
 	berkdb? ( || (
 		sys-libs/db:5.3
@@ -94,11 +94,11 @@ src_prepare() {
 
 	local PATCHES=(
 		"${WORKDIR}/patches"
-		# Fix for cross-compiling.
 		"${FILESDIR}/python-2.7.5-nonfatal-compileall.patch"
 		"${FILESDIR}/python-2.7.9-ncurses-pkg-config.patch"
 		"${FILESDIR}/python-2.7.10-cross-compile-warn-test.patch"
 		"${FILESDIR}/python-2.7.10-system-libffi.patch"
+		"${FILESDIR}/python-2.7.15-PGO-r1.patch"
 	)
 
 	default
@@ -173,6 +173,11 @@ src_configure() {
 	# Please query BSD team before removing this!
 	append-ldflags "-L."
 
+	# LTO needs this
+	if use lto; then
+		append-ldflags "${CFLAGS}"
+	fi
+
 	local dbmliborder
 	if use gdbm; then
 		dbmliborder+="${dbmliborder:+:}gdbm"
@@ -185,22 +190,25 @@ src_configure() {
 	mkdir -p "${BUILD_DIR}" || die
 	cd "${BUILD_DIR}" || die
 
-	ECONF_SOURCE="${S}" OPT="" \
-	econf \
-		--with-fpectl \
-		--enable-shared \
-		$(use_enable ipv6) \
-		$(use_with threads) \
-		$(use wide-unicode && echo "--enable-unicode=ucs4" || echo "--enable-unicode=ucs2") \
-		--infodir='${prefix}/share/info' \
-		--mandir='${prefix}/share/man' \
-		--with-computed-gotos \
-		--with-dbmliborder="${dbmliborder}" \
-		--with-libc="" \
-		--enable-loadable-sqlite-extensions \
-		--with-system-expat \
-		--with-system-ffi \
+	local myeconfargs=(
+		--with-fpectl
+		--enable-shared
+		$(use_enable ipv6)
+		$(use_with threads)
+		$(use wide-unicode && echo "--enable-unicode=ucs4" || echo "--enable-unicode=ucs2")
+		$(use_enable pgo optimizations)
+		$(use_with lto)
+		--infodir='${prefix}/share/info'
+		--mandir='${prefix}/share/man'
+		--with-computed-gotos
+		--with-dbmliborder="${dbmliborder}"
+		--with-libc=""
+		--enable-loadable-sqlite-extensions
+		--with-system-expat
+		--with-system-ffi
 		--without-ensurepip
+	)
+	ECONF_SOURCE="${S}" OPT="" econf "${myeconfargs[@]}"
 
 	if use threads && grep -q "#define POSIX_SEMAPHORES_NOT_ENABLED 1" pyconfig.h; then
 		eerror "configure has detected that the sem_open function is broken."
@@ -210,12 +218,16 @@ src_configure() {
 }
 
 src_compile() {
+	if use pgo; then
+		# disable distcc and ccache
+		export DISTCC_HOSTS=""
+		export CCACHE_DISABLE=1
+	fi
+
 	# Avoid invoking pgen for cross-compiles.
 	touch Include/graminit.h Python/graminit.c
 
 	cd "${BUILD_DIR}" || die
-
-	#The following code borrowed from https://github.com/stefantalpalaru/gentoo-overlay
 
 	# extract the number of parallel jobs in MAKEOPTS
 	echo ${MAKEOPTS} | egrep -o '(\-j|\-\-jobs)(=?|[[:space:]]*)[[:digit:]]+' > /dev/null
@@ -226,12 +238,7 @@ src_compile() {
 	fi
 	export par_arg
 
-	#NOTE: upstream has a bug where PGO builds don't use the libpython*.so in the build directory. See: https://www.reddit.com/r/Gentoo/comments/7ya7gm/build_python_27_with_optimizations_lto_and_pgo/dug7cnu/
-	if use pgo; then
-		emake profile-opt LLVM_PROF_FILE="_PYTHONNOSITEPACKAGES=1 \$(RUNSHARED)" PROFILE_TASK="-E \$(TESTPROG) ${par_arg} --pgo -w -uall,-audio -x test_gdb test_multiprocessing"
-	else
-		emake
-	fi
+	emake EXTRATESTOPTS="${par_arg} -uall,-audio -x test_distutils"
 
 	# Work around bug 329499. See also bug 413751 and 457194.
 	if has_version dev-libs/libffi[pax_kernel]; then
@@ -251,11 +258,14 @@ src_test() {
 	cd "${BUILD_DIR}" || die
 
 	# Skip failing tests.
-	local skipped_tests="distutils gdb"
+	local skipped_tests="distutils gdb curses xpickle bdb runpy test_support"
 
 	for test in ${skipped_tests}; do
 		mv "${S}"/Lib/test/test_${test}.py "${T}"
 	done
+
+	# bug 660358
+	local -x COLUMNS=80
 
 	# Daylight saving time problem
 	# https://bugs.python.org/issue22067
@@ -263,7 +273,7 @@ src_test() {
 	local -x TZ=UTC
 
 	# Rerun failed tests in verbose mode (regrtest -w).
-	emake test EXTRATESTOPTS="-w" < /dev/tty
+	emake test TESTOPTS="-w -uall,-audio ${par_arg}" < /dev/tty
 	local result="$?"
 
 	for test in ${skipped_tests}; do

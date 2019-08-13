@@ -101,7 +101,7 @@ LDFLAGS="${LDFLAGS} -Wl,--your-modifications=here"
 
 Previously we set `-Wl,--hash-style=gnu` in `LDFLAGS`, but this is not necessary anymore as it is the Gentoo default except on MIPS, where it's not supported. See issue #362 for details.
 
-It is strongly recommended to use the latest GCC (9.1.0 at the time of writing), latest binutils (2.32 currently), and latest glibc (2.29 currently). Other compilers and libcs may be supported in the future.
+It is strongly recommended to use the latest GCC (9.2.0 at the time of writing), latest binutils (2.32 currently), and latest glibc (2.29 currently). Other compilers and libcs may be supported in the future.
 
 When you find a problem, whether it's a package not playing nice with -O3, Graphite, or LTO, consider opening an issue here or sending a pull request with the overrides needed to get the package working.  Over time, we should be able to achieve full coverage of `/usr/portage` this way and provide a one size fits all solution, and not to mention help improve some open source software through the bug reports that will no doubt be generated!
 

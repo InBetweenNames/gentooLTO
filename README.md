@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/InBetweenNames/gentooLTO.svg?branch=master)](https://travis-ci.org/InBetweenNames/gentooLTO)
 [![Gitter](https://badges.gitter.im/gentooLTO/community.svg)](https://gitter.im/gentooLTO/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-English | [Serbo-Croatian, Cyrillic (Српскохрватски)](/ПРОЧИТАЈ_МЕ.md) | [Serbo-Croatian, Latin (Srpskohrvatski)](/PROČITAJ_ME.md)
+[Bosnian, Cyrillic (Босански)](/README_bs_Cyril.md) | [Bosnian, Latin (Bosanski)](/README_bs_Lat.md) | [Serbian (Српски)](/README_sr.md) | [Croatian (Hrvatski)](/README_hr.md)
 
 ---
 

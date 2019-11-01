@@ -19,9 +19,9 @@ Da li vas zanima korištenje Gentoo-a (teoretski) maksimalnom brzinom? Želite l
 
 ---
 
-## NOVO: Izvještaj pokrivenosti, 17. april 2019. godine
+## NOVO: Izvještaj pokrivenosti, 17. travanj 2019. godine
 
-Na osnovu broja podnesaka iz ankete koja je bila u toku od 27. oktobra 2018. godine, došli smo do sljedećih saznanja:
+Na osnovu broja podnesaka iz ankete koja je bila u toku od 27. listopada 2018. godine, došli smo do sljedećih saznanja:
 
 * ~27,4% Gentoo-ovog glavnog spremišta paketa je potvrđeno da radi sa GentooLTO-ovom zadanom konfiguracijom
 * ~27% Gentoo-ovog glavnog spremišta paketa je potvrđeno da radi sa GentooLTO-ovom zadanom konfiguracijom bez ikakve potrebe za zaobilaznim rješenjima od strane GentooLTO-a
@@ -38,11 +38,11 @@ Ovaj overlej sadrži niz konfiguracijskih datoteka koje se temelje na mojoj lič
 
 ### Prošlost
 
-Ranije tokom 2017. godine sam odlučio izvršiti ogled, izgraditi Gentoo sistem koristeći `-O3` zastavu GCC kompajlera. Veoma je dobro dokumentirano na Gentoo wiki-ju da ovo nije poželjna konfiguracija, ali sam htio vidjeti u kojoj mjeri će se sistem srušiti. Kako se ispstavilo, većina paketa koji se ne mogu izgraditi sa `-O3` je već prisiljena u ebuild-ovima da se izgradi sa `-O2`, tako da sam iskusio poprilično mali broj neuspjeha. Zbog uspjeha kojeg sam imao koristeći `-O3`, odlučio sam načiniti stvari malo složenijim, te sam dodao [Graphite](https://gcc.gnu.org/wiki/Graphite) optimizacije (grafit; engleski link). Onda sam postao malo odvažniji i još dodao LTO. Nakon što sam radio ovo otprilike osam mjeseci, osjećao sam se dovoljno dobro u vezi svoje konfiguracije, te sam odlučio da ju objavim da ju mogu vidjeti oni koje to zanima. Ovaj overlej će biti aktivno ažuriran i ispitivan, pošto se temelji na mojoj Portage konfiguraciji.
+Ranije tokom 2017. godine sam odlučio izvršiti jedan ogled, izgraditi Gentoo sistem koristeći `-O3` zastavu GCC kompajlera. Veoma je dobro dokumentirano na Gentoo wiki-ju da ovo nije poželjna konfiguracija, ali sam htio vidjeti u kojoj mjeri će se sistem srušiti. Kako se ispstavilo, većina paketa koji se ne mogu izgraditi sa `-O3` je već prisiljena u ebuild-ovima da se izgradi sa `-O2`, tako da sam iskusio poprilično mali broj neuspjeha. Zbog uspjeha kojeg sam imao koristeći `-O3`, odlučio sam načiniti stvari malo složenijim, te sam dodao [Graphite](https://gcc.gnu.org/wiki/Graphite) optimizacije (grafit; engleski link). Onda sam postao malo odvažniji i još dodao LTO. Nakon što sam radio ovo otprilike osam mjeseci, osjećao sam se dovoljno dobro u vezi svoje konfiguracije, te sam odlučio da ju objavim da ju mogu vidjeti oni koje to zanima. Ovaj overlej će biti aktivno ažuriran i ispitivan, pošto se temelji na mojoj Portage konfiguraciji.
 
 ---
 
-Moji izvorni LTO i Graphite pokusi su se temeljili na [ovom korisnom blog članku.](http://yuguangzhang.com/blog/enabling-gcc-graphite-and-lto-on-gentoo/) Šta ovaj overlej postiže jeste proširenje sadržaja iz tog članka sa aktivnom i ažuriranom konfiguracijom.
+Moji izvorni LTO i Graphite ogledi su se temeljili na [ovom korisnom blog članku.](http://yuguangzhang.com/blog/enabling-gcc-graphite-and-lto-on-gentoo/) Šta ovaj overlej postiže jeste proširenje sadržaja iz tog članka sa aktivnom i ažuriranom konfiguracijom.
 
 ---
 

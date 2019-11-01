@@ -16,11 +16,10 @@ this command will fail. You can use -l to manually intervene.
 
 Options:
 
--h or --help	Display this help
--a or --list-other	Only list the archives that were built with other GCC versions
--l or --list-pkg	Only list the packages that would be rebuilt (and their slots)
--r or --rebuild	Rebuild the packages using emerge (will ask for confirmation)
--v or --verbose	Verbose emerge output
+-h	Display this help
+-a	Only list the archives that were built with other GCC versions
+-l	Only list the packages that would be rebuilt (and their slots)
+-r	Rebuild the packages using emerge (will ask for confirmation)
 "
 }
 
@@ -64,21 +63,18 @@ then
 fi
 
 case "${1}" in
-	"-a" | "--list-other")
-		echo "The following packages installed static archives" >&2
-		echo -e "that were built using a different GCC:\n" >&2 
-		printf "%s\n" "${packages[@]}"
-		;;
-	"-l" | "--list-pkg")
+	"-l")
 		echo "The following static archives were built" >&2
 		echo -e "using a different GCC:\n" >&2
 		printf "%s\n" "${archives[@]}"
 		;;
-	"-r" | "--rebuild")
-		emerge -1a "${packages[@]}"
+	"-a")
+		echo "The following packages installed static archives" >&2
+		echo -e "that were built using a different GCC:\n" >&2 
+		printf "%s\n" "${packages[@]}"
 		;;
-	"-rv" | "-vr" | "-r -v" | "-v -r" | "--rebuild --verbose" | "--verbose --rebuild")
-		emerge -1av "${packages[@]}"
+	"-r")
+		emerge -1a "${packages[@]}"
 		;;
 	*)
 		exit 1
@@ -87,13 +83,14 @@ esac
 }
 
 case "${1}" in
-	"" | "-h" | "--help")
+	"" | "-h")
 		display_help
 		;;
-	"-a" | "--list-other" | "-l" | "--list-pkg" | "-r" | "--rebuild" | "-rv" | "-vr" | "-r -v" | "-v -r" | "--rebuild --verbose" | "--verbose --rebuild")
+	"-l" | "-a" | "-r")
 		perform_action "${1}"
 		;;
 	*)
 		exit 1
 		;;
 esac
+

@@ -1,0 +1,174 @@
+Patch pulled from the `3.7` branch, which will be incorporated into a
+future 3.7.6 release:
+https://github.com/python/cpython/commit/598bfa4d45
+
+An equivalent change already landed for 3.8.0, so drop it when moving to
+the 3.8 series.
+https://github.com/python/cpython/commit/359a1975cb
+
+
+From 598bfa4d457d61431142ad99ecbb9bd10cf314e6 Mon Sep 17 00:00:00 2001
+From: "Miss Islington (bot)"
+ <31488909+miss-islington@users.noreply.github.com>
+Date: Wed, 9 Oct 2019 06:52:34 -0700
+Subject: [PATCH] bpo-37531: regrtest ignores output on timeout (GH-16659)
+
+bpo-37531, bpo-38207: On timeout, regrtest no longer attempts to call
+`popen.communicate() again: it can hang until all child processes
+using stdout and stderr pipes completes. Kill the worker process and
+ignores its output.
+
+Reenable test_regrtest.test_multiprocessing_timeout().
+
+bpo-37531: Change also the faulthandler timeout of the main process
+from 1 minute to 5 minutes, for Python slowest buildbots.
+(cherry picked from commit 0ec618af98ac250a91ee9c91f8569e6df6772758)
+
+Co-authored-by: Victor Stinner <vstinner@python.org>
+---
+ Lib/test/libregrtest/runtest_mp.py            | 64 +++++++++++--------
+ .../2019-10-08-16-42-05.bpo-37531.7v-_Ca.rst  |  5 ++
+ 2 files changed, 42 insertions(+), 27 deletions(-)
+ create mode 100644 Misc/NEWS.d/next/Tests/2019-10-08-16-42-05.bpo-37531.7v-_Ca.rst
+
+diff --git a/Lib/test/libregrtest/runtest_mp.py b/Lib/test/libregrtest/runtest_mp.py
+index 9d5a699852b9c..2770cf93bd7d8 100644
+--- a/Lib/test/libregrtest/runtest_mp.py
++++ b/Lib/test/libregrtest/runtest_mp.py
+@@ -22,6 +22,12 @@
+ PROGRESS_UPDATE = 30.0   # seconds
+ assert PROGRESS_UPDATE >= PROGRESS_MIN_TIME
+ 
++# Kill the main process after 5 minutes. It is supposed to write an update
++# every PROGRESS_UPDATE seconds. Tolerate 5 minutes for Python slowest
++# buildbot workers.
++MAIN_PROCESS_TIMEOUT = 5 * 60.0
++assert MAIN_PROCESS_TIMEOUT >= PROGRESS_UPDATE
++
+ # Time to wait until a worker completes: should be immediate
+ JOIN_TIMEOUT = 30.0   # seconds
+ 
+@@ -159,20 +165,6 @@ def mp_result_error(self, test_name, error_type, stdout='', stderr='',
+         result = TestResult(test_name, error_type, test_time, None)
+         return MultiprocessResult(result, stdout, stderr, err_msg)
+ 
+-    def _timedout(self, test_name):
+-        self._kill()
+-
+-        stdout = stderr = ''
+-        popen = self._popen
+-        try:
+-            stdout, stderr = popen.communicate(timeout=JOIN_TIMEOUT)
+-        except (subprocess.TimeoutExpired, OSError) as exc:
+-            print_warning(f"Failed to read {self} output "
+-                          f"(timeout={format_duration(JOIN_TIMEOUT)}): "
+-                          f"{exc!r}")
+-
+-        return self.mp_result_error(test_name, TIMEOUT, stdout, stderr)
+-
+     def _run_process(self, test_name):
+         self.start_time = time.monotonic()
+ 
+@@ -195,23 +187,32 @@ def _run_process(self, test_name):
+ 
+             try:
+                 stdout, stderr = popen.communicate(timeout=self.timeout)
++                retcode = popen.returncode
++                assert retcode is not None
+             except subprocess.TimeoutExpired:
+                 if self._stopped:
+                     # kill() has been called: communicate() fails
+                     # on reading closed stdout/stderr
+                     raise ExitThread
+ 
+-                return self._timedout(test_name)
++                # On timeout, kill the process
++                self._kill()
++
++                # None means TIMEOUT for the caller
++                retcode = None
++                # bpo-38207: Don't attempt to call communicate() again: on it
++                # can hang until all child processes using stdout and stderr
++                # pipes completes.
++                stdout = stderr = ''
+             except OSError:
+                 if self._stopped:
+                     # kill() has been called: communicate() fails
+                     # on reading closed stdout/stderr
+                     raise ExitThread
+                 raise
+-
+-            retcode = popen.returncode
+-            stdout = stdout.strip()
+-            stderr = stderr.rstrip()
++            else:
++                stdout = stdout.strip()
++                stderr = stderr.rstrip()
+ 
+             return (retcode, stdout, stderr)
+         except:
+@@ -223,13 +224,10 @@ def _run_process(self, test_name):
+             self.current_test_name = None
+ 
+     def _runtest(self, test_name):
+-        result = self._run_process(test_name)
+-
+-        if isinstance(result, MultiprocessResult):
+-            # _timedout() case
+-            return result
++        retcode, stdout, stderr = self._run_process(test_name)
+ 
+-        retcode, stdout, stderr = result
++        if retcode is None:
++            return self.mp_result_error(test_name, TIMEOUT, stdout, stderr)
+ 
+         err_msg = None
+         if retcode != 0:
+@@ -248,7 +246,8 @@ def _runtest(self, test_name):
+                     err_msg = "Failed to parse worker JSON: %s" % exc
+ 
+         if err_msg is not None:
+-            return self.mp_result_error(test_name, CHILD_ERROR, stdout, stderr, err_msg)
++            return self.mp_result_error(test_name, CHILD_ERROR,
++                                        stdout, stderr, err_msg)
+ 
+         return MultiprocessResult(result, stdout, stderr, err_msg)
+ 
+@@ -287,6 +286,16 @@ def _wait_completed(self):
+                           f"{exc!r}")
+ 
+     def wait_stopped(self, start_time):
++        # bpo-38207: MultiprocessTestRunner.stop_workers() called self.stop()
++        # which killed the process. Sometimes, killing the process from the
++        # main thread does not interrupt popen.communicate() in
++        # TestWorkerProcess thread. This loop with a timeout is a workaround
++        # for that.
++        #
++        # Moreover, if this method fails to join the thread, it is likely
++        # that Python will hang at exit while calling threading._shutdown()
++        # which tries again to join the blocked thread. Regrtest.main()
++        # uses EXIT_TIMEOUT to workaround this second bug.
+         while True:
+             # Write a message every second
+             self.join(1.0)
+@@ -353,7 +362,8 @@ def _get_result(self):
+         timeout = PROGRESS_UPDATE
+         while True:
+             if use_faulthandler:
+-                faulthandler.dump_traceback_later(timeout * 2.0, exit=True)
++                faulthandler.dump_traceback_later(MAIN_PROCESS_TIMEOUT,
++                                                  exit=True)
+ 
+             # wait for a thread
+             try:
+diff --git a/Misc/NEWS.d/next/Tests/2019-10-08-16-42-05.bpo-37531.7v-_Ca.rst b/Misc/NEWS.d/next/Tests/2019-10-08-16-42-05.bpo-37531.7v-_Ca.rst
+new file mode 100644
+index 0000000000000..78ab636516514
+--- /dev/null
++++ b/Misc/NEWS.d/next/Tests/2019-10-08-16-42-05.bpo-37531.7v-_Ca.rst
+@@ -0,0 +1,5 @@
++On timeout, regrtest no longer attempts to call ``popen.communicate()``
++again: it can hang until all child processes using stdout and stderr pipes
++completes. Kill the worker process and ignores its output. Change also the
++faulthandler timeout of the main process from 1 minute to 5 minutes, for Python
++slowest buildbots.

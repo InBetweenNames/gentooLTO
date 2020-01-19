@@ -56,7 +56,7 @@ The biggest gotcha with `-O3` is that it does not play nice at all with Undefine
 
 ## How to use this configuration
 
-Add the `mv` overlay (`layman -a mv`) and then add this overlay (`layman -a lto-overlay`) to your system and run `emerge sys-config/ltoize`. Add the package to your `/etc/portage/package.accept_keywords` if necessary. This will add the necessary overrides to `/etc/portage/`, but it won't modify your `make.conf`. It will create a `make.conf.lto` symlink in `/etc/portage` with the default GentooLTO configuration. You may need to add `graphite` to your `USE` and recompile `gcc` before adding the GentooLTO configuration to your `make.conf` file. To use the default configuration, define a variable `NTHREADS` with the number of threads you want to use for LTO. Then, source the file in your own `make.conf` like in this example:
+Add the `mv` overlay (`layman -a mv`) and then add this overlay (`layman -a lto-overlay`) to your system and run `emerge sys-config/ltoize`. Add the package to your `/etc/portage/package.accept_keywords` if necessary. This will add the necessary overrides to `/etc/portage/`, but it won't modify your `make.conf`. It will create a `make.conf.lto` symlink in `/etc/portage` with the default GentooLTO configuration. You may need to add `graphite` to your USE flags and recompile GCC before adding the GentooLTO configuration to your `make.conf` file. To use the default configuration, define a variable `NTHREADS` with the number of threads you want to use for LTO. Then, source the file in your own `make.conf` like in this example:
 
 ~~~ bash
 NTHREADS="12"

@@ -1,0 +1,16 @@
+diff --git a/src/gather.c b/src/gather.c
+index 277f1b5..3cdc7fd 100644
+--- a/src/gather.c
++++ b/src/gather.c
+@@ -189,6 +189,11 @@ gather_deps (DSO *dso, struct prelink_entry *ent)
+       if (line[n - 1] == '\n')
+ 	line[n - 1] = '\0';
+ 
++      if (strncmp (line, "lookup", sizeof ("lookup") - 1) == 0)
++      {
++         continue;
++      }
++
+       p = strstr (line, " => ");
+       if (p)
+ 	{

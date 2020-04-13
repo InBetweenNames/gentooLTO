@@ -18,7 +18,7 @@ S="${WORKDIR}/${MY_P}"
 
 LICENSE="PSF-2"
 SLOT="${PYVER}"
-KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86"
+KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sparc ~x86"
 IUSE="-berkdb bluetooth build elibc_uclibc examples gdbm hardened ipv6 libressl +lto +ncurses +pgo +readline sqlite +ssl +threads tk +wide-unicode wininst +xml"
 
 # Do not add a dependency on dev-lang/python to this ebuild.
@@ -28,7 +28,7 @@ IUSE="-berkdb bluetooth build elibc_uclibc examples gdbm hardened ipv6 libressl 
 
 RDEPEND="app-arch/bzip2:=
 	>=sys-libs/zlib-1.1.3:=
-	virtual/libffi:=
+	dev-libs/libffi:=
 	virtual/libintl
 	berkdb? ( || (
 		sys-libs/db:5.3

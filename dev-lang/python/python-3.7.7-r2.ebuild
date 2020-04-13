@@ -1,4 +1,4 @@
-# Copyright 1999-2019 Gentoo Authors
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="7"
@@ -8,17 +8,17 @@ inherit autotools flag-o-matic pax-utils python-utils-r1 toolchain-funcs
 
 MY_P="Python-${PV}"
 PYVER=$(ver_cut 1-2)
-PATCHSET_VERSION="3.8.0"
+PATCHSET="python-gentoo-patches-3.7.6"
 
 DESCRIPTION="An interpreted, interactive, object-oriented programming language"
 HOMEPAGE="https://www.python.org/"
 SRC_URI="https://www.python.org/ftp/python/${PV}/${MY_P}.tar.xz
-	https://dev.gentoo.org/~mgorny/dist/python-gentoo-patches-${PATCHSET_VERSION}.tar.xz"
+	https://dev.gentoo.org/~mgorny/dist/python/${PATCHSET}.tar.xz"
 S="${WORKDIR}/${MY_P}"
 
 LICENSE="PSF-2"
-SLOT="${PYVER}"
-KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~riscv ~s390 ~sh ~sparc ~x86"
+SLOT="${PYVER}/${PYVER}m"
+KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86"
 IUSE="bluetooth build examples gdbm hardened ipv6 libressl +ncurses +readline sqlite +ssl test tk wininst +xml pgo"
 RESTRICT="!test? ( test )"
 
@@ -29,11 +29,12 @@ RESTRICT="!test? ( test )"
 
 RDEPEND="app-arch/bzip2:=
 	app-arch/xz-utils:=
+	dev-libs/libffi:=
 	sys-apps/util-linux:=
 	>=sys-libs/zlib-1.1.3:=
-	virtual/libffi:=
+	virtual/libcrypt:=
 	virtual/libintl
-	gdbm? ( sys-libs/gdbm:0=[berkdb] )
+	gdbm? ( sys-libs/gdbm:=[berkdb] )
 	ncurses? ( >=sys-libs/ncurses-5.2:= )
 	readline? ( >=sys-libs/readline-4.1:= )
 	sqlite? ( >=dev-db/sqlite-3.3.8:3= )
@@ -47,8 +48,7 @@ RDEPEND="app-arch/bzip2:=
 		dev-tcltk/blt:=
 		dev-tcltk/tix
 	)
-	xml? ( >=dev-libs/expat-2.1:= )
-	!!<sys-apps/sandbox-2.6-r1"
+	xml? ( >=dev-libs/expat-2.1:= )"
 # bluetooth requires headers from bluez
 DEPEND="${RDEPEND}
 	bluetooth? ( net-wireless/bluez )
@@ -65,9 +65,8 @@ src_prepare() {
 	rm -fr Modules/zlib || die
 
 	local PATCHES=(
-		"${FILESDIR}/python-3.7.5-hashlib.patch"
-		"${WORKDIR}/patches"
-		#"${FILESDIR}/clearlinux-pkgs"
+		"${WORKDIR}/${PATCHSET}"
+		"${FILESDIR}/test.support.unlink-ignore-PermissionError.patch"
 	)
 
 	default
@@ -110,8 +109,7 @@ src_configure() {
 	# https://bugs.gentoo.org/show_bug.cgi?id=50309
 	if is-flagq -O3; then
 		is-flagq -fstack-protector-all && replace-flags -O3 -O2
-		use hardened && replace-flags -O3 -O2 &&
-		einfo "You have enabled the hardened USE flag. ${P} will now be compiled with -O2"
+		use hardened && replace-flags -O3 -O2
 	fi
 
 	# Export CXX so it ends up in /usr/lib/python3.X/config/Makefile.
@@ -131,6 +129,11 @@ src_configure() {
 	fi
 
 	local myeconfargs=(
+		# glibc-2.30 removes it; since we can't cleanly force-rebuild
+		# Python on glibc upgrade, remove it proactively to give
+		# a chance for users rebuilding python before glibc
+		ac_cv_header_stropts_h=no
+
 		--enable-shared
 		$(use_enable ipv6)
 		--infodir='${prefix}/share/info'
@@ -145,11 +148,6 @@ src_configure() {
 	)
 
 	OPT="" econf "${myeconfargs[@]}"
-
-	# Would be appended if --with-lto was used
-	if test-flags flto >/dev/null ; then
-		append-flags -Wl,--export-dynamic
-	fi
 }
 
 src_compile() {
@@ -302,7 +300,8 @@ src_install() {
 	local pymajor=${PYVER%.*}
 	mkdir -p "${D}${PYTHON_SCRIPTDIR}" || die
 	# python and pythonX
-	ln -s "../../../bin/${abiver}" "${D}${PYTHON_SCRIPTDIR}/python${pymajor}" || die
+	ln -s "../../../bin/${abiver}" \
+		"${D}${PYTHON_SCRIPTDIR}/python${pymajor}" || die
 	ln -s "python${pymajor}" "${D}${PYTHON_SCRIPTDIR}/python" || die
 	# python-config and pythonX-config
 	# note: we need to create a wrapper rather than symlinking it due
@@ -312,13 +311,19 @@ src_install() {
 		exec "${abiver}-config" "\${@}"
 	EOF
 	chmod +x "${D}${PYTHON_SCRIPTDIR}/python${pymajor}-config" || die
-	ln -s "python${pymajor}-config" "${D}${PYTHON_SCRIPTDIR}/python-config" || die
-	# 2to3, pydoc
-	ln -s "../../../bin/2to3-${PYVER}" "${D}${PYTHON_SCRIPTDIR}/2to3" || die
-	ln -s "../../../bin/pydoc${PYVER}" "${D}${PYTHON_SCRIPTDIR}/pydoc" || die
+	ln -s "python${pymajor}-config" \
+		"${D}${PYTHON_SCRIPTDIR}/python-config" || die
+	# 2to3, pydoc, pyvenv
+	ln -s "../../../bin/2to3-${PYVER}" \
+		"${D}${PYTHON_SCRIPTDIR}/2to3" || die
+	ln -s "../../../bin/pydoc${PYVER}" \
+		"${D}${PYTHON_SCRIPTDIR}/pydoc" || die
+	ln -s "../../../bin/pyvenv-${PYVER}" \
+		"${D}${PYTHON_SCRIPTDIR}/pyvenv" || die
 	# idle
 	if use tk; then
-		ln -s "../../../bin/idle${PYVER}" "${D}${PYTHON_SCRIPTDIR}/idle" || die
+		ln -s "../../../bin/idle${PYVER}" \
+			"${D}${PYTHON_SCRIPTDIR}/idle" || die
 	fi
 }
 
@@ -329,11 +334,14 @@ pkg_preinst() {
 }
 
 eselect_python_update() {
-	if [[ -z "$(eselect python show)" || ! -f "${EROOT}/usr/bin/$(eselect python show)" ]]; then
+	if [[ -z "$(eselect python show)" || \
+			! -f "${EROOT}/usr/bin/$(eselect python show)" ]]; then
 		eselect python update
 	fi
 
-	if [[ -z "$(eselect python show --python${PV%%.*})" || ! -f "${EROOT}/usr/bin/$(eselect python show --python${PV%%.*})" ]]; then
+	if [[ -z "$(eselect python show --python${PV%%.*})" || \
+			! -f "${EROOT}/usr/bin/$(eselect python show --python${PV%%.*})" ]]
+	then
 		eselect python update --python${PV%%.*}
 	fi
 }

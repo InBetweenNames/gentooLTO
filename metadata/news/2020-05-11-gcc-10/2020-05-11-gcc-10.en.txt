@@ -1,0 +1,41 @@
+Title: GCC 10.1.0 and GentooLTO
+Author: Shane Peelar <lookatyouhacker@gmail.com>
+Content-Type: text/plain
+Posted: 2020-05-11
+Revision: 1
+News-Item-Format: 1.0
+
+The time for GCC 10 is upon us!
+
+GentooLTO will be officially switching over to GCC 10 in the next few weeks.  There are some notable changes in
+this new version of GCC that may make the transition less simple than with previous GCCs.  Notably,
+`-fno-common` is now a default flag for GCC, which we have observed doesn't play nice with a fair number of
+packages.  Gentoo upstream is tracking these packages and patching them or modifying the ebuilds to append `-fcommon`,
+which is helping a lot.  `-fno-common` and LTO together introduce new complications in some packages due to libtool,
+which aren't observable with `-fno-common` by itself.  For this reason, a new type of workaround,
+`NOCOMMON_OVERRIDE_LIBTOOL`, has been introduced to attempt to work around these problems by patching libtool
+on a per-package basis.  It's not the cleanest solution, but it's the best we've got in the short term.
+Of course, an actual package patch is preferable. GCC 10 also brings a number of LTO improvements,
+which will of course require revisiting the workarounds list.
+
+If you want to ease into the GCC 10 transition while keeping GCC 9, you can start running `-fno-common` right now to
+catch package failures. When the GCC 10 change officially takes place, the `-fno-common` section of the workarounds will
+be moved to a different file (not enabled by default) and an `-fcommon` section will be added to `ltoworkarounds.conf`
+instead.
+
+As of today, GentooLTO should work with GCC 10, although be warned it's less tested than it was with GCC 9 at the
+moment.  Please continue reporting any issues you've found on the GitHub issue tracker or making pull requests.
+
+On the note of stability, I'd like to propose a new GentooLTO configuration called GentooLTO Lite which is aimed
+at users that simply want better Gentoo defaults, and aren't interested in finding bugs in packages.  Right now,
+I'm leaning towards "-O2 -ftree-vectorize -flto", but it's not set in stone.  The default GentooLTO will remain
+as it is, with bleeding edge features enabled (though perhaps without Graphite).  Of course, you'll still be able
+to customize your configuration as before with the `.defines` file.  If you have any thoughts on this, please reach out
+via GitHub, Gitter, or email.
+
+Well, I suppose that wraps everything up.  I'm busy preparing for a thesis defence so I unfortunately can't spend
+as much time as I'd like on GentooLTO -- but I will for sure make sure the GCC 10 transition goes smoothly at the very
+least.  I'll post another news entry when the GCC 10 migration date is set in stone.
+
+All the best,
+-Shane

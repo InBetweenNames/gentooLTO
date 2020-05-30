@@ -7,7 +7,7 @@ WANT_LIBTOOL="none"
 inherit autotools check-reqs flag-o-matic pax-utils python-utils-r1 \
 	toolchain-funcs
 
-MY_P="Python-${PV/_alpha/a}"
+MY_P="Python-${PV/_beta/b}"
 PYVER=$(ver_cut 1-2)
 PATCHSET="python-gentoo-patches-3.9.0_alpha6"
 
@@ -64,10 +64,6 @@ CHECKREQS_DISK_BUILD=5500M
 
 pkg_pretend() {
 	use test && check-reqs_pkg_pretend
-
-	ewarn "This is an early developer preview of Python 3.9.  New features"
-	ewarn "can still be added up to 2020-05-18.  It's not suitable for production"
-	ewarn "use, and it is not supported for Gentoo packages."
 }
 
 pkg_setup() {

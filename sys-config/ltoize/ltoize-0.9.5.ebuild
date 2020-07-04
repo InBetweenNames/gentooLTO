@@ -7,7 +7,7 @@ inherit toolchain-funcs
 
 DESCRIPTION="A configuration for portage to make building with LTO easy."
 HOMEPAGE="https://github.com/InBetweenNames/gentooLTO"
-KEYWORDS="~amd64 ~x86 ~arm"
+KEYWORDS="~amd64 ~x86 ~arm ~arm64"
 
 SRC_URI=""
 

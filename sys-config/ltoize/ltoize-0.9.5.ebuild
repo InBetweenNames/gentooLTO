@@ -1,4 +1,4 @@
-# Copyright 1999-2019 Gentoo Foundation
+# Copyright 1999-2020 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -7,7 +7,10 @@ inherit toolchain-funcs
 
 DESCRIPTION="A configuration for portage to make building with LTO easy."
 HOMEPAGE="https://github.com/InBetweenNames/gentooLTO"
-KEYWORDS="~alpha amd64 arm arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc x86"
+
+#Note: there's nothing preventing this from working on stable, but the dependencies of ltoize aren't keyworded for
+#stable, so we only can do testing
+KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sparc ~x86"
 
 SRC_URI=""
 

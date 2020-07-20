@@ -41,7 +41,8 @@ SEMINTERPOS="-fno-semantic-interposition"
 NOCOMMON="-fno-common"
 
 # This option only affects C code.  Only non-conformant C code needs -fcommon, which is enabled by default.  Clear Linux leaves this flag off by default.
-# We may enable this at some point.  For now, there's a lot of breakages to work through.
+# This is enabled by default with GCC 10 and is kept here only for documentation purposes.  Use `-fcommon` to restore
+# GCC 9.x behaviour and below.
 
 SAFEST_FAST_MATH="-fno-math-errno -fno-trapping-math"
 SAFER_UNSAFE_MATH_OPTS="-fno-signed-zeros -fno-trapping-math -fassociative-math -freciprocal-math"

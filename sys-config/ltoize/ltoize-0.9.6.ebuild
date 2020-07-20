@@ -1,4 +1,4 @@
-# Copyright 1999-2020 Gentoo Foundation
+# Copyright 1999-2021 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -16,7 +16,7 @@ SRC_URI=""
 
 LICENSE="GPL-2+"
 SLOT="0"
-IUSE="override-flagomatic"
+IUSE="override-flagomatic keep-nocommon"
 
 #portage-bashrc-mv can be obtained from mv overlay
 DEPEND="
@@ -37,8 +37,8 @@ pkg_setup() {
 
 	ACTIVE_GCC=$(gcc-fullversion)
 
-	if ver_test "${ACTIVE_GCC}" -lt 9.2.0; then
-		ewarn "Warning: Active GCC version < 9.2.0, it is recommended that you use the newest GCC if you want LTO."
+	if ver_test "${ACTIVE_GCC}" -lt 10.1.0; then
+		ewarn "Warning: Active GCC version < 10.1.0, it is recommended that you use the newest GCC if you want LTO."
 		if [ "${I_KNOW_WHAT_I_AM_DOING}" != "y" ]; then
 			eerror "Aborting LTOize installation due to older GCC -- set I_KNOW_WHAT_I_AM_DOING=y if you want to override this behaviour."
 			die
@@ -74,6 +74,10 @@ pkg_preinst() {
 	elog "Installing ltoworkarounds.conf package.cflags overrides"
 	dosym "${LTO_PORTAGE_DIR}/package.cflags/ltoworkarounds.conf" "${PORTAGE_CONFIGROOT%/}/etc/portage/package.cflags/ltoworkarounds.conf"
 
+	#Install -fno-common workarounds file
+	use keep-nocommon && dosym "${LTO_PORTAGE_DIR}/package.cflags/nocommon.conf"
+	"${PORTAGE_CONFIGROOT%/}/etc/portage/package.cflags/nocommon.conf"
+
 	#Install patch framework
 
 	elog "Installing bashrc.d hook symlink to apply LTO patches directly from lto-overlay"
@@ -107,7 +111,7 @@ pkg_postinst()
 
 	BINUTILS_VER=$(binutils-config ${CHOST} -c | sed -e "s/.*-//")
 
-	if ver_test "${BINUTILS_VER}" -lt 2.32; then
-		ewarn "Warning: active binutils version < 2.32, it is recommended that you use the newest binutils for LTO."
+	if ver_test "${BINUTILS_VER}" -lt 2.34; then
+		ewarn "Warning: active binutils version < 2.34, it is recommended that you use the newest binutils for LTO."
 	fi
 }

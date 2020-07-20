@@ -1,0 +1,15 @@
+Title: GentooLTO is now officially on GCC 10
+Author: Shane Peelar <lookatyouhacker@gmail.com>
+Content-Type: text/plain
+Posted: 2020-07-20
+Revision: 1
+News-Item-Format: 1.0
+
+Hello again everyone,
+
+GentooLTO is now officially on GCC 10.  If you're still on an older compiler and don't intend to upgrade,
+make sure you enable `USE=keep-nocommon` on `sys-config/ltoize` to ensure that you still have the `-fno-common`
+overrides on your system.  They have been moved to a separate file called `nocommon.conf`, which is not installed
+unless that `USE` is set.
+
+-Shane

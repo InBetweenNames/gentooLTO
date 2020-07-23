@@ -37,8 +37,8 @@ pkg_setup() {
 
 	ACTIVE_GCC=$(gcc-fullversion)
 
-	if ver_test "${ACTIVE_GCC}" -lt 10.1.0; then
-		ewarn "Warning: Active GCC version < 10.1.0, it is recommended that you use the newest GCC if you want LTO."
+	if ver_test "${ACTIVE_GCC}" -lt 10.2.0; then
+		ewarn "Warning: Active GCC version < 10.2.0, it is recommended that you use the newest GCC if you want LTO."
 		if [ "${I_KNOW_WHAT_I_AM_DOING}" != "y" ]; then
 			eerror "Aborting LTOize installation due to older GCC -- set I_KNOW_WHAT_I_AM_DOING=y if you want to override this behaviour."
 			die

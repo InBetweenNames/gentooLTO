@@ -20,6 +20,7 @@
 
 #FLTO is of the form -flto[=n] where n is the number of threads to use during linking.
 #It's usually a good idea to set this to the number of hardware threads in your system
+#You may also set this to "auto" to have gcc determine optimal number of cores (GCC 10+)
 FLTO="-flto=${NTHREADS}"
 
 #GRAPHITE contains Graphite specific optimizations and other optimizations that are disabled at O3

@@ -9,6 +9,7 @@
 #NTHREADS="12" 
 
 #A good number is the number of hardware threads you have available on your system.
+#You may also set this to "auto" to have gcc determine optimal number of cores (GCC 10+) 
 #After this, but before any other variables are defined, source this file directly:
 
 #source make.conf.lto

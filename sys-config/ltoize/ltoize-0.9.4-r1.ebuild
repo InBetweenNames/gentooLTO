@@ -1,4 +1,4 @@
-# Copyright 1999-2019 Gentoo Foundation
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -7,7 +7,7 @@ inherit toolchain-funcs
 
 DESCRIPTION="A configuration for portage to make building with LTO easy."
 HOMEPAGE="https://github.com/InBetweenNames/gentooLTO"
-KEYWORDS="~amd64 ~x86 ~arm"
+KEYWORDS="~amd64 ~arm ~x86"
 
 SRC_URI=""
 
@@ -19,10 +19,7 @@ IUSE="override-flagomatic"
 DEPEND="
 	>=sys-devel/binutils-2.32:*
 	>=sys-devel/gcc-config-1.9.1
-	|| (
-		>=sys-apps/portage-2.3.52
-		>=sys-apps/portage-mgorny-2.3.51.1
-	)
+	>=sys-apps/portage-2.3.52
 	app-portage/portage-bashrc-mv[cflags]
 	"
 

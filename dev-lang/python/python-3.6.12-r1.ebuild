@@ -4,11 +4,12 @@
 EAPI="7"
 WANT_LIBTOOL="none"
 
-inherit autotools flag-o-matic pax-utils python-utils-r1 toolchain-funcs
+inherit autotools flag-o-matic multiprocessing pax-utils \
+	python-utils-r1 toolchain-funcs
 
 MY_P="Python-${PV}"
 PYVER=$(ver_cut 1-2)
-PATCHSET="python-gentoo-patches-3.6.11-r3"
+PATCHSET="python-gentoo-patches-${PV}"
 
 DESCRIPTION="An interpreted, interactive, object-oriented programming language"
 HOMEPAGE="https://www.python.org/"
@@ -80,6 +81,11 @@ src_prepare() {
 		Modules/getpath.c \
 		configure.ac \
 		setup.py || die "sed failed to replace @@GENTOO_LIBDIR@@"
+
+	# force correct number of jobs
+	# https://bugs.gentoo.org/737660
+	local jobs=$(makeopts_jobs "${MAKEOPTS}" "$(get_nproc)")
+	sed -i -e "/self\.parallel/s:True:${jobs}:" setup.py || die
 
 	eautoreconf
 }
@@ -208,10 +214,12 @@ src_test() {
 
 	# bug 660358
 	local -x COLUMNS=80
-
 	local -x PYTHONDONTWRITEBYTECODE=
 
-	emake test EXTRATESTOPTS="-u-network" CPPFLAGS= CFLAGS= LDFLAGS= < /dev/tty
+	local jobs=$(makeopts_jobs "${MAKEOPTS}" "$(get_nproc)")
+
+	emake test EXTRATESTOPTS="-u-network -j${jobs}" \
+		CPPFLAGS= CFLAGS= LDFLAGS= < /dev/tty
 	local result=$?
 
 	for test in ${skipped_tests}; do

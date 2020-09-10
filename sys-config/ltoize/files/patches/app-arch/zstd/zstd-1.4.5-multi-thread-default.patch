@@ -1,0 +1,39 @@
+diff --git a/programs/zstdcli.c b/programs/zstdcli.c
+index 70e2b70..ebd5b33 100644
+--- a/programs/zstdcli.c
++++ b/programs/zstdcli.c
+@@ -695,7 +695,7 @@ int main(int const argCount, const char* argv[])
+     if ((filenames==NULL) || (file_of_names==NULL)) { DISPLAY("zstd: allocation error \n"); exit(1); }
+     programName = lastNameFromPath(programName);
+ #ifdef ZSTD_MULTITHREAD
+-    nbWorkers = 1;
++    nbWorkers = 0;
+ #endif
+ 
+     /* preset behaviors */
+diff --git a/programs/README.md b/programs/README.md
+index 53706de..c1b032f 100644
+--- a/programs/README.md
++++ b/programs/README.md
+@@ -168,7 +168,7 @@ Advanced arguments :
+ --stream-size=# : optimize compression parameters for streaming input of given number of bytes
+ --size-hint=# optimize compression parameters for streaming input of approximately this size
+ --target-compressed-block-size=# : make compressed block near targeted size
+- -T#    : spawns # compression threads (default: 1, 0==# cores)
++ -T#    : spawns # compression threads (default: 0==# cores)
+  -B#    : select size of each job (default: 0==automatic)
+ --rsyncable : compress using a rsync-friendly method (-B sets block size)
+ --no-dictID : don't write dictID into header (dictionary compression)
+diff --git a/programs/zstdcli.c b/programs/zstdcli.c
+index 70e2b70..4a872fe 100644
+--- a/programs/zstdcli.c
++++ b/programs/zstdcli.c
+@@ -160,7 +160,7 @@ static void usage_advanced(const char* programName)
+     DISPLAYOUT( "--fast[=#]: switch to very fast compression levels (default: %u) \n", 1);
+     DISPLAYOUT( "--adapt : dynamically adapt compression level to I/O conditions \n");
+ # ifdef ZSTD_MULTITHREAD
+-    DISPLAYOUT( " -T#    : spawns # compression threads (default: 1, 0==# cores) \n");
++    DISPLAYOUT( " -T#    : spawns # compression threads (default: 0==# cores) \n");
+     DISPLAYOUT( " -B#    : select size of each job (default: 0==automatic) \n");
+     DISPLAYOUT( "--single-thread : use a single thread for both I/O and compression (result slightly different than -T1) \n");
+     DISPLAYOUT( "--rsyncable : compress using a rsync-friendly method (-B sets block size) \n");

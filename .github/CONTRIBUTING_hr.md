@@ -1,6 +1,6 @@
 # Doprinosi
 
-Doprinosi su dobrodošli. Zbog prirode Portage-a, spajanje promijena bi moglo biti poteško, posebno pošto se očekuje da korisnici uzmu od ove konfiguracije jedino ono što oni nađu korisnim. Promjene u USE zastavama, na primjer, vjerovatno neće biti prihvaćene, dok bi promjene u zastavama kompajlera mogle biti, posebno ako daju kompajleru više slobode da pravi odluke. Doprinosi moraju održati filozofiju navedenu u [README-u](/README_bs_Lat.md). Doprinosi koji nadjačavaju kompajlerovu bolju prosudbu će biti odbijeni.
+Doprinosi su dobrodošli. Zbog prirode Portage-a, spajanje promijena bi moglo biti poteško, posebno pošto se očekuje da korisnici uzmu od ove konfiguracije jedino ono što oni nađu korisnim. Promjene u USE zastavama, na primjer, vjerovatno neće biti prihvaćene, dok bi promjene u zastavama kompajlera mogle biti, posebno ako daju kompajleru više slobode da pravi odluke. Doprinosi moraju održati filozofiju navedenu u [README-u](README_bs_Lat.md). Doprinosi koji nadjačavaju kompajlerovu bolju prosudbu će biti odbijeni.
 
 ## Smjernice za zahtjeve za povlačenje
 

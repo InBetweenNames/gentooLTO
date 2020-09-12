@@ -1,0 +1,22 @@
+diff --git a/programs/zstdcli.c b/programs/zstdcli.c
+index cd6b40bc..e64867bc 100644
+--- a/programs/zstdcli.c
++++ b/programs/zstdcli.c
+@@ -146,7 +146,7 @@ static int usage_advanced(const char* programName)
+     DISPLAY( "--size-hint=# optimize compression parameters for streaming input of approximately this size\n");
+     DISPLAY( "--target-compressed-block-size=# : make compressed block near targeted size \n");
+ #ifdef ZSTD_MULTITHREAD
+-    DISPLAY( " -T#    : spawns # compression threads (default: 1, 0==# cores) \n");
++    DISPLAY( " -T#    : spawns # compression threads (default: 0==# cores) \n");
+     DISPLAY( " -B#    : select size of each job (default: 0==automatic) \n");
+     DISPLAY( "--rsyncable : compress using a rsync-friendly method (-B sets block size) \n");
+ #endif
+@@ -624,7 +624,7 @@ int main(int argCount, const char* argv[])
+     cLevel = init_cLevel();
+     programName = lastNameFromPath(programName);
+ #ifdef ZSTD_MULTITHREAD
+-    nbWorkers = 1;
++    nbWorkers = 0;
+ #endif
+ 
+     /* preset behaviors */

@@ -1,6 +1,6 @@
 # GentooLTO overlay
 
-[![Build Status](https://travis-ci.org/InBetweenNames/gentooLTO.svg?branch=master)](https://travis-ci.org/InBetweenNames/gentooLTO)
+[![Build Status](https://github.com/InBetweenNames/gentooLTO/workflows/GentooLTO/badge.svg?branch=master)](https://github.com/InBetweenNames/gentooLTO/actions)
 [![Gitter](https://badges.gitter.im/gentooLTO/community.svg)](https://gitter.im/gentooLTO/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 [Bosnian, Cyrillic (Босански)](.github/README_bs-Cyril.md) | [Bosnian, Latin (Bosanski)](.github/README_bs-Latn.md) | [Serbian (Српски)](.github/README_sr.md) | [Croatian (Hrvatski)](.github/README_hr.md)

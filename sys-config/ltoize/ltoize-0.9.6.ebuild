@@ -1,4 +1,4 @@
-# Copyright 1999-2019 Gentoo Foundation
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -7,22 +7,22 @@ inherit toolchain-funcs
 
 DESCRIPTION="A configuration for portage to make building with LTO easy."
 HOMEPAGE="https://github.com/InBetweenNames/gentooLTO"
-KEYWORDS="~amd64 ~x86 ~arm ~arm64"
+
+#Note: there's nothing preventing this from working on stable, but the dependencies of ltoize aren't keyworded for
+#stable, so we only can do testing
+KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sparc ~x86"
 
 SRC_URI=""
 
 LICENSE="GPL-2+"
 SLOT="0"
-IUSE="override-flagomatic"
+IUSE="override-flagomatic keep-nocommon"
 
 #portage-bashrc-mv can be obtained from mv overlay
 DEPEND="
 	>=sys-devel/binutils-2.32:*
 	>=sys-devel/gcc-config-1.9.1
-	|| (
-		>=sys-apps/portage-2.3.52
-		>=sys-apps/portage-mgorny-2.3.51.1
-	)
+	>=sys-apps/portage-2.3.52
 	app-portage/portage-bashrc-mv[cflags]
 	"
 
@@ -34,10 +34,10 @@ pkg_setup() {
 
 	ACTIVE_GCC=$(gcc-fullversion)
 
-	if ver_test "${ACTIVE_GCC}" -lt 9.2.0; then
-		ewarn "Warning: Active GCC version < 9.2.0, it is recommended that you use the newest GCC if you want LTO."
+	if ver_test "${ACTIVE_GCC}" -lt 10.1.0; then
+		ewarn "Warning: Active GCC version '$ACTIVE_GCC' is lower then the expected version '10.1.0', it is recommended that you use the newest GCC if you want LTO."
 		if [ "${I_KNOW_WHAT_I_AM_DOING}" != "y" ]; then
-			eerror "Aborting LTOize installation due to older GCC -- set I_KNOW_WHAT_I_AM_DOING=y if you want to override this behaviour."
+			eerror "Aborting LTOize installation due to older GCC version '$ACTIVE_GCC' -- set I_KNOW_WHAT_I_AM_DOING=y if you want to override this behaviour."
 			die
 		else
 			ewarn "I_KNOW_WHAT_I_AM_DOING=y -- continuing anyway"
@@ -70,6 +70,10 @@ pkg_preinst() {
 
 	elog "Installing ltoworkarounds.conf package.cflags overrides"
 	dosym "${LTO_PORTAGE_DIR}/package.cflags/ltoworkarounds.conf" "${PORTAGE_CONFIGROOT%/}/etc/portage/package.cflags/ltoworkarounds.conf"
+
+	#Install -fno-common workarounds file
+	use keep-nocommon && dosym "${LTO_PORTAGE_DIR}/package.cflags/nocommon.conf"
+	"${PORTAGE_CONFIGROOT%/}/etc/portage/package.cflags/nocommon.conf"
 
 	#Install patch framework
 
@@ -104,7 +108,7 @@ pkg_postinst()
 
 	BINUTILS_VER=$(binutils-config ${CHOST} -c | sed -e "s/.*-//")
 
-	if ver_test "${BINUTILS_VER}" -lt 2.32; then
-		ewarn "Warning: active binutils version < 2.32, it is recommended that you use the newest binutils for LTO."
+	if ver_test "${BINUTILS_VER}" -lt 2.34; then
+		ewarn "Warning: active binutils version < 2.34, it is recommended that you use the newest binutils for LTO."
 	fi
 }

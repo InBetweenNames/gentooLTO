@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/InBetweenNames/gentooLTO.svg?branch=master)](https://travis-ci.org/InBetweenNames/gentooLTO)
 [![Gitter](https://badges.gitter.im/gentooLTO/community.svg)](https://gitter.im/gentooLTO/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-[Bosnian, Cyrillic (Босански)](/README_bs-Cyril.md) | [Bosnian, Latin (Bosanski)](/README_bs-Latn.md) | [Serbian (Српски)](/README_sr.md) | [Croatian (Hrvatski)](/README_hr.md)
+[Bosnian, Cyrillic (Босански)](.github/README_bs-Cyril.md) | [Bosnian, Latin (Bosanski)](.github/README_bs-Latn.md) | [Serbian (Српски)](.github/README_sr.md) | [Croatian (Hrvatski)](.github/README_hr.md)
 
 ---
 
@@ -56,9 +56,12 @@ The biggest gotcha with `-O3` is that it does not play nice at all with Undefine
 
 ## How to use this configuration
 
-Add the `mv` overlay (`layman -a mv`) and then add this overlay (`layman -a lto-overlay`) to your system and run `emerge sys-config/ltoize`. Add the package to your `/etc/portage/package.accept_keywords` if necessary. This will add the necessary overrides to `/etc/portage/`, but it won't modify your `make.conf`. It will create a `make.conf.lto` symlink in `/etc/portage` with the default GentooLTO configuration. To use the default configuration, define a variable `NTHREADS` with the number of threads you want to use for LTO. Then, source the file in your own `make.conf` like in this example:
+Add the `mv` and `lto-overlay` overlays to your system with either `layman` or `eselect repository` and run `emerge sys-config/ltoize`. Add the `ltoize` package to your `/etc/portage/package.accept_keywords` if necessary.
+
+This will add the necessary overrides to `/etc/portage/`, but it won't modify your `make.conf`. It will create a `make.conf.lto` symlink in `/etc/portage` with the default GentooLTO configuration. To use the default configuration, define a variable `NTHREADS` with the number of threads you want to use for LTO. Then, source the file in your own `make.conf` like in this example:
 
 ~~~ bash
+#Set this to "auto" to have gcc determine optimal number of cores (GCC 10+)
 NTHREADS="12"
 
 source make.conf.lto
@@ -80,7 +83,7 @@ As shown, your own `CFLAGS` inherit the `CFLAGS` defined by GentooLTO in `make.c
 The default configuration of GentooLTO enables the following:
 
 * O3
-* Graphite
+* Graphite ( requires gcc to be built with the `graphite` use flag )
 * -fno-semantic-interposition
 * -fipa-pta
 * -fdevirtualize-at-ltrans
@@ -120,13 +123,13 @@ LDFLAGS="${LDFLAGS} -Wl,--your-modifications=here"
 
 Previously we set `-Wl,--hash-style=gnu` in `LDFLAGS`, but this is not necessary anymore as it is the Gentoo default except on MIPS, where it's not supported, and could cause issues in some cases. See issue #362 for details.
 
-It is strongly recommended to use the latest GCC (9.3.0 at the time of writing), the latest binutils (2.34 currently), and the latest glibc (2.30 currently). Other compilers and C libraries may be supported in the future.
+It is strongly recommended to use the latest GCC (10.2.0 at the time of writing), the latest binutils (2.34 currently), and the latest glibc (2.31 currently). Other compilers and C libraries may be supported in the future.
 
 When you find a problem, whether it's a package not playing nice with `-O3`, Graphite, or LTO, consider opening an issue here or sending a pull request with the overrides needed to get the package working.  Over time, we should be able to achieve full coverage of Gentoo's main repository this way and provide a one size fits all solution, and not to mention help improve some open source software through the bug reports that will no doubt be generated!
 
 ---
 
-**After you've set everything up, run an `emerge -e @world` to rebuild your system with LTO and any optimizations you have chosen, or alternatively use [lto-rebuild](https://github.com/InBetweenNames/gentooLTO/wiki/lto-rebuild) to gradually convert your system over to GentooLTO.**
+**After you've set everything up, run an `emerge -e --keep-going @world` to rebuild your system with LTO and any optimizations you have chosen, or alternatively use [lto-rebuild](https://github.com/InBetweenNames/gentooLTO/wiki/lto-rebuild) to gradually convert your system over to GentooLTO.**
 
 ---
 

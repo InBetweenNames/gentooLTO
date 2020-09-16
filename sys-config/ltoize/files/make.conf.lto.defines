@@ -8,24 +8,25 @@
 #source make.conf.lto.defines
 
 #Guidelines:
-#* Your CFLAGS should contain ${FLTO} and, depending on your gcc, -fuse-linker-plugin
-#* Newer GCCs enable -fuse-linker-plugin by default.
+#* Your CFLAGS should contain ${FLTO}
 #* If you want Graphite, include "${GRAPHITE}" in your CFLAGS
-#* If you want -fipa-pta, include "${IPAPTA}" in your CFLAGS (undefined for now, issue #257)
+#* If you want -fipa-pta, include "${IPAPTA}" in your CFLAGS
 #* Anything else is up to you, such as -march, -pipe, -O{3,2,s,1}, etc...
 #* CXXFLAGS should be set to CFLAGS
-#* Optionally, set other *FLAGS for languages compiled with GCC as well (See make.conf.lto)
+#* Optionally, set other *FLAGS for languages compiled with GCC as well
 #* LDFLAGS of your Gentoo profile should be respected.
 #  See make.conf.lto for more details.
 
-#FLTO is of the form -flto[=n] where n is the number of threads to use during linking.
-#It's usually a good idea to set this to the number of hardware threads in your system
 FLTO="-flto=${NTHREADS}"
 
-#GRAPHITE contains Graphite specific optimizations and other optimizations that are disabled at O3
-#but don't influence the compiler's judgement.
-#With GCC 8.1.0, -ftree-loop-distribution is enabled by default at -O3
+#FLTO is of the form -flto[=n] where n is the number of threads to use during linking.
+#It's usually a good idea to set this to the number of hardware threads in your system
+#You may also set this to "auto" to have gcc determine optimal number of cores (GCC 10+)
+
 GRAPHITE="-fgraphite-identity -floop-nest-optimize"
+
+#GRAPHITE contains Graphite specific optimizations and other optimizations that are disabled at O3 but don't influence the compiler's judgement.
+#Since GCC 8.1.0, -ftree-loop-distribution is enabled by default at -O3
 #NOTE: To use graphite, make sure you have gcc compiled with graphite support (add graphite to your USE).  Otherwise GCC will complain!
 
 IPAPTA="-fipa-pta"
@@ -36,12 +37,16 @@ IPAPTA="-fipa-pta"
 
 SEMINTERPOS="-fno-semantic-interposition"
 
-# With -fno-semantic-interposition the compiler assumes that if interposition happens for functions the overwriting function will have precisely the same semantics (and side effects). Similarly if interposition happens for variables, the constructor of the variable will be the same. The flag has no effect for functions explicitly declared inline (where it is never allowed for interposition to change semantics) and for symbols explicitly declared weak.
+#With -fno-semantic-interposition the compiler assumes that if interposition happens for functions
+#the overwriting function will have precisely the same semantics (and side effects).
+#Similarly if interposition happens for variables, the constructor of the variable will be the same.
+#The flag has no effect for functions explicitly declared inline (where it is never allowed for interposition to change semantics) and for symbols explicitly declared weak.
 
 NOCOMMON="-fno-common"
 
 # This option only affects C code.  Only non-conformant C code needs -fcommon, which is enabled by default.  Clear Linux leaves this flag off by default.
-# We may enable this at some point.  For now, there's a lot of breakages to work through.
+# This is enabled by default with GCC 10 and is kept here only for documentation purposes.  Use `-fcommon` to restore
+# GCC 9.x behaviour and below.
 
 SAFEST_FAST_MATH="-fno-math-errno -fno-trapping-math"
 SAFER_UNSAFE_MATH_OPTS="-fno-signed-zeros -fno-trapping-math -fassociative-math -freciprocal-math"
@@ -54,8 +59,7 @@ SAFER_FAST_MATH="${SAFER_UNSAFE_MATH_OPTS} -fno-math-errno -ffinite-math-only -f
 
 DEVIRTLTO="-fdevirtualize-at-ltrans"
 
-#This allows GCC to perform devirtualization across object file boundaries using LTO.  It's off by default because it
-#increases compilation time.
+#This allows GCC to perform devirtualization across object file boundaries using LTO.
 
 NOPLT="-fno-plt"
 

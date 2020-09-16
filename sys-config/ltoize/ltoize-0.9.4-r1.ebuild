@@ -1,4 +1,4 @@
-# Copyright 1999-2019 Gentoo Foundation
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -7,7 +7,7 @@ inherit toolchain-funcs
 
 DESCRIPTION="A configuration for portage to make building with LTO easy."
 HOMEPAGE="https://github.com/InBetweenNames/gentooLTO"
-KEYWORDS="~amd64 ~x86 ~arm"
+KEYWORDS="~amd64 ~arm ~x86"
 
 SRC_URI=""
 
@@ -19,10 +19,7 @@ IUSE="override-flagomatic"
 DEPEND="
 	>=sys-devel/binutils-2.32:*
 	>=sys-devel/gcc-config-1.9.1
-	|| (
-		>=sys-apps/portage-2.3.52
-		>=sys-apps/portage-mgorny-2.3.51.1
-	)
+	>=sys-apps/portage-2.3.52
 	app-portage/portage-bashrc-mv[cflags]
 	"
 
@@ -35,9 +32,9 @@ pkg_setup() {
 	ACTIVE_GCC=$(gcc-fullversion)
 
 	if ver_test "${ACTIVE_GCC}" -lt 9.2.0; then
-		ewarn "Warning: Active GCC version < 9.2.0, it is recommended that you use the newest GCC if you want LTO."
+		ewarn "Warning: Active GCC version '$ACTIVE_GCC' is lower then the expected version '9.2.0', it is recommended that you use the newest GCC if you want LTO."
 		if [ "${I_KNOW_WHAT_I_AM_DOING}" != "y" ]; then
-			eerror "Aborting LTOize installation due to older GCC -- set I_KNOW_WHAT_I_AM_DOING=y if you want to override this behaviour."
+			eerror "Aborting LTOize installation due to older GCC version '$ACTIVE_GCC' -- set I_KNOW_WHAT_I_AM_DOING=y if you want to override this behaviour."
 			die
 		else
 			ewarn "I_KNOW_WHAT_I_AM_DOING=y -- continuing anyway"

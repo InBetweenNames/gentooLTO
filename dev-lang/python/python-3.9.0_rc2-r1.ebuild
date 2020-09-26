@@ -4,15 +4,16 @@
 EAPI="7"
 WANT_LIBTOOL="none"
 
-inherit autotools flag-o-matic pax-utils python-utils-r1 toolchain-funcs
+inherit autotools check-reqs flag-o-matic multiprocessing pax-utils \
+	python-utils-r1 toolchain-funcs
 
-MY_P="Python-${PV}"
+MY_P="Python-${PV/_/}"
 PYVER=$(ver_cut 1-2)
-PATCHSET="python-gentoo-patches-${PV}"
+PATCHSET="python-gentoo-patches-3.9.0rc1"
 
 DESCRIPTION="An interpreted, interactive, object-oriented programming language"
 HOMEPAGE="https://www.python.org/"
-SRC_URI="https://www.python.org/ftp/python/${PV}/${MY_P}.tar.xz
+SRC_URI="https://www.python.org/ftp/python/${PV%_*}/${MY_P}.tar.xz
 	https://dev.gentoo.org/~mgorny/dist/python/${PATCHSET}.tar.xz"
 S="${WORKDIR}/${MY_P}"
 
@@ -58,6 +59,17 @@ DEPEND="${RDEPEND}
 RDEPEND+=" !build? ( app-misc/mime-types )"
 PDEPEND=">=app-eselect/eselect-python-20140125-r1"
 
+# large file tests involve a 2.5G file being copied (duplicated)
+CHECKREQS_DISK_BUILD=5500M
+
+pkg_pretend() {
+	use test && check-reqs_pkg_pretend
+}
+
+pkg_setup() {
+	use test && check-reqs_pkg_setup
+}
+
 src_prepare() {
 	# Ensure that internal copies of expat, libffi and zlib are not used.
 	rm -fr Modules/expat || die
@@ -72,6 +84,12 @@ src_prepare() {
 
 	sed -i -e "s:@@GENTOO_LIBDIR@@:$(get_libdir):g" \
 		setup.py || die "sed failed to replace @@GENTOO_LIBDIR@@"
+
+	# force correct number of jobs
+	# https://bugs.gentoo.org/737660
+	local jobs=$(makeopts_jobs "${MAKEOPTS}" "$(get_nproc)")
+	sed -i -e "s:-j0:-j${jobs}:" Makefile.pre.in || die
+	sed -i -e "/self\.parallel/s:True:${jobs}:" setup.py || die
 
 	eautoreconf
 }
@@ -200,10 +218,12 @@ src_test() {
 
 	# bug 660358
 	local -x COLUMNS=80
-
 	local -x PYTHONDONTWRITEBYTECODE=
 
-	emake test EXTRATESTOPTS="-u-network" CPPFLAGS= CFLAGS= LDFLAGS= < /dev/tty
+	local jobs=$(makeopts_jobs "${MAKEOPTS}" "$(get_nproc)")
+
+	emake test EXTRATESTOPTS="-u-network -j${jobs}" \
+		CPPFLAGS= CFLAGS= LDFLAGS= < /dev/tty
 	local result=$?
 
 	for test in ${skipped_tests}; do
@@ -262,8 +282,6 @@ src_install() {
 
 	use sqlite || rm -r "${libdir}/"{sqlite3,test/test_sqlite*} || die
 	use tk || rm -r "${ED}/usr/bin/idle${PYVER}" "${libdir}/"{idlelib,tkinter,test/test_tk*} || die
-
-	use wininst || rm "${libdir}/distutils/command/"wininst-*.exe || die
 
 	dodoc Misc/{ACKS,HISTORY,NEWS}
 
@@ -325,37 +343,4 @@ src_install() {
 		ln -s "../../../bin/idle${PYVER}" \
 			"${scriptdir}/idle" || die
 	fi
-}
-
-pkg_preinst() {
-	if has_version "<${CATEGORY}/${PN}-${PYVER}" && ! has_version ">=${CATEGORY}/${PN}-${PYVER}_alpha"; then
-		python_updater_warning="1"
-	fi
-}
-
-eselect_python_update() {
-	if [[ -z "$(eselect python show)" || \
-			! -f "${EROOT}/usr/bin/$(eselect python show)" ]]; then
-		eselect python update
-	fi
-
-	if [[ -z "$(eselect python show --python${PV%%.*})" || \
-			! -f "${EROOT}/usr/bin/$(eselect python show --python${PV%%.*})" ]]
-	then
-		eselect python update --python${PV%%.*}
-	fi
-}
-
-pkg_postinst() {
-	eselect_python_update
-
-	if [[ "${python_updater_warning}" == "1" ]]; then
-		ewarn "You have just upgraded from an older version of Python."
-		ewarn
-		ewarn "Please adjust PYTHON_TARGETS (if so desired), and run emerge with the --newuse or --changed-use option to rebuild packages installing python modules."
-	fi
-}
-
-pkg_postrm() {
-	eselect_python_update
 }

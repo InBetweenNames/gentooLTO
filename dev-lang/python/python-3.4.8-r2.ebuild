@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="5"
@@ -16,7 +16,7 @@ SRC_URI="https://www.python.org/ftp/python/${PV%_rc*}/${MY_P}.tar.xz
 
 LICENSE="PSF-2"
 SLOT="3.4/3.4m"
-KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86"
+KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sparc ~x86"
 IUSE="bluetooth build elibc_uclibc examples gdbm hardened ipv6 libressl +ncurses +readline sqlite +ssl +threads tk wininst +xml pgo"
 
 # Do not add a dependency on dev-lang/python to this ebuild.
@@ -27,7 +27,7 @@ IUSE="bluetooth build elibc_uclibc examples gdbm hardened ipv6 libressl +ncurses
 RDEPEND="app-arch/bzip2:0=
 	app-arch/xz-utils:0=
 	>=sys-libs/zlib-1.1.3:0=
-	virtual/libffi
+	dev-libs/libffi
 	virtual/libintl
 	gdbm? ( sys-libs/gdbm:0=[berkdb] )
 	ncurses? (

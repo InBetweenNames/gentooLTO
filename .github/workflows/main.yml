@@ -1,0 +1,48 @@
+name: GentooLTO
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+on: [push, pull_request]
+
+env:
+  PORTAGE_VER: "3.0.6"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Install packages
+        run: |
+          sudo apt-get install python3-setuptools
+          pip3 install wheel
+          pip3 install lxml pyyaml
+
+      - name: Setup runner
+        run: |
+          shopt -s extglob
+          sudo mkdir -p /var/db/repos/gentoo /var/cache/distfiles /etc/portage/repos.conf
+          sudo chmod a+rwX /etc/passwd /etc/group /etc /usr /usr/local /var/db/repos/gentoo /var/cache/distfiles
+          mkdir overlay; mv !(overlay) overlay/; mv .git overlay/
+
+          wget -qO - "https://github.com/gentoo/portage/archive/portage-${PORTAGE_VER}.tar.gz" | tar xz
+          wget -qO - "https://github.com/gentoo-mirror/gentoo/archive/master.tar.gz" | tar xz -C /var/db/repos/gentoo --strip-components=1
+          wget "https://www.gentoo.org/dtd/metadata.dtd" -O /var/cache/distfiles/metadata.dtd
+
+          sudo echo "portage:x:250:250:portage:/var/tmp/portage:/bin/false" >> /etc/passwd
+          sudo echo "portage::250:portage,travis" >> /etc/group
+
+          sudo ln -s $GITHUB_WORKSPACE/portage-portage-${PORTAGE_VER}/cnf/repos.conf /etc/portage/repos.conf/gentoo.conf
+          sudo ln -s $GITHUB_WORKSPACE/overlay/testconfig/mv.conf /etc/portage/repos.conf/mv.conf
+          sudo ln -s /usr/portage/profiles/default/linux/amd64/17.1 /etc/portage/make.profile
+          
+          cd /usr/local
+          git clone --depth 1 https://github.com/vaeth/mv-overlay mv; chmod a+rwX mv
+
+      - name: Verify GentooLTO
+        run: |
+          cd $GITHUB_WORKSPACE/overlay
+          shellcheck app-portage/lto-rebuild/files/lto-rebuild
+          python3 ../portage-portage-${PORTAGE_VER}/repoman/bin/repoman full -dx

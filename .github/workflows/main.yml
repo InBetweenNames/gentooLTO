@@ -35,11 +35,7 @@ jobs:
           sudo echo "portage::250:portage,travis" >> /etc/group
 
           sudo ln -s $GITHUB_WORKSPACE/portage-portage-${PORTAGE_VER}/cnf/repos.conf /etc/portage/repos.conf/gentoo.conf
-          sudo ln -s $GITHUB_WORKSPACE/overlay/testconfig/mv.conf /etc/portage/repos.conf/mv.conf
           sudo ln -s /usr/portage/profiles/default/linux/amd64/17.1 /etc/portage/make.profile
-          
-          cd /usr/local
-          git clone --depth 1 https://github.com/vaeth/mv-overlay mv; chmod a+rwX mv
 
       - name: Verify GentooLTO
         run: |

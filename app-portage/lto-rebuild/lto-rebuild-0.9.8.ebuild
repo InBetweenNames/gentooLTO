@@ -1,4 +1,4 @@
-# Copyright 2019 Gentoo Authors
+# Copyright 2019-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -9,17 +9,9 @@ HOMEPAGE="https://github.com/InBetweenNames/gentooLTO"
 LICENSE="GPL-2+"
 SLOT="0"
 KEYWORDS="~amd64 ~arm64 ~x86"
-IUSE=""
 
-DEPEND="
-	app-portage/portage-utils
-	app-shells/bash:*
-	sys-devel/binutils:*
-	sys-devel/gcc:*
-	"
-RDEPEND="${DEPEND}"
-BDEPEND=""
+RDEPEND="app-portage/portage-utils"
 
-pkg_preinst() {
-	dobin "${FILESDIR}"/lto-rebuild
+src_install() {
+	dobin "${FILESDIR}/lto-rebuild"
 }

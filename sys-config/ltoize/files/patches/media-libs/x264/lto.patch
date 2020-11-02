@@ -1,11 +1,12 @@
---- a/configure 2020-07-07 20:37:00.103200843 -0400
-+++ b/configure 2020-07-07 20:36:38.819867863 -0400
-@@ -1017,7 +1017,7 @@
+diff -uw a/configure b/configure
+--- a/configure	2020-11-02 12:24:41.569046153 -0500
++++ b/configure	2020-11-02 12:24:34.609046389 -0500
+@@ -994,7 +994,7 @@
  CPU_ENDIAN="little-endian"
  if [ $compiler = GNU ]; then
      echo "int i[2] = {0x42494745,0}; double f[2] = {0x1.0656e6469616ep+102,0};" > conftest.c
 -    $CC $CFLAGS conftest.c -c -o conftest.o 2>/dev/null || die "endian test failed"
 +    $CC $CFLAGS conftest.c -c -o conftest.o -shared 2>/dev/null || die "endian test failed"
-     if (${STRINGS} -a conftest.o | grep -q BIGE) && (${STRINGS} -a conftest.o | grep -q FPendian) ; then
+     if (${cross_prefix}strings -a conftest.o | grep -q BIGE) && (${cross_prefix}strings -a conftest.o | grep -q FPendian) ; then
          define WORDS_BIGENDIAN
          CPU_ENDIAN="big-endian"

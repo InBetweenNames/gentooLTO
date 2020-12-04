@@ -72,4 +72,4 @@ LTOPatch() {
 
 }
 
-BashrcdPhase prepare LTOPatch
+BashrcdPhase configure LTOPatch

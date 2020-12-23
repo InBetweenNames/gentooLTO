@@ -12,6 +12,8 @@ KEYWORDS="~amd64 ~arm64 ~x86"
 
 RDEPEND="app-portage/portage-utils"
 
+S="${WORKDIR}"
+
 src_install() {
 	dobin "${FILESDIR}/lto-rebuild"
 }

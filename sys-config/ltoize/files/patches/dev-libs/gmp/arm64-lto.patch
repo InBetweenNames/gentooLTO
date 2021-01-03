@@ -1,0 +1,45 @@
+diff -r 575ff753614f mpn/arm64/bdiv_q_1.asm
+--- a/mpn/arm64/bdiv_q_1.asm	Fri Jan 01 14:46:22 2021 +0100
++++ b/mpn/arm64/bdiv_q_1.asm	Fri Jan 01 17:13:01 2021 +0100
+@@ -61,9 +61,15 @@
+ 	clz	cnt, x6
+ 	lsr	d, d, cnt
+ 
+-	LEA_HI(	x7, binvert_limb_table)
++ifdef(`PIC',`
++	adrp	x7, :got:__gmp_binvert_limb_table
+ 	ubfx	x6, d, 1, 7
+-	LEA_LO(	x7, binvert_limb_table)
++	ldr	x7, [x7, #:got_lo12:__gmp_binvert_limb_table]
++',`
++	adrp	x7, __gmp_binvert_limb_table
++	ubfx	x6, d, 1, 7
++	add	x7, x7, :lo12:__gmp_binvert_limb_table
++')
+ 	ldrb	w6, [x7, x6]
+ 	ubfiz	x7, x6, 1, 8
+ 	umull	x6, w6, w6
+@@ -75,7 +81,7 @@
+ 	mul	x6, x6, x6
+ 	msub	di, x6, d, x7
+ 
+-	b	GSYM_PREFIX`'mpn_pi1_bdiv_q_1
++	b	mpn_pi1_bdiv_q_1
+ EPILOGUE()
+ 
+ PROLOGUE(mpn_pi1_bdiv_q_1)
+diff -r 575ff753614f mpn/arm64/invert_limb.asm
+--- a/mpn/arm64/invert_limb.asm	Fri Jan 01 14:46:22 2021 +0100
++++ b/mpn/arm64/invert_limb.asm	Fri Jan 01 17:13:01 2021 +0100
+@@ -41,9 +41,9 @@
+ ASM_START()
+ PROLOGUE(mpn_invert_limb)
+ 	lsr	x2, x0, #54
+-	LEA_HI(	x1, approx_tab)
++	adrp	x1, approx_tab
+ 	and	x2, x2, #0x1fe
+-	LEA_LO(	x1, approx_tab)
++	add	x1, x1, :lo12:approx_tab
+ 	ldrh	w3, [x1,x2]
+ 	lsr	x4, x0, #24
+ 	add	x4, x4, #1

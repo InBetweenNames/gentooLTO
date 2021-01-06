@@ -192,7 +192,7 @@ src_compile() {
 	export par_arg
 
 	if use pgo; then
-		emake profile-opt PROFILE_TASK="-m test -x test_gdb test_compileall test_ctypes -j $(nproc) --pgo-extended"
+		emake profile-opt PROFILE_TASK="-m test -x test_gdb test_compileall test_ctypes test_distutils -j $(nproc) --pgo-extended"
 	else
 		emake CPPFLAGS= CFLAGS= LDFLAGS=
 	fi

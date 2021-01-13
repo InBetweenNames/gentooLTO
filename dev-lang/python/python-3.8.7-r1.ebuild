@@ -1,4 +1,4 @@
-# Copyright 1999-2020 Gentoo Authors
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="7"
@@ -9,7 +9,7 @@ inherit autotools flag-o-matic multiprocessing pax-utils \
 
 MY_P="Python-${PV}"
 PYVER=$(ver_cut 1-2)
-PATCHSET="python-gentoo-patches-${PV}"
+PATCHSET="python-gentoo-patches-3.8.6"
 
 DESCRIPTION="An interpreted, interactive, object-oriented programming language"
 HOMEPAGE="https://www.python.org/"
@@ -178,7 +178,7 @@ src_compile() {
 	export par_arg
 
 	if use pgo; then
-		emake profile-opt PROFILE_TASK="-m test -x test_gdb test_compileall -j $(nproc) --pgo-extended"
+		emake profile-opt PROFILE_TASK="-m test -x test_gdb test_compileall test_distutils -j $(nproc) --pgo-extended"
 	else
 		emake CPPFLAGS= CFLAGS= LDFLAGS=
 	fi

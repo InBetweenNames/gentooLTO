@@ -1,0 +1,29 @@
+Title: GentooLTO layout change
+Author: Shane Peelar <lookatyouhacker@gmail.com>
+Content-Type: text/plain
+Posted: 2021-01-24
+Revision: 1
+News-Item-Format: 1.0
+
+Greetings and happy new year!
+
+GentooLTO is undergoing some changes to become more modular and suitable for a wider range of systems.
+As of today, the `ltoworkarounds.conf` file has been split across multiple separate files that
+are installed in package.cflags instead with the latest `sys-config/ltoize`.
+They are named after their corresponding section from the previous `ltoworkarounds.conf` file.
+Eventually, these files will disappear entirely and be managed similar to the LTO patching functionality
+within GentooLTO with the aim of preventing files from being installed into /etc/portage entirely.
+
+Users upgrading may experience some breaking changes under certain scenarios:
+ * You have a .conf within package.cflags whose name conflicts with one of the GentooLTO .conf files
+ * You have changes to ltoworkarounds.conf that have not been upstreamed
+
+In these cases, you will need to run etc-update to resolve the conflicts.
+
+For backwards compatibility, I am keeping the original ltoworkarounds.conf present for a week
+so that users not ready to migrate to the new system can stay at ltoize-0.9.7.  No PRs will be 
+accepted to the original ltoworkarounds.conf, however, and it will disappear after this.
+
+More to come soon!
+
+-Shane

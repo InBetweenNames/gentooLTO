@@ -52,9 +52,21 @@ pkg_setup() {
 }
 
 pkg_preinst() {
-
 	GENTOOLTO_PORTDIR=$(portageq get_repo_path ${PORTAGE_CONFIGROOT} lto-overlay)
 	LTO_PORTAGE_DIR="${GENTOOLTO_PORTDIR}/${CATEGORY}/${PN}/files"
+	COMMON_WORKAROUNDS=(
+		cmake-makefile.conf
+		devirtualize-at-ltrans.conf
+		graphite.conf
+		ipa-pta.conf
+		lto.conf
+		no-common-libtool.conf
+		no-plt.conf
+		no-semantic-interposition.conf
+		optimizations.conf
+		tls-dialect.conf
+		use-ld.conf
+	)
 
 	ACTIVE_GCC=$(gcc-fullversion)
 
@@ -66,17 +78,17 @@ pkg_preinst() {
 	elog "Installing make.conf.lto default full optimization config for make.conf"
 	dosym "${LTO_PORTAGE_DIR}/make.conf.lto" "${PORTAGE_CONFIGROOT%/}/etc/portage/make.conf.lto"
 
-	#Install main workarounds file
-
-	elog "Installing ltoworkarounds.conf package.cflags overrides"
-	dosym "${LTO_PORTAGE_DIR}/package.cflags/ltoworkarounds.conf" "${PORTAGE_CONFIGROOT%/}/etc/portage/package.cflags/ltoworkarounds.conf"
+	#Install main workarounds files
+	for i in "${COMMON_WORKAROUNDS[@]}"; do
+		elog "Installing package.cflags ${i} override"
+		dosym "${LTO_PORTAGE_DIR}/package.cflags/${i}" "${PORTAGE_CONFIGROOT%/}/etc/portage/package.cflags/${i}"
+	done
 
 	#Install -fno-common workarounds file
-	use keep-nocommon && dosym "${LTO_PORTAGE_DIR}/package.cflags/nocommon.conf" \
-	"${PORTAGE_CONFIGROOT%/}/etc/portage/package.cflags/nocommon.conf"
+	use keep-nocommon && dosym "${LTO_PORTAGE_DIR}/package.cflags/no-common.conf" \
+	"${PORTAGE_CONFIGROOT%/}/etc/portage/package.cflags/no-common.conf"
 
 	#Install patch framework
-
 	elog "Installing bashrc.d hook symlink to apply LTO patches directly from lto-overlay"
 	dosym "${LTO_PORTAGE_DIR}/bashrc.d/41-lto-patch.sh" "${PORTAGE_CONFIGROOT%/}/etc/portage/bashrc.d/41-lto-patch.sh"
 
@@ -84,6 +96,7 @@ pkg_preinst() {
 	if use override-flagomatic; then
 		ewarn "Installing bashrc.d hook to override strip-flags and replace-flags functions in flag-o-matic.  This is an experimental feature!"
 		dosym "${LTO_PORTAGE_DIR}/bashrc.d/42-lto-flag-o-matic.sh" "${PORTAGE_CONFIGROOT%/}/etc/portage/bashrc.d/42-lto-flag-o-matic.sh"
+		dosym "${LTO_PORTAGE_DIR}/package.cflags/flag-o-matic.conf" "${PORTAGE_CONFIGROOT%/}/etc/portage/package.cflags/flag-o-matic.conf"
 	fi
 
 	elog "Installing bashrc.d hook symlink to override package libtool lt_cv_sys_global_symbol_pipe and lt_cv_sys_global_symbol_to_cdecl"

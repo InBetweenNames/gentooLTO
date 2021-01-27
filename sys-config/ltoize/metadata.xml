@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
-<maintainer type="person">
-<email>lookatyouhacker@gmail.com</email>
-<name>Shane Peelar</name>
-</maintainer>
-<longdescription lang="en">
-LTOize is a set of configuration files and overrides to make building your system Link Time Optimization easy.  This is part of a bigger initiative to find errors in C and C++ programs that are caused by undefined behaviour.  Users are strongly encouraged to contribute their configuration changes upstream.  For more information, see the gentooLTO project on GitHub.
-</longdescription>
-<use><flag name="override-flagomatic">Override strip-flags and replace-flags in flag-o-matic.eclass (EXPERIMENTAL)</flag>
-<flag name="keep-nocommon">Keep old -fno-common overrides for older GCCs (not recommended)</flag></use>
+    <maintainer type="person">
+        <email>lookatyouhacker@gmail.com</email>
+        <name>Shane Peelar</name>
+    </maintainer>
+    <longdescription lang="en">
+        LTOize is a set of configuration files and overrides to make building your system Link Time Optimization easy.
+        This is part of a bigger initiative to find errors in C and C++ programs that are caused by undefined behaviour.
+        Users are strongly encouraged to contribute their configuration changes upstream.
+        For more information, see the gentooLTO project on GitHub.
+    </longdescription>
+    <use>
+        <flag name="clang">Install clang.conf overrides where LTO on Clang creates issues</flag>
+        <flag name="override-flagomatic">Override strip-flags and replace-flags in flag-o-matic.eclass (EXPERIMENTAL)</flag>
+        <flag name="keep-nocommon">Keep old -fno-common overrides for older GCCs (not recommended)</flag>
+    </use>
 </pkgmetadata>

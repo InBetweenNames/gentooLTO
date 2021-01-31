@@ -91,11 +91,13 @@ The default configuration of GentooLTO enables the following:
 
 ---
 
-**GentooLTO uses `ld.bfd` as the default linker**
+**GentooLTO with GCC uses `ld.bfd` as the default linker**
+
+**If you have the `sys-config/ltoize` `clang` USE flag enabled, certain overrides assume you are using the `ld.lld` linker and Thin LTO**
 
 ---
 
-GentooLTO was previously using `ld.gold` as the default linker, but it appears that it is not being maintained upstream anymore, except for minor bugfixes. `ld.gold` is still supported by GentooLTO and workarounds are still being accepted in `ltoworkarounds.conf`, but going forward the recommended linker will be `ld.bfd`.
+GentooLTO was previously using `ld.gold` as the default linker, but it appears that it is not being maintained upstream anymore, except for minor bugfixes. `ld.gold` is still supported by GentooLTO and workarounds are still being accepted, but going forward the recommended linker will be `ld.bfd`.
 
 If you'd like to override the default configuration, you can source `make.conf.lto.defines` instead. This file contains the definitions for the variables that `sys-config/ltoize` uses for the optimization flags. Using this file directly, you can cherry-pick and define your own config.  For example:
 

@@ -64,7 +64,7 @@ This will add the necessary overrides to `/etc/portage/`, but it won't modify yo
 #Set this to "auto" to have gcc determine optimal number of cores (GCC 10+)
 NTHREADS="12"
 
-source make.conf.lto
+source /etc/portage/make.conf.lto
 
 CFLAGS="-march=native ${CFLAGS} -pipe" #NOTE: Consider using -falign-functions=32 if you use an Intel processor.  See issue #164.
 CXXFLAGS="${CFLAGS}"
@@ -104,7 +104,7 @@ If you'd like to override the default configuration, you can source `make.conf.l
 ~~~ bash
 NTHREADS="12"
 
-source make.conf.lto.defines
+source /etc/portage/make.conf.lto.defines
 
 CFLAGS="-march=native -O3 ${SEMINTERPOS} ${GRAPHITE} ${IPA} ${FLTO} -fuse-linker-plugin -pipe" #NOTE: consider using -falign-functions=32 if you use an Intel processor (Sandy Bridge or later).  See issue #164.
 CXXFLAGS="${CFLAGS}"

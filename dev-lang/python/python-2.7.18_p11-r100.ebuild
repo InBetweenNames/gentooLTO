@@ -4,22 +4,26 @@
 EAPI="7"
 WANT_LIBTOOL="none"
 
-inherit autotools flag-o-matic pax-utils python-utils-r1 toolchain-funcs
+inherit autotools flag-o-matic pax-utils \
+	python-utils-r1 toolchain-funcs verify-sig
 
-MY_P="Python-${PV}"
+MY_P="Python-${PV%_p*}"
 PYVER=$(ver_cut 1-2)
-PATCHSET="python-gentoo-patches-2.7.18"
+PATCHSET="python-gentoo-patches-${PV}"
 
 DESCRIPTION="An interpreted, interactive, object-oriented programming language"
 HOMEPAGE="https://www.python.org/"
-SRC_URI="https://www.python.org/ftp/python/${PV}/${MY_P}.tar.xz
-	https://dev.gentoo.org/~mgorny/dist/python/${PATCHSET}.tar.xz"
+SRC_URI="https://www.python.org/ftp/python/${PV%_*}/${MY_P}.tar.xz
+	https://dev.gentoo.org/~mgorny/dist/python/${PATCHSET}.tar.xz
+	verify-sig? (
+		https://www.python.org/ftp/python/${PV%_*}/${MY_P}.tar.xz.asc
+	)"
 S="${WORKDIR}/${MY_P}"
 
 LICENSE="PSF-2"
 SLOT="${PYVER}"
-KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 s390 ~sparc x86"
-IUSE="-berkdb bluetooth build elibc_uclibc examples gdbm hardened ipv6 +lto +ncurses +pgo +readline sqlite +ssl +threads tk +wide-unicode wininst +xml"
+KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sparc ~x86"
+IUSE="berkdb bluetooth build elibc_uclibc examples gdbm hardened ipv6 +lto +ncurses +pgo +readline +sqlite +ssl +threads tk +wide-unicode wininst +xml"
 
 # Do not add a dependency on dev-lang/python to this ebuild.
 # If you need to apply a patch which requires python for bootstrapping, please
@@ -56,11 +60,17 @@ RDEPEND="app-arch/bzip2:=
 	xml? ( >=dev-libs/expat-2.1:= )"
 # bluetooth requires headers from bluez
 DEPEND="${RDEPEND}
-	bluetooth? ( net-wireless/bluez )
+	bluetooth? ( net-wireless/bluez )"
+BDEPEND="
 	virtual/pkgconfig
+	verify-sig? ( app-crypt/openpgp-keys-python )
 	!sys-devel/gcc[libffi(-)]"
-RDEPEND+=" !build? ( app-misc/mime-types )"
-PDEPEND=">=app-eselect/eselect-python-20140125-r1"
+PDEPEND="app-eselect/eselect-python"
+RDEPEND+="
+	!build? ( app-misc/mime-types )
+	!<=dev-lang/python-exec-2.4.6-r1"
+
+VERIFY_SIG_OPENPGP_KEY_PATH=/usr/share/openpgp-keys/python.org.asc
 
 pkg_setup() {
 	if use berkdb; then
@@ -75,6 +85,13 @@ pkg_setup() {
 			ewarn "You might need to migrate your databases."
 		fi
 	fi
+}
+
+src_unpack() {
+	if use verify-sig; then
+		verify-sig_verify_detached "${DISTDIR}"/${MY_P}.tar.xz{,.asc}
+	fi
+	default
 }
 
 src_prepare() {
@@ -155,16 +172,6 @@ src_configure() {
 	# The configure script fails to use pkg-config correctly.
 	# http://bugs.python.org/issue15506
 	export ac_cv_path_PKG_CONFIG=$(tc-getPKG_CONFIG)
-
-	# Set LDFLAGS so we link modules with -lpython2.7 correctly.
-	# Needed on FreeBSD unless Python 2.7 is already installed.
-	# Please query BSD team before removing this!
-	append-ldflags "-L."
-
-	# LTO needs this
-	if use lto; then
-		append-ldflags "${CFLAGS}"
-	fi
 
 	local dbmliborder
 	if use gdbm; then
@@ -341,17 +348,13 @@ src_install() {
 	python_domodule epython.py
 
 	# python-exec wrapping support
-	local pymajor=${PYVER%.*}
 	local scriptdir=${D}$(python_get_scriptdir)
 	mkdir -p "${scriptdir}" || die
-	# python and pythonX
+	# python
 	ln -s "../../../bin/python${PYVER}" \
-		"${scriptdir}/python${pymajor}" || die
-	ln -s "python${pymajor}" "${scriptdir}/python" || die
-	# python-config and pythonX-config
+		"${scriptdir}/python" || die
+	# python-config
 	ln -s "../../../bin/python${PYVER}-config" \
-		"${scriptdir}/python${pymajor}-config" || die
-	ln -s "python${pymajor}-config" \
 		"${scriptdir}/python-config" || die
 	# 2to3, pydoc, pyvenv
 	ln -s "../../../bin/2to3-${PYVER}" \
@@ -363,25 +366,9 @@ src_install() {
 		ln -s "../../../bin/idle${PYVER}" \
 			"${scriptdir}/idle" || die
 	fi
-}
 
-eselect_python_update() {
-	if [[ -z "$(eselect python show)" || \
-			! -f "${EROOT}/usr/bin/$(eselect python show)" ]]; then
-		eselect python update
-	fi
-
-	if [[ -z "$(eselect python show --python${PV%%.*})" || \
-			! -f "${EROOT}/usr/bin/$(eselect python show --python${PV%%.*})" ]]
-	then
-		eselect python update --python${PV%%.*}
-	fi
-}
-
-pkg_postinst() {
-	eselect_python_update
-}
-
-pkg_postrm() {
-	eselect_python_update
+	# python2* is no longer wrapped, so just symlink it
+	local pymajor=${PYVER%.*}
+	dosym "python${PYVER}" "/usr/bin/python${pymajor}"
+	dosym "python${PYVER}-config" "/usr/bin/python${pymajor}-config"
 }

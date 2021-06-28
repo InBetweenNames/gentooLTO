@@ -1,0 +1,29 @@
+Title: GentooLTO GCC 11
+Author: Shane Peelar <lookatyouhacker@gmail.com>
+Content-Type: text/plain
+Posted: 2021-05-01
+Revision: 1
+News-Item-Format: 1.0
+
+Greetings GentooLTO community,
+
+As you may have heard, GCC 11.1 has been released!  And we, of course, must move with it.
+As of May 15th 2021, barring any unexpected issues, GentooLTO will be officially moved over to GCC 11.
+There shouldn't be any major breaking changes in this release, so I expect things to go pretty smoothly.
+
+One important point to bring up: the GCC 11 ebuild in Gentoo now supports `custom-cflags`.  If you have
+this enabled system-wide, as I'm sure many do, that means that your CFLAGS won't get stripped from the GCC
+build process.  This can create problems when trying to build it.  Historically, we have always honoured `strip-flags`
+for GCC as we get LTO and PGO through the USE flags provided in the ebuild anyway.  If you do want to enable
+`custom-cflags` for GCC, you must filter out `-flto*` manually from it with a workaround.  I'm omitting putting
+a workaround in the overlay for this as I believe this should be your choice - however, personally, I recommend
+disabling `custom-cflags` with your GCC to retain the original behaviour as it's much safer.
+
+GCC 11 brings improvements on both the LTO and the PGO front, which of course are always
+welcome :)  I encourage everyone to start testing out GCC 11 themselves before then -- just don't forget to `lto-rebuild`!
+And of course, if you encounter any showstoppers with GCC 11, please let us know in the issue tracker.
+
+All the best,
+-Shane
+
+

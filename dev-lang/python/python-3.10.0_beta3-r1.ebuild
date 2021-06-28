@@ -4,23 +4,27 @@
 EAPI="7"
 WANT_LIBTOOL="none"
 
-inherit autotools flag-o-matic multiprocessing pax-utils \
-	python-utils-r1 toolchain-funcs
+inherit autotools check-reqs flag-o-matic multiprocessing pax-utils \
+	python-utils-r1 toolchain-funcs verify-sig
 
-MY_P="Python-${PV}"
+MY_PV=${PV/_beta/b}
+MY_P="Python-${MY_PV%_p*}"
 PYVER=$(ver_cut 1-2)
-PATCHSET="python-gentoo-patches-3.8.6"
+PATCHSET="python-gentoo-patches-${MY_PV}"
 
 DESCRIPTION="An interpreted, interactive, object-oriented programming language"
 HOMEPAGE="https://www.python.org/"
-SRC_URI="https://www.python.org/ftp/python/${PV}/${MY_P}.tar.xz
-	https://dev.gentoo.org/~mgorny/dist/python/${PATCHSET}.tar.xz"
+SRC_URI="https://www.python.org/ftp/python/${PV%%_*}/${MY_P}.tar.xz
+	https://dev.gentoo.org/~mgorny/dist/python/${PATCHSET}.tar.xz
+	verify-sig? (
+		https://www.python.org/ftp/python/${PV%%_*}/${MY_P}.tar.xz.asc
+	)"
 S="${WORKDIR}/${MY_P}"
 
 LICENSE="PSF-2"
 SLOT="${PYVER}"
 KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86"
-IUSE="bluetooth build examples gdbm hardened ipv6 libressl +ncurses +readline sqlite +ssl test tk wininst +xml pgo"
+IUSE="bluetooth build examples gdbm hardened ipv6 +ncurses +readline +sqlite +ssl test tk wininst +xml pgo"
 RESTRICT="!test? ( test )"
 
 # Do not add a dependency on dev-lang/python to this ebuild.
@@ -39,25 +43,47 @@ RDEPEND="app-arch/bzip2:=
 	ncurses? ( >=sys-libs/ncurses-5.2:= )
 	readline? ( >=sys-libs/readline-4.1:= )
 	sqlite? ( >=dev-db/sqlite-3.3.8:3= )
-	ssl? (
-		!libressl? ( dev-libs/openssl:= )
-		libressl? ( dev-libs/libressl:= )
-	)
+	ssl? ( dev-libs/openssl:= )
 	tk? (
 		>=dev-lang/tcl-8.0:=
 		>=dev-lang/tk-8.0:=
 		dev-tcltk/blt:=
 		dev-tcltk/tix
 	)
-	xml? ( >=dev-libs/expat-2.1:= )"
+	xml? ( >=dev-libs/expat-2.1:= )
+	!!<sys-apps/sandbox-2.21"
 # bluetooth requires headers from bluez
 DEPEND="${RDEPEND}
 	bluetooth? ( net-wireless/bluez )
-	test? ( app-arch/xz-utils[extra-filters(+)] )
+	test? ( app-arch/xz-utils[extra-filters(+)] )"
+# autoconf-archive needed to eautoreconf
+BDEPEND="
+	sys-devel/autoconf-archive
 	virtual/pkgconfig
+	verify-sig? ( app-crypt/openpgp-keys-python )
 	!sys-devel/gcc[libffi(-)]"
+PDEPEND="app-eselect/eselect-python"
 RDEPEND+=" !build? ( app-misc/mime-types )"
-PDEPEND=">=app-eselect/eselect-python-20140125-r1"
+
+VERIFY_SIG_OPENPGP_KEY_PATH=/usr/share/openpgp-keys/python.org.asc
+
+# large file tests involve a 2.5G file being copied (duplicated)
+CHECKREQS_DISK_BUILD=5500M
+
+pkg_pretend() {
+	use test && check-reqs_pkg_pretend
+}
+
+pkg_setup() {
+	use test && check-reqs_pkg_setup
+}
+
+src_unpack() {
+	if use verify-sig; then
+		verify-sig_verify_detached "${DISTDIR}"/${MY_P}.tar.xz{,.asc}
+	fi
+	default
+}
 
 src_prepare() {
 	# Ensure that internal copies of expat, libffi and zlib are not used.
@@ -126,11 +152,6 @@ src_configure() {
 	# Export CXX so it ends up in /usr/lib/python3.X/config/Makefile.
 	tc-export CXX
 
-	# Set LDFLAGS so we link modules with -lpython3.2 correctly.
-	# Needed on FreeBSD unless Python 3.2 is already installed.
-	# Please query BSD team before removing this!
-	append-ldflags "-L."
-
 	# Fix implicit declarations on cross and prefix builds. Bug #674070.
 	use ncurses && append-cppflags -I"${ESYSROOT}"/usr/include/ncursesw
 
@@ -146,6 +167,7 @@ src_configure() {
 		ac_cv_header_stropts_h=no
 
 		--enable-shared
+		--without-static-libpython
 		$(use_enable ipv6)
 		--infodir='${prefix}/share/info'
 		--mandir='${prefix}/share/man'
@@ -159,6 +181,12 @@ src_configure() {
 	)
 
 	OPT="" econf "${myeconfargs[@]}"
+
+	if grep -q "#define POSIX_SEMAPHORES_NOT_ENABLED 1" pyconfig.h; then
+		eerror "configure has detected that the sem_open function is broken."
+		eerror "Please ensure that /dev/shm is mounted as a tmpfs with mode 1777."
+		die "Broken sem_open function (bug 496328)"
+	fi
 }
 
 src_compile() {
@@ -178,7 +206,7 @@ src_compile() {
 	export par_arg
 
 	if use pgo; then
-		emake profile-opt PROFILE_TASK="-m test -x test_gdb test_compileall test_distutils -j $(nproc) --pgo-extended"
+		emake profile-opt PROFILE_TASK="-m test -x test_gdb test_compileall test_ctypes test_distutils -j $(nproc) --pgo-extended"
 	else
 		emake CPPFLAGS= CFLAGS= LDFLAGS=
 	fi
@@ -208,6 +236,8 @@ src_test() {
 	# bug 660358
 	local -x COLUMNS=80
 	local -x PYTHONDONTWRITEBYTECODE=
+	# workaround https://bugs.gentoo.org/775416
+	addwrite /usr/lib/python3.10/site-packages
 
 	local jobs=$(makeopts_jobs "${MAKEOPTS}" "$(get_nproc)")
 
@@ -237,9 +267,6 @@ src_install() {
 	local libdir=${ED}/usr/lib/python${PYVER}
 
 	emake DESTDIR="${D}" altinstall
-
-	# Remove static library
-	rm "${ED}"/usr/$(get_libdir)/libpython*.a || die
 
 	sed \
 		-e "s/\(CONFIGURE_LDFLAGS=\).*/\1/" \
@@ -271,8 +298,6 @@ src_install() {
 
 	use sqlite || rm -r "${libdir}/"{sqlite3,test/test_sqlite*} || die
 	use tk || rm -r "${ED}/usr/bin/idle${PYVER}" "${libdir}/"{idlelib,tkinter,test/test_tk*} || die
-
-	use wininst || rm "${libdir}/distutils/command/"wininst-*.exe || die
 
 	dodoc Misc/{ACKS,HISTORY,NEWS}
 
@@ -334,37 +359,4 @@ src_install() {
 		ln -s "../../../bin/idle${PYVER}" \
 			"${scriptdir}/idle" || die
 	fi
-}
-
-pkg_preinst() {
-	if has_version "<${CATEGORY}/${PN}-${PYVER}" && ! has_version ">=${CATEGORY}/${PN}-${PYVER}_alpha"; then
-		python_updater_warning="1"
-	fi
-}
-
-eselect_python_update() {
-	if [[ -z "$(eselect python show)" || \
-			! -f "${EROOT}/usr/bin/$(eselect python show)" ]]; then
-		eselect python update
-	fi
-
-	if [[ -z "$(eselect python show --python${PV%%.*})" || \
-			! -f "${EROOT}/usr/bin/$(eselect python show --python${PV%%.*})" ]]
-	then
-		eselect python update --python${PV%%.*}
-	fi
-}
-
-pkg_postinst() {
-	eselect_python_update
-
-	if [[ "${python_updater_warning}" == "1" ]]; then
-		ewarn "You have just upgraded from an older version of Python."
-		ewarn
-		ewarn "Please adjust PYTHON_TARGETS (if so desired), and run emerge with the --newuse or --changed-use option to rebuild packages installing python modules."
-	fi
-}
-
-pkg_postrm() {
-	eselect_python_update
 }

@@ -57,16 +57,6 @@
 
 #MAKEOPTS="-j${NTHREADS}"
 
-#Lastly, for cmake packages, you may want to set the default generator to Ninja.
-#It is considerably faster than GNU make and can help build times.
-
-#CMAKE_MAKEFILE_GENERATOR=ninja
-
-#Only one package, kde-plasma/kinfocenter, needs CMAKE_MAKEFILE_GENERATOR=emake.  It can be overridden
-#in your own package.cflags/kinfocenter.conf file like so:
-
-#kde-plasma/kinfocenter CMAKE_MAKEFILE_GENERATOR=emake
-
 #This concludes setup for GentooLTO using the default settings.
 #If you want to cherry pick these settings, source make.conf.lto.defines directly
 #and read the comments in that file.

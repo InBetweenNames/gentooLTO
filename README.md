@@ -1,7 +1,6 @@
 # GentooLTO overlay
 
-[![Build Status](https://github.com/InBetweenNames/gentooLTO/workflows/GentooLTO/badge.svg?branch=master)](https://github.com/InBetweenNames/gentooLTO/actions)
-[![Gitter](https://badges.gitter.im/gentooLTO/community.svg)](https://gitter.im/gentooLTO/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+**NOTE: This project is in maintenance mode for the foreseeable future, consider using Gentoo upstream's LTO support.** 
 
 [Bosnian, Cyrillic (Босански)](.github/README_bs-Cyril.md) | [Bosnian, Latin (Bosanski)](.github/README_bs-Latn.md) | [Serbian (Српски)](.github/README_sr.md) | [Croatian (Hrvatski)](.github/README_hr.md)
 

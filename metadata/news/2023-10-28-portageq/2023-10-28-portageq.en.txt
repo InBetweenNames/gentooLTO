@@ -1,0 +1,50 @@
+Title: GentooLTO portageq changes
+Author: Shane Peelar <lookatyouhacker@gmail.com>
+Content-Type: text/plain
+Posted: 2023-10-28
+Revision: 1
+News-Item-Format: 1.0
+
+Greetings GentooLTO community,
+
+As a result of the portageq removal from ebuilds, I've had to change the configuration of GentooLTO a bit.
+In make.conf, if you are using the override-flagomatic option, you must now specify the path to lto-overlay
+in the variable LTO_OVERLAY_PATH.  If you're not using this GentooLTO flag, this probably wouldn't affect you.
+Both ltoize and 41-lto-patch.sh have been updated for the change and will issue an error if the flag isn't set.
+Hopefully this migration isn't too inconvenient for you.
+
+On another note, as you probably already know, I don't maintain GentooLTO very often anymore.
+There's a number of reasons for this, but the biggest is probably that the project has kind of accomplished
+its goals, more or less.  There just aren't very many workarounds required anymore for getting a working LTO system.
+Larger Linux distributions even support building with LTO now, which is fantastic!  I don't know if it's our
+community that normalized LTO necessarily, but I like to imagine that we've had some impact here at least.
+
+If you're looking for a more stable alternative to GentooLTO for your system, I encourage you to use the upstream
+support provided by the Gentoo community.  Upstream now supports LTO and will accept bugs with packages that
+don't build with LTO cleanly.  So, if you're running a vanilla LTO system now without the other flags supported
+in this repo, you might consider just using the upstream Gentoo support, as they have your back.
+
+If you're using the other flags in GentooLTO that aren't supported upstream, rest assured, this repository
+isn't going away.  However, my time is pretty limited now and I can't verify workarounds like I once could.
+So, if it's not a straightforward verification, it might take a while for me (read: months?) to get around to confirming
+the need for your workaround.
+
+As for future GentooLTO plans, consider the project on maintenance mode now with no major work planned other
+than keeping the lights on.  For anything seriously urgent (like the portageq stuff) I'll definitely intervene.
+Otherwise, you can continue enjoying your LTO system.  BTW, Even if you use LTO without sys-config/ltoize, you might
+consider using lto-rebuild here to help you deal with static archives.  Not sure if that's an upstream thing yet.
+
+One last thing.  I've received some calls for adding another maintainer to the project.  I have considered this
+but consider it far too risky to do.  GentooLTO installs itself directly into your package manager and basically
+has root access, and I simply can't pay enough attention to maintainer activity to ensure no funny business is going
+on.  So, while I appreciate the genuine offers for help from various members of the community,
+I can't accept any requests for maintainer access to the project.  If you truly want to do this,
+I recommend forking the project and direct users to your fork.  Who knows, I may even use it myself :)
+
+Anyway, sad as it is to say, it's been a slice, GentooLTO'ers.
+Thank you so much for your dedication and support over the years.
+As a community I like to think we've accomplished a lot together, even if it is a rather niche topic.
+Keep on doing great things and being awesome people.
+
+-Shane
+

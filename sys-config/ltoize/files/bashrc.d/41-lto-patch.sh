@@ -1,4 +1,10 @@
 LTOPatch() {
+	if [ -z "${LTO_OVERLAY_PATH}" ]; then
+		eerror "You must set LTO_OVERLAY_PATH in your make.conf to point to where lto-overlay lives."
+		eerror "You can use: 'portageq get_repo_path ${PORTAGE_CONFIGROOT} lto-overlay' to obtain it if you're not sure."
+		die
+	fi
+
 	# Lifted straight from the Portage sources
 	# Working directory is set to ${HOME} by default
 	# Set it properly for patch application
@@ -17,8 +23,8 @@ LTOPatch() {
 	local tagfile=${T}/.portage_lto_patches_applied
 	[[ -f ${tagfile} ]] && return
 	>> "${tagfile}"
-
-	local lto_overlay_dir="$(portageq get_repo_path ${PORTAGE_CONFIGROOT} lto-overlay)"		
+ 
+	local lto_overlay_dir="${LTO_OVERLAY_PATH:-/var/db/repos/lto-overlay}"
 	local basedir="${lto_overlay_dir%/}/sys-config/ltoize/files/patches"
 
 	local applied d f
